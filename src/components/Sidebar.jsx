@@ -13,77 +13,61 @@ function Sidebar({
 }) {
 
   return (
-<aside className="sidebar">
-<div className="sidebar-brand">
-<div className="sidebar-logo">DB</div>
-<div>
+<div className="sidebar">
+<div className="sidebar-header">
 <strong>Dadboy POS</strong>
 <span>
 
-            {ownerMode
+          {ownerMode
 
-              ? "โหมดเจ้าของร้าน"
+            ? "โหมดเจ้าของร้าน"
 
-              : "โหมดพนักงาน"}
+            : "โหมดพนักงาน"}
 </span>
 </div>
-</div>
-<nav className="sidebar-menu">
+<div className="sidebar-menu">
+
+        {currentPage !== "pos" && (
+<button
+
+            type="button"
+
+            className="sidebar-button"
+
+            onClick={() =>
+
+              onChangePage("pos")
+
+            }
+>
+
+            🛒 ขายสินค้า
+</button>
+
+        )}
 <button
 
           type="button"
 
-          className={
+          className="sidebar-button"
 
-            currentPage === "pos"
+          onClick={() =>
 
-              ? "sidebar-item active"
-
-              : "sidebar-item"
+            onChangePage("stock")
 
           }
-
-          onClick={() => onChangePage("pos")}
 >
-<span className="sidebar-icon">🛒</span>
-<span>ขายสินค้า</span>
-</button>
-<button
 
-          type="button"
-
-          className={
-
-            currentPage === "stock"
-
-              ? "sidebar-item active"
-
-              : "sidebar-item"
-
-          }
-
-          onClick={() => onChangePage("stock")}
->
-<span className="sidebar-icon">📥</span>
-<span>รับสินค้าเข้า</span>
+          📥 รับสินค้าเข้า
 </button>
 
-        {ownerMode && (
+        {ownerMode ? (
 <>
-<div className="sidebar-divider" />
 <button
 
               type="button"
 
-              className={
-
-                currentPage === "dashboard"
-
-                  ? "sidebar-item active"
-
-                  : "sidebar-item"
-
-              }
+              className="sidebar-button"
 
               onClick={() =>
 
@@ -91,22 +75,14 @@ function Sidebar({
 
               }
 >
-<span className="sidebar-icon">📊</span>
-<span>Dashboard</span>
+
+              📊 Dashboard
 </button>
 <button
 
               type="button"
 
-              className={
-
-                currentPage === "products"
-
-                  ? "sidebar-item active"
-
-                  : "sidebar-item"
-
-              }
+              className="sidebar-button"
 
               onClick={() =>
 
@@ -114,22 +90,14 @@ function Sidebar({
 
               }
 >
-<span className="sidebar-icon">📦</span>
-<span>สินค้า</span>
+
+              📦 จัดการสินค้า
 </button>
 <button
 
               type="button"
 
-              className={
-
-                currentPage === "reports"
-
-                  ? "sidebar-item active"
-
-                  : "sidebar-item"
-
-              }
+              className="sidebar-button"
 
               onClick={() =>
 
@@ -137,22 +105,14 @@ function Sidebar({
 
               }
 >
-<span className="sidebar-icon">🧾</span>
-<span>รายงาน</span>
+
+              📈 รายงาน
 </button>
 <button
 
               type="button"
 
-              className={
-
-                currentPage === "settings"
-
-                  ? "sidebar-item active"
-
-                  : "sidebar-item"
-
-              }
+              className="sidebar-button"
 
               onClick={() =>
 
@@ -160,44 +120,38 @@ function Sidebar({
 
               }
 >
-<span className="sidebar-icon">⚙️</span>
-<span>ตั้งค่า</span>
+
+              ⚙️ ตั้งค่า
 </button>
-</>
-
-        )}
-</nav>
-<div className="sidebar-bottom">
-
-        {ownerMode ? (
 <button
 
-            type="button"
+              type="button"
 
-            className="sidebar-owner-button logout"
+              className="sidebar-button"
 
-            onClick={onOwnerLogout}
+              onClick={onOwnerLogout}
 >
-<span className="sidebar-icon">🚪</span>
-<span>ออกจากโหมดเจ้าของ</span>
+
+              🔓 ออกจากโหมดเจ้าของร้าน
 </button>
+</>
 
         ) : (
 <button
 
             type="button"
 
-            className="sidebar-owner-button"
+            className="sidebar-button"
 
             onClick={onOwnerLogin}
 >
-<span className="sidebar-icon">🔒</span>
-<span>โหมดเจ้าของร้าน</span>
+
+            🔐 โหมดเจ้าของร้าน
 </button>
 
         )}
 </div>
-</aside>
+</div>
 
   );
 

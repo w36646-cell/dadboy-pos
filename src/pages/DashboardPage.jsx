@@ -2,17 +2,21 @@ import { useMemo } from "react";
 
 const SALES_KEY = "dadboy_sales_v1";
 
-function loadSales() {
+const STOCK_KEY = "dadboy_inventory_v2";
+
+const PRODUCTS_KEY = "dadboy_products_v1";
+
+function readStorage(key, fallback) {
 
   try {
 
-    const saved = localStorage.getItem(SALES_KEY);
+    const saved = localStorage.getItem(key);
 
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : fallback;
 
   } catch {
 
-    return [];
+    return fallback;
 
   }
 
@@ -20,23 +24,23 @@ function loadSales() {
 
 function DashboardPage() {
 
-  const sales = loadSales();
+  const sales = readStorage(SALES_KEY, []);
+
+  const inventory = readStorage(STOCK_KEY, {});
+
+  const products = readStorage(PRODUCTS_KEY, []);
 
   const today = new Date().toLocaleDateString("en-CA");
 
-  const todaySales = useMemo(
+  const todaySales = useMemo(() => {
 
-    () =>
+    return sales.filter(
 
-      sales.filter(
+      (sale) => sale.soldDate === today
 
-        (sale) => sale.soldDate === today
+    );
 
-      ),
-
-    [sales, today]
-
-  );
+  }, [sales, today]);
 
   const summary = useMemo(() => {
 
@@ -88,27 +92,19 @@ function DashboardPage() {
 
   }, [todaySales]);
 
-  const averageBill =
-
-    todaySales.length > 0
-
-      ? summary.totalAmount / todaySales.length
-
-      : 0;
-
   const topProducts = useMemo(() => {
 
-    const productSummary = {};
+    const result = {};
 
-    sales.forEach((sale) => {
+    todaySales.forEach((sale) => {
 
       sale.items?.forEach((item) => {
 
         const key = `${item.productId}-${item.option}`;
 
-        if (!productSummary[key]) {
+        if (!result[key]) {
 
-          productSummary[key] = {
+          result[key] = {
 
             name: item.productName,
 
@@ -118,27 +114,19 @@ function DashboardPage() {
 
             amount: 0,
 
-            profit: 0,
-
           };
 
         }
 
-        productSummary[key].quantity += Number(
+        result[key].quantity += Number(
 
           item.quantity || 0
 
         );
 
-        productSummary[key].amount += Number(
+        result[key].amount += Number(
 
           item.lineTotal || 0
-
-        );
-
-        productSummary[key].profit += Number(
-
-          item.lineProfit || 0
 
         );
 
@@ -146,205 +134,216 @@ function DashboardPage() {
 
     });
 
-    return Object.values(productSummary)
+    return Object.values(result)
 
       .sort(
 
-        (first, second) =>
-
-          second.quantity - first.quantity
+        (a, b) => b.quantity - a.quantity
 
       )
 
+      .slice(0, 5);
+
+  }, [todaySales]);
+
+  const lowStockProducts = useMemo(() => {
+
+    return products
+
+      .map((product) => ({
+
+        ...product,
+
+        stock: Number(
+
+          inventory[product.id] ?? product.stock ?? 50
+
+        ),
+
+      }))
+
+      .filter((product) => product.stock <= 5)
+
+      .sort((a, b) => a.stock - b.stock)
+
       .slice(0, 10);
 
-  }, [sales]);
+  }, [products, inventory]);
 
-  const recentBills = useMemo(() => {
+  const bestProduct =
 
-    return [...sales]
+    topProducts.length > 0
 
-      .sort(
+      ? topProducts[0]
 
-        (first, second) =>
-
-          new Date(second.soldAt) -
-
-          new Date(first.soldAt)
-
-      )
-
-      .slice(0, 10);
-
-  }, [sales]);
+      : null;
 
   return (
 <div className="dashboard-page">
-<header className="page-header">
+<div className="dashboard-header">
 <div>
 <h1>Dashboard</h1>
-<p>สรุปข้อมูลการขายของร้าน</p>
+<p>สรุปยอดขายวันนี้</p>
 </div>
-</header>
-<div className="dashboard-cards">
-<article className="dashboard-card">
+</div>
+<div className="dashboard-summary-grid">
+<div className="dashboard-summary-card">
 <span>ยอดขายวันนี้</span>
 <strong>
 
             {summary.totalAmount.toLocaleString()} บาท
 </strong>
-</article>
-<article className="dashboard-card">
-<span>ต้นทุนวันนี้</span>
-<strong>
-
-            {summary.totalCost.toLocaleString()} บาท
-</strong>
-</article>
-<article className="dashboard-card">
+</div>
+<div className="dashboard-summary-card">
 <span>กำไรวันนี้</span>
 <strong>
 
             {summary.totalProfit.toLocaleString()} บาท
 </strong>
-</article>
-<article className="dashboard-card">
-<span>จำนวนบิลวันนี้</span>
+</div>
+<div className="dashboard-summary-card">
+<span>จำนวนบิล</span>
 <strong>
 
             {todaySales.length.toLocaleString()} บิล
 </strong>
-</article>
-<article className="dashboard-card">
+</div>
+<div className="dashboard-summary-card">
 <span>จำนวนสินค้าที่ขาย</span>
 <strong>
 
             {summary.totalQty.toLocaleString()} ชิ้น
 </strong>
-</article>
-<article className="dashboard-card">
-<span>ยอดเฉลี่ยต่อบิล</span>
-<strong>
-
-            {averageBill.toLocaleString(undefined, {
-
-              maximumFractionDigits: 2,
-
-            })}{" "}
-
-            บาท
-</strong>
-</article>
 </div>
-<section className="dashboard-section">
-<h2>สินค้าขายดี 10 อันดับ</h2>
+</div>
+<div className="dashboard-main-grid">
+<section className="dashboard-box">
+<div className="dashboard-box-title">
+<div>
+<h2>สินค้าขายดีวันนี้</h2>
 
-        {topProducts.length === 0 ? (
-<p className="empty-dashboard">
+              {bestProduct && (
+<p>
 
-            ยังไม่มีข้อมูลการขาย
+                  อันดับ 1: {bestProduct.name}
 </p>
 
-        ) : (
-<div className="dashboard-table-wrap">
-<table className="product-table">
-<thead>
-<tr>
-<th>อันดับ</th>
-<th>สินค้า</th>
-<th>ตัวเลือก</th>
-<th>จำนวน</th>
-<th>ยอดขาย</th>
-<th>กำไร</th>
-</tr>
-</thead>
-<tbody>
+              )}
+</div>
+</div>
 
-                {topProducts.map((item, index) => (
-<tr
+          {topProducts.length === 0 ? (
+<div className="dashboard-empty">
+
+              ยังไม่มีข้อมูลการขายวันนี้
+</div>
+
+          ) : (
+<div className="dashboard-ranking">
+
+              {topProducts.map(
+
+                (item, index) => (
+<div
+
+                    className="dashboard-ranking-row"
 
                     key={`${item.name}-${item.option}`}
 >
-<td>{index + 1}</td>
-<td>{item.name}</td>
-<td>{item.option}</td>
-<td>{item.quantity}</td>
-<td>
+<div className="dashboard-rank">
 
-                      {item.amount.toLocaleString()} บาท
-</td>
-<td>
+                      {index + 1}
+</div>
+<div className="dashboard-ranking-info">
+<strong>{item.name}</strong>
+<span>
 
-                      {item.profit.toLocaleString()} บาท
-</td>
-</tr>
+                        {item.option}
+</span>
+</div>
+<div className="dashboard-ranking-value">
+<strong>
 
-                ))}
-</tbody>
-</table>
+                        {item.quantity} ชิ้น
+</strong>
+<span>
+
+                        {item.amount.toLocaleString()} บาท
+</span>
+</div>
 </div>
 
-        )}
+                )
+
+              )}
+</div>
+
+          )}
 </section>
-<section className="dashboard-section">
-<h2>บิลล่าสุด</h2>
+<section className="dashboard-box">
+<div className="dashboard-box-title">
+<div>
+<h2>สินค้าใกล้หมด</h2>
+<p>
 
-        {recentBills.length === 0 ? (
-<p className="empty-dashboard">
-
-            ยังไม่มีบิลขาย
+                เหลือไม่เกิน 5 ชิ้น
 </p>
+</div>
+<strong>
 
-        ) : (
-<div className="dashboard-table-wrap">
-<table className="product-table">
-<thead>
-<tr>
-<th>เลขที่บิล</th>
-<th>วันที่</th>
-<th>เวลา</th>
-<th>จำนวนสินค้า</th>
-<th>ยอดรวม</th>
-<th>กำไร</th>
-</tr>
-</thead>
-<tbody>
-
-                {recentBills.map((sale) => (
-<tr key={sale.billId}>
-<td>{sale.billId}</td>
-<td>{sale.soldDate}</td>
-<td>{sale.soldTime}</td>
-<td>{sale.totalQty}</td>
-<td>
-
-                      {Number(
-
-                        sale.totalAmount || 0
-
-                      ).toLocaleString()}{" "}
-
-                      บาท
-</td>
-<td>
-
-                      {Number(
-
-                        sale.totalProfit || 0
-
-                      ).toLocaleString()}{" "}
-
-                      บาท
-</td>
-</tr>
-
-                ))}
-</tbody>
-</table>
+              {lowStockProducts.length} รายการ
+</strong>
 </div>
 
-        )}
+          {lowStockProducts.length === 0 ? (
+<div className="dashboard-empty">
+
+              ไม่มีสินค้าใกล้หมด
+</div>
+
+          ) : (
+<div className="dashboard-low-stock-list">
+
+              {lowStockProducts.map(
+
+                (product) => (
+<div
+
+                    className="dashboard-low-stock-row"
+
+                    key={product.id}
+>
+<div>
+<strong>
+
+                        {product.name}
+</strong>
+</div>
+<span
+
+                      className={
+
+                        product.stock < 0
+
+                          ? "dashboard-stock-number negative"
+
+                          : "dashboard-stock-number"
+
+                      }
+>
+
+                      {product.stock}
+</span>
+</div>
+
+                )
+
+              )}
+</div>
+
+          )}
 </section>
+</div>
 </div>
 
   );
@@ -352,4 +351,3 @@ function DashboardPage() {
 }
 
 export default DashboardPage;
- 
