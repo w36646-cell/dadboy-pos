@@ -6,11 +6,15 @@ import StockManager from "./components/StockManager";
 
 import ProductManager from "./components/ProductManager";
 
+import OwnerLogin from "./components/OwnerLogin";
+
+import OwnerSidebar from "./components/OwnerSidebar";
+
 import DashboardPage from "./pages/DashboardPage";
 
 import ReportPage from "./pages/ReportPage";
 
-import OwnerLogin from "./components/OwnerLogin";
+import BillsPage from "./pages/BillsPage";
 
 import "./styles/App.css";
 
@@ -26,7 +30,11 @@ function readStorage(key, fallback) {
 
     const saved = localStorage.getItem(key);
 
-    return saved ? JSON.parse(saved) : fallback;
+    return saved
+
+      ? JSON.parse(saved)
+
+      : fallback;
 
   } catch {
 
@@ -38,7 +46,13 @@ function readStorage(key, fallback) {
 
 function loadProducts() {
 
-  const saved = readStorage(PRODUCTS_KEY, null);
+  const saved = readStorage(
+
+    PRODUCTS_KEY,
+
+    null
+
+  );
 
   return Array.isArray(saved)
 
@@ -50,9 +64,21 @@ function loadProducts() {
 
 function loadInventory(productList) {
 
-  const saved = readStorage(STOCK_KEY, null);
+  const saved = readStorage(
 
-  if (saved && typeof saved === "object") {
+    STOCK_KEY,
+
+    null
+
+  );
+
+  if (
+
+    saved &&
+
+    typeof saved === "object"
+
+  ) {
 
     return saved;
 
@@ -62,7 +88,11 @@ function loadInventory(productList) {
 
   productList.forEach((product) => {
 
-    result[product.id] = Number(product.stock ?? 50);
+    result[product.id] = Number(
+
+      product.stock ?? 50
+
+    );
 
   });
 
@@ -72,7 +102,9 @@ function loadInventory(productList) {
 
 function App() {
 
-  const initialProducts = loadProducts();
+  const initialProducts =
+
+    loadProducts();
 
   const [products, setProducts] =
 
@@ -80,47 +112,95 @@ function App() {
 
   const [inventory, setInventory] =
 
-    useState(() => loadInventory(initialProducts));
+    useState(() =>
 
-  const [page, setPage] = useState("pos");
-
-  const [ownerMode, setOwnerMode] = useState(false);
-
-  const [loginOpen, setLoginOpen] = useState(false);
-
-  const [cart, setCart] = useState([]);
-
-  const [searchText, setSearchText] = useState("");
-
-  const [selectedProduct, setSelectedProduct] =
-
-    useState(null);
-
-  const [selectedOption, setSelectedOption] =
-
-    useState(null);
-
-  const [popupQty, setPopupQty] = useState(1);
-
-  const filteredProducts = useMemo(() => {
-
-    const keyword = searchText.trim().toLowerCase();
-
-    if (!keyword) {
-
-      return products;
-
-    }
-
-    return products.filter((product) =>
-
-      product.name.toLowerCase().includes(keyword)
+      loadInventory(initialProducts)
 
     );
 
-  }, [products, searchText]);
+  const [page, setPage] =
 
-  function saveProducts(newProducts) {
+    useState("pos");
+
+  const [ownerMode, setOwnerMode] =
+
+    useState(false);
+
+  const [loginOpen, setLoginOpen] =
+
+    useState(false);
+
+  const [cart, setCart] =
+
+    useState([]);
+
+  const [searchText, setSearchText] =
+
+    useState("");
+
+  const [
+
+    selectedProduct,
+
+    setSelectedProduct,
+
+  ] = useState(null);
+
+  const [
+
+    selectedOption,
+
+    setSelectedOption,
+
+  ] = useState(null);
+
+  const [popupQty, setPopupQty] =
+
+    useState(1);
+
+  const filteredProducts =
+
+    useMemo(() => {
+
+      const keyword =
+
+        searchText
+
+          .trim()
+
+          .toLowerCase();
+
+      if (!keyword) {
+
+        return products;
+
+      }
+
+      return products.filter(
+
+        (product) =>
+
+          product.name
+
+            .toLowerCase()
+
+            .includes(keyword)
+
+      );
+
+    }, [
+
+      products,
+
+      searchText,
+
+    ]);
+
+  function saveProducts(
+
+    newProducts
+
+  ) {
 
     setProducts(newProducts);
 
@@ -128,22 +208,9 @@ function App() {
 
       PRODUCTS_KEY,
 
-      JSON.stringify(newProducts)
+      JSON.stringify(
 
-    );
-
-  }
-
-  function saveProduct(updatedProduct) {
-
-    saveProducts(
-
-      products.map((product) =>
-product.id === updatedProduct.id
-
-          ? updatedProduct
-
-          : product
+        newProducts
 
       )
 
@@ -151,7 +218,35 @@ product.id === updatedProduct.id
 
   }
 
-  function saveInventory(newInventory) {
+  function saveProduct(
+
+    updatedProduct
+
+  ) {
+
+    saveProducts(
+
+      products.map(
+
+        (product) =>
+product.id ===
+updatedProduct.id
+
+            ? updatedProduct
+
+            : product
+
+      )
+
+    );
+
+  }
+
+  function saveInventory(
+
+    newInventory
+
+  ) {
 
     setInventory(newInventory);
 
@@ -159,7 +254,11 @@ product.id === updatedProduct.id
 
       STOCK_KEY,
 
-      JSON.stringify(newInventory)
+      JSON.stringify(
+
+        newInventory
+
+      )
 
     );
 
@@ -167,15 +266,33 @@ product.id === updatedProduct.id
 
   function getStock(productId) {
 
-    return Number(inventory[productId] ?? 50);
+    return Number(
+
+      inventory[productId] ?? 50
+
+    );
 
   }
 
-  function addStock(productId, quantity) {
+  function addStock(
 
-    const safeQty = Number(quantity);
+    productId,
 
-    if (!Number.isFinite(safeQty) || safeQty <= 0) {
+    quantity
+
+  ) {
+
+    const safeQty =
+
+      Number(quantity);
+
+    if (
+
+      !Number.isFinite(safeQty) ||
+
+      safeQty <= 0
+
+    ) {
 
       return;
 
@@ -185,7 +302,11 @@ product.id === updatedProduct.id
 
       ...inventory,
 
-      [productId]: getStock(productId) + safeQty,
+      [productId]:
+
+        getStock(productId) +
+
+        safeQty,
 
     });
 
@@ -209,41 +330,67 @@ product.id === updatedProduct.id
 
     );
 
-    const cost = Number(product.cost || 0);
+    const cost = Number(
+
+      product.cost || 0
+
+    );
 
     setCart((currentCart) => {
 
-      const found = currentCart.find(
+      const found =
 
-        (item) =>
-item.id === product.id &&
+        currentCart.find(
 
-          item.option === option.name
+          (item) =>
+item.id ===
+product.id &&
 
-      );
+            item.option ===
+
+              option.name
+
+        );
 
       if (found) {
 
-        return currentCart.map((item) =>
-item.id === product.id &&
+        return currentCart.map(
 
-          item.option === option.name
+          (item) =>
+item.id ===
+product.id &&
 
-            ? {
+            item.option ===
 
-                ...item,
+              option.name
 
-                name: product.name,
+              ? {
 
-                price: Number(option.price),
+                  ...item,
 
-                cost,
+                  name:
 
-                qty: item.qty + safeQty,
+                    product.name,
 
-              }
+                  price:
 
-            : item
+                    Number(
+
+                      option.price
+
+                    ),
+
+                  cost,
+
+                  qty:
+
+                    item.qty +
+
+                    safeQty,
+
+                }
+
+              : item
 
         );
 
@@ -255,17 +402,30 @@ item.id === product.id &&
 
         {
 
-          id: product.id,
+          id:
+product.id,
 
-          name: product.name,
+          name:
 
-          option: option.name,
+            product.name,
 
-          price: Number(option.price),
+          option:
+
+            option.name,
+
+          price:
+
+            Number(
+
+              option.price
+
+            ),
 
           cost,
 
-          qty: safeQty,
+          qty:
+
+            safeQty,
 
         },
 
@@ -283,15 +443,29 @@ item.id === product.id &&
 
       product.hasOptions === true;
 
-    if (!hasOption || !product.options?.length) {
+    if (
 
-      addToCart(product, {
+      !hasOption ||
 
-        name: "ปกติ",
+      !product.options?.length
 
-        price: product.price,
+    ) {
 
-      });
+      addToCart(
+
+        product,
+
+        {
+
+          name: "ปกติ",
+
+          price:
+
+            product.price,
+
+        }
+
+      );
 
       return;
 
@@ -301,13 +475,24 @@ item.id === product.id &&
 
       product.options.find(
 
-        (option) => option.id === "normal"
+        (option) =>
+option.id === "normal"
 
-      ) || product.options[0];
+      ) ||
 
-    setSelectedProduct(product);
+      product.options[0];
 
-    setSelectedOption(normalOption);
+    setSelectedProduct(
+
+      product
+
+    );
+
+    setSelectedOption(
+
+      normalOption
+
+    );
 
     setPopupQty(1);
 
@@ -325,7 +510,13 @@ item.id === product.id &&
 
   function confirmPopup() {
 
-    if (!selectedProduct || !selectedOption) {
+    if (
+
+      !selectedProduct ||
+
+      !selectedOption
+
+    ) {
 
       return;
 
@@ -345,7 +536,13 @@ item.id === product.id &&
 
   }
 
-  function changeCartQty(index, quantity) {
+  function changeCartQty(
+
+    index,
+
+    quantity
+
+  ) {
 
     const safeQty = Math.max(
 
@@ -357,13 +554,21 @@ item.id === product.id &&
 
     setCart((currentCart) =>
 
-      currentCart.map((item, itemIndex) =>
+      currentCart.map(
 
-        itemIndex === index
+        (item, itemIndex) =>
 
-          ? { ...item, qty: safeQty }
+          itemIndex === index
 
-          : item
+            ? {
+
+                ...item,
+
+                qty: safeQty,
+
+              }
+
+            : item
 
       )
 
@@ -375,13 +580,23 @@ item.id === product.id &&
 
     setCart((currentCart) =>
 
-      currentCart.map((item, itemIndex) =>
+      currentCart.map(
 
-        itemIndex === index
+        (item, itemIndex) =>
 
-          ? { ...item, qty: item.qty + 1 }
+          itemIndex === index
 
-          : item
+            ? {
+
+                ...item,
+
+                qty:
+
+                  item.qty + 1,
+
+              }
+
+            : item
 
       )
 
@@ -395,17 +610,33 @@ item.id === product.id &&
 
       currentCart
 
-        .map((item, itemIndex) =>
+        .map(
 
-          itemIndex === index
+          (item, itemIndex) =>
 
-            ? { ...item, qty: item.qty - 1 }
+            itemIndex === index
 
-            : item
+              ? {
+
+                  ...item,
+
+                  qty:
+
+                    item.qty - 1,
+
+                }
+
+              : item
 
         )
 
-        .filter((item) => item.qty > 0)
+        .filter(
+
+          (item) =>
+
+            item.qty > 0
+
+        )
 
     );
 
@@ -417,7 +648,9 @@ item.id === product.id &&
 
       currentCart.filter(
 
-        (_, itemIndex) => itemIndex !== index
+        (_, itemIndex) =>
+
+          itemIndex !== index
 
       )
 
@@ -425,23 +658,33 @@ item.id === product.id &&
 
   }
 
-  const totalQty = cart.reduce(
+  const totalQty =
 
-    (sum, item) => sum + item.qty,
+    cart.reduce(
 
-    0
+      (sum, item) =>
 
-  );
+        sum + item.qty,
 
-  const total = cart.reduce(
+      0
 
-    (sum, item) =>
+    );
 
-      sum + item.price * item.qty,
+  const total =
 
-    0
+    cart.reduce(
 
-  );
+      (sum, item) =>
+
+        sum +
+
+        item.price *
+
+          item.qty,
+
+      0
+
+    );
 
   function completeSale() {
 
@@ -463,15 +706,31 @@ item.id === product.id &&
 
     });
 
-    const newInventory = { ...inventory };
+    const newInventory = {
 
-    Object.entries(soldByProduct).forEach(
+      ...inventory,
+
+    };
+
+    Object.entries(
+
+      soldByProduct
+
+    ).forEach(
 
       ([productId, quantity]) => {
 
         newInventory[productId] =
 
-          Number(newInventory[productId] ?? 50) -
+          Number(
+
+            newInventory[
+
+              productId
+
+            ] ?? 50
+
+          ) -
 
           Number(quantity);
 
@@ -479,89 +738,158 @@ item.id === product.id &&
 
     );
 
-    const saleItems = cart.map((item) => {
+    const saleItems =
 
-      const unitCost = Number(item.cost || 0);
+      cart.map((item) => {
 
-      const lineTotal =
+        const unitCost =
 
-        item.price * item.qty;
+          Number(
 
-      const lineCost =
+            item.cost || 0
 
-        unitCost * item.qty;
+          );
 
-      return {
+        const lineTotal =
 
-        productId: item.id,
+          item.price *
 
-        productName: item.name,
+          item.qty;
 
-        option: item.option,
+        const lineCost =
 
-        unitPrice: item.price,
+          unitCost *
 
-        unitCost,
+          item.qty;
 
-        quantity: item.qty,
+        return {
 
-        lineTotal,
+          productId:
+item.id,
 
-        lineCost,
+          productName:
 
-        lineProfit: lineTotal - lineCost,
+            item.name,
 
-      };
+          option:
 
-    });
+            item.option,
 
-    const totalCost = saleItems.reduce(
+          unitPrice:
 
-      (sum, item) => sum + item.lineCost,
+            item.price,
 
-      0
+          unitCost,
 
-    );
+          quantity:
 
-    const now = new Date();
+            item.qty,
+
+          lineTotal,
+
+          lineCost,
+
+          lineProfit:
+
+            lineTotal -
+
+            lineCost,
+
+        };
+
+      });
+
+    const totalCost =
+
+      saleItems.reduce(
+
+        (sum, item) =>
+
+          sum +
+
+          item.lineCost,
+
+        0
+
+      );
+
+    const now =
+
+      new Date();
 
     const sale = {
 
-      billId: `DB-${now.getTime()}`,
+      billId:
 
-      soldAt: now.toISOString(),
+        `DB-${now.getTime()}`,
+
+      soldAt:
+
+        now.toISOString(),
 
       soldDate:
 
-        now.toLocaleDateString("en-CA"),
+        now.toLocaleDateString(
+
+          "en-CA"
+
+        ),
 
       soldTime:
 
-        now.toLocaleTimeString("th-TH"),
+        now.toLocaleTimeString(
+
+          "th-TH"
+
+        ),
 
       totalQty,
 
-      totalAmount: total,
+      totalAmount:
+
+        total,
 
       totalCost,
 
-      totalProfit: total - totalCost,
+      totalProfit:
 
-      items: saleItems,
+        total - totalCost,
+
+      items:
+
+        saleItems,
 
     };
 
-    const sales = readStorage(SALES_KEY, []);
+    const sales =
+
+      readStorage(
+
+        SALES_KEY,
+
+        []
+
+      );
 
     localStorage.setItem(
 
       SALES_KEY,
 
-      JSON.stringify([...sales, sale])
+      JSON.stringify([
+
+        ...sales,
+
+        sale,
+
+      ])
 
     );
 
-    saveInventory(newInventory);
+    saveInventory(
+
+      newInventory
+
+    );
 
     setCart([]);
 
@@ -591,181 +919,52 @@ item.id === product.id &&
 
   }
 
-  if (page === "dashboard" && ownerMode) {
+  function renderPOS() {
 
     return (
-<DashboardPage />
-
-    );
-
-  }
-
-  if (page === "reports" && ownerMode) {
-
-    return (
-<ReportPage />
-
-    );
-
-  }
-
-  if (page === "products" && ownerMode) {
-
-    return (
-<ProductManager
-
-        products={products}
-
-        inventory={inventory}
-
-        onSaveProduct={saveProduct}
-
-        onClose={() => setPage("pos")}
-
-      />
-
-    );
-
-  }
-
-  if (page === "stock") {
-
-    return (
-<StockManager
-
-        products={products}
-
-        inventory={inventory}
-
-        onAddStock={addStock}
-
-        onClose={() => setPage("pos")}
-
-      />
-
-    );
-
-  }
-
-  return (
-<>
 <div className="app">
 <main className="product-panel">
 <header className="main-header">
-<h1>Dadboy POS</h1>
+<h1>
+
+              Dadboy POS
+</h1>
+
+            {!ownerMode && (
 <div className="header-buttons">
-
-              {ownerMode ? (
-<>
 <button
 
-                    className="product-menu-button"
+                  className="stock-menu-button"
 
-                    type="button"
+                  type="button"
 
-                    onClick={() =>
+                  onClick={() =>
 
-                      setPage("dashboard")
+                    setPage("stock")
 
-                    }
+                  }
 >
 
-                    Dashboard
+                  รับสินค้าเข้า
 </button>
 <button
 
-                    className="product-menu-button"
+                  className="product-menu-button"
 
-                    type="button"
+                  type="button"
 
-                    onClick={() =>
+                  onClick={() =>
 
-                      setPage("reports")
+                    setLoginOpen(true)
 
-                    }
+                  }
 >
 
-                    รายงาน
+                  โหมดเจ้าของร้าน
 </button>
-<button
-
-                    className="product-menu-button"
-
-                    type="button"
-
-                    onClick={() =>
-
-                      setPage("products")
-
-                    }
->
-
-                    จัดการสินค้า
-</button>
-<button
-
-                    className="stock-menu-button"
-
-                    type="button"
-
-                    onClick={() =>
-
-                      setPage("stock")
-
-                    }
->
-
-                    รับสินค้าเข้า
-</button>
-<button
-
-                    className="remove-button"
-
-                    type="button"
-
-                    onClick={exitOwnerMode}
->
-
-                    ออกจากโหมดเจ้าของ
-</button>
-</>
-
-              ) : (
-<>
-<button
-
-                    className="stock-menu-button"
-
-                    type="button"
-
-                    onClick={() =>
-
-                      setPage("stock")
-
-                    }
->
-
-                    รับสินค้าเข้า
-</button>
-<button
-
-                    className="product-menu-button"
-
-                    type="button"
-
-                    onClick={() =>
-
-                      setLoginOpen(true)
-
-                    }
->
-
-                    โหมดเจ้าของร้าน
-</button>
-</>
-
-              )}
 </div>
+
+            )}
 </header>
 <input
 
@@ -779,103 +978,129 @@ item.id === product.id &&
 
             onChange={(event) =>
 
-              setSearchText(event.target.value)
+              setSearchText(
+
+                event.target.value
+
+              )
 
             }
 
           />
 <div className="product-grid">
 
-            {filteredProducts.map((product) => {
+            {filteredProducts.map(
 
-              const normalPrice =
+              (product) => {
 
-                product.options?.find(
+                const normalPrice =
 
-                  (option) =>
-option.id === "normal"
+                  product.options?.find(
 
-                )?.price ??
+                    (option) =>
+option.id ===
 
-                product.options?.[0]?.price ??
+                      "normal"
 
-                product.price;
+                  )?.price ??
 
-              const stock = getStock(product.id);
+                  product.options?.[0]
 
-              return (
+                    ?.price ??
+
+                  product.price;
+
+                const stock =
+
+                  getStock(
+product.id
+
+                  );
+
+                return (
 <article
 
-                  className="product-card"
+                    className="product-card"
 
-                  key={product.id}
->
-<div className="product-image-box">
-
-                    {product.image ? (
-<img
-
-                        className="product-image"
-
-                        src={product.image}
-
-                        alt={product.name}
-
-                      />
-
-                    ) : (
-<span>ไม่มีรูป</span>
-
-                    )}
-</div>
-<div className="product-name">
-
-                    {product.name}
-</div>
-<div className="product-price">
-
-                    {normalPrice} บาท
-</div>
-<div
-
-                    className={
-
-                      stock < 0
-
-                        ? "stock-text stock-negative"
-
-                        : "stock-text"
-
-                    }
->
-
-                    คงเหลือ {stock}
-</div>
-<button
-
-                    className="add-button"
-
-                    type="button"
+                    key={product.id}
 
                     onClick={() =>
 
-                      openProduct(product)
+                      openProduct(
+
+                        product
+
+                      )
 
                     }
 >
+<div className="product-image-box">
 
-                    เพิ่ม
-</button>
+                      {product.image ? (
+<img
+
+                          className="product-image"
+
+                          src={
+
+                            product.image
+
+                          }
+
+                          alt={
+
+                            product.name
+
+                          }
+
+                        />
+
+                      ) : (
+<span>
+
+                          ไม่มีรูป
+</span>
+
+                      )}
+</div>
+<div className="product-name">
+
+                      {product.name}
+</div>
+<div className="product-price">
+
+                      {normalPrice} บาท
+</div>
+<div
+
+                      className={
+
+                        stock < 0
+
+                          ? "stock-text stock-negative"
+
+                          : "stock-text"
+
+                      }
+>
+
+                      คงเหลือ {stock}
+</div>
 </article>
 
-              );
+                );
 
-            })}
+              }
+
+            )}
 </div>
 </main>
 <aside className="cart-panel">
 <div className="cart-header">
-<h2>🛒 ตะกร้า</h2>
+<h2>
+
+              🛒 ตะกร้า
+</h2>
 <span className="cart-badge">
 
               {totalQty}
@@ -891,105 +1116,152 @@ option.id === "normal"
 
             ) : (
 
-              cart.map((item, index) => (
+              cart.map(
+
+                (
+
+                  item,
+
+                  index
+
+                ) => (
 <div
 
-                  className="cart-item"
+                    className="cart-item"
 
-                  key={`${item.id}-${item.option}`}
+                    key={`${item.id}-${item.option}`}
 >
 <div className="cart-item-header">
 <div>
-<strong>{item.name}</strong>
+<strong>
+
+                          {item.name}
+</strong>
 <div className="cart-option">
 
-                        {item.option} ·{" "}
+                          {item.option}
 
-                        {item.price} บาท
+                          {" · "}
+
+                          {item.price} บาท
 </div>
 </div>
 <button
 
-                      className="remove-button"
+                        className="remove-button"
 
-                      type="button"
+                        type="button"
 
-                      onClick={() =>
+                        onClick={() =>
 
-                        removeItem(index)
+                          removeItem(
 
-                      }
+                            index
+
+                          )
+
+                        }
 >
 
-                      ลบ
+                        ลบ
 </button>
 </div>
 <div className="cart-item-bottom">
 <div className="quantity-controls">
 <button
 
-                        type="button"
+                          type="button"
 
-                        onClick={() =>
+                          onClick={() =>
 
-                          decreaseQty(index)
+                            decreaseQty(
 
-                        }
+                              index
+
+                            )
+
+                          }
 >
 
-                        −
+                          −
 </button>
 <input
 
-                        className="quantity-input"
+                          className="quantity-input"
 
-                        type="number"
+                          type="number"
 
-                        min="1"
+                          min="1"
 
-                        value={item.qty}
+                          value={
 
-                        onChange={(event) =>
+                            item.qty
 
-                          changeCartQty(
+                          }
 
-                            index,
+                          onChange={(
 
-                            event.target.value
+                            event
 
-                          )
+                          ) =>
 
-                        }
+                            changeCartQty(
 
-                      />
+                              index,
+
+                              event.target
+
+                                .value
+
+                            )
+
+                          }
+
+                        />
 <button
 
-                        type="button"
+                          type="button"
 
-                        onClick={() =>
+                          onClick={() =>
 
-                          increaseQty(index)
+                            increaseQty(
 
-                        }
+                              index
+
+                            )
+
+                          }
 >
 
-                        +
+                          +
 </button>
 </div>
 <strong>
 
-                      {item.price * item.qty} บาท
+                        {item.price *
+
+                          item.qty}{" "}
+
+                        บาท
 </strong>
 </div>
 </div>
 
-              ))
+                )
+
+              )
 
             )}
 </div>
 <div className="grand-total">
-<span>รวมทั้งหมด</span>
-<span>{total} บาท</span>
+<span>
+
+              รวมทั้งหมด
+</span>
+<span>
+
+              {total} บาท
+</span>
 </div>
 <button
 
@@ -997,182 +1269,440 @@ option.id === "normal"
 
             type="button"
 
-            disabled={cart.length === 0}
+            disabled={
 
-            onClick={completeSale}
+              cart.length === 0
+
+            }
+
+            onClick={
+
+              completeSale
+
+            }
 >
 
             คิดเงิน
 </button>
 </aside>
 
-        {selectedProduct && selectedOption && (
+        {selectedProduct &&
+
+          selectedOption && (
 <div
 
-            className="popup-overlay"
+              className="popup-overlay"
 
-            onClick={closePopup}
->
-<div
+              onClick={
 
-              className="popup"
-
-              onClick={(event) =>
-
-                event.stopPropagation()
+                closePopup
 
               }
 >
-<h2>{selectedProduct.name}</h2>
+<div
+
+                className="popup"
+
+                onClick={(
+
+                  event
+
+                ) =>
+
+                  event.stopPropagation()
+
+                }
+>
+<h2>
+
+                  {
+
+                    selectedProduct.name
+
+                  }
+</h2>
 <div className="option-list">
 
-                {selectedProduct.options.map(
+                  {selectedProduct.options.map(
 
-                  (option) => (
+                    (option) => (
 <label
 
-                      className={
-selectedOption.id === option.id
+                        className={
+selectedOption.id ===
+option.id
 
-                          ? "option-button selected-option"
+                            ? "option-button selected-option"
 
-                          : "option-button"
+                            : "option-button"
 
-                      }
+                        }
 
-                      key={option.id}
+                        key={
+option.id
+
+                        }
 >
 <span>
 <input
 
-                          type="radio"
+                            type="radio"
 
-                          name="product-option"
+                            name="product-option"
 
-                          checked={
-selectedOption.id === option.id
+                            checked={
+selectedOption.id ===
+option.id
 
-                          }
+                            }
 
-                          onChange={() =>
+                            onChange={() =>
 
-                            setSelectedOption(option)
+                              setSelectedOption(
 
-                          }
+                                option
 
-                        />
+                              )
 
-                        {" "}
+                            }
 
-                        {option.name}
+                          />
+
+                          {" "}
+
+                          {option.name}
 </span>
 <strong>
 
-                        {option.price} บาท
+                          {option.price} บาท
 </strong>
 </label>
 
-                  )
+                    )
 
-                )}
+                  )}
 </div>
 <div className="popup-quantity">
 <button
 
-                  type="button"
+                    type="button"
 
-                  onClick={() =>
+                    onClick={() =>
 
-                    setPopupQty((qty) =>
+                      setPopupQty(
 
-                      Math.max(1, Number(qty) - 1)
+                        (qty) =>
 
-                    )
+                          Math.max(
 
-                  }
->
+                            1,
 
-                  −
-</button>
-<input
+                            Number(qty) -
 
-                  className="quantity-input"
+                              1
 
-                  type="number"
-
-                  min="1"
-
-                  value={popupQty}
-
-                  onChange={(event) =>
-
-                    setPopupQty(
-
-                      Math.max(
-
-                        1,
-
-                        Number(event.target.value) || 1
+                          )
 
                       )
 
-                    )
+                    }
+>
 
-                  }
+                    −
+</button>
+<input
 
-                />
+                    className="quantity-input"
+
+                    type="number"
+
+                    min="1"
+
+                    value={
+
+                      popupQty
+
+                    }
+
+                    onChange={(
+
+                      event
+
+                    ) =>
+
+                      setPopupQty(
+
+                        Math.max(
+
+                          1,
+
+                          Number(
+
+                            event.target
+
+                              .value
+
+                          ) || 1
+
+                        )
+
+                      )
+
+                    }
+
+                  />
 <button
+
+                    type="button"
+
+                    onClick={() =>
+
+                      setPopupQty(
+
+                        (qty) =>
+
+                          Number(qty) +
+
+                          1
+
+                      )
+
+                    }
+>
+
+                    +
+</button>
+</div>
+<button
+
+                  className="pay-button"
 
                   type="button"
 
-                  onClick={() =>
+                  onClick={
 
-                    setPopupQty((qty) =>
-
-                      Number(qty) + 1
-
-                    )
+                    confirmPopup
 
                   }
 >
 
-                  +
-</button>
-</div>
-<button
-
-                className="pay-button"
-
-                type="button"
-
-                onClick={confirmPopup}
->
-
-                เพิ่มลงตะกร้า
+                  เพิ่มลงตะกร้า
 </button>
 <button
 
-                className="cancel-button"
+                  className="cancel-button"
 
-                type="button"
+                  type="button"
 
-                onClick={closePopup}
+                  onClick={
+
+                    closePopup
+
+                  }
 >
 
-                ยกเลิก
+                  ยกเลิก
 </button>
 </div>
 </div>
 
-        )}
+          )}
 </div>
+
+    );
+
+  }
+
+  function renderOwnerPage() {
+
+    if (page === "dashboard") {
+
+      return (
+<DashboardPage />
+
+      );
+
+    }
+
+    if (page === "reports") {
+
+      return (
+<ReportPage />
+
+      );
+
+    }
+
+    if (page === "bills") {
+
+      return (
+<BillsPage />
+
+      );
+
+    }
+
+    if (page === "products") {
+
+      return (
+<ProductManager
+
+          products={products}
+
+          inventory={inventory}
+
+          onSaveProduct={
+
+            saveProduct
+
+          }
+
+          onClose={() =>
+
+            setPage("pos")
+
+          }
+
+        />
+
+      );
+
+    }
+
+    if (page === "stock") {
+
+      return (
+<StockManager
+
+          products={products}
+
+          inventory={inventory}
+
+          onAddStock={
+
+            addStock
+
+          }
+
+          onClose={() =>
+
+            setPage("pos")
+
+          }
+
+        />
+
+      );
+
+    }
+
+    if (page === "settings") {
+
+      return (
+<div className="owner-placeholder-page">
+<h1>
+
+            ตั้งค่า
+</h1>
+<p>
+
+            เราจะทำหน้านี้ต่อ
+</p>
+</div>
+
+      );
+
+    }
+
+    return renderPOS();
+
+  }
+
+  if (
+
+    !ownerMode &&
+
+    page === "stock"
+
+  ) {
+
+    return (
+<StockManager
+
+        products={products}
+
+        inventory={
+
+          inventory
+
+        }
+
+        onAddStock={
+
+          addStock
+
+        }
+
+        onClose={() =>
+
+          setPage("pos")
+
+        }
+
+      />
+
+    );
+
+  }
+
+  return (
+<>
+
+      {ownerMode ? (
+<div className="owner-app-shell">
+<OwnerSidebar
+
+            currentPage={page}
+
+            onChangePage={
+
+              setPage
+
+            }
+
+            onLogout={
+
+              exitOwnerMode
+
+            }
+
+          />
+<main className="owner-app-content">
+
+            {renderOwnerPage()}
+</main>
+</div>
+
+      ) : (
+
+        renderPOS()
+
+      )}
 <OwnerLogin
 
         open={loginOpen}
 
-        onSuccess={enterOwnerMode}
+        onSuccess={
 
-        onClose={() => setLoginOpen(false)}
+          enterOwnerMode
+
+        }
+
+        onClose={() =>
+
+          setLoginOpen(false)
+
+        }
 
       />
 </>
