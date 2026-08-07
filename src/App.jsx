@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import defaultProducts from "./data/products";
 
@@ -12,11 +12,15 @@ import OwnerSidebar from "./components/OwnerSidebar";
 
 import PaymentPopup from "./components/PaymentPopup";
 
+import POSPage from "./pages/POSPage";
+
 import DashboardPage from "./pages/DashboardPage";
 
 import ReportPage from "./pages/ReportPage";
 
 import BillsPage from "./pages/BillsPage";
+
+import createBillId from "./utils/createBillId";
 
 import "./styles/App.css";
 
@@ -106,9 +110,7 @@ function loadInventory(productList) {
 
 function App() {
 
-  const initialProducts =
-
-    loadProducts();
+  const initialProducts = loadProducts();
 
   const [products, setProducts] =
 
@@ -121,6 +123,10 @@ function App() {
       loadInventory(initialProducts)
 
     );
+
+  const [cart, setCart] =
+
+    useState([]);
 
   const [page, setPage] =
 
@@ -138,72 +144,6 @@ function App() {
 
     useState(false);
 
-  const [cart, setCart] =
-
-    useState([]);
-
-  const [searchText, setSearchText] =
-
-    useState("");
-
-  const [
-
-    selectedProduct,
-
-    setSelectedProduct,
-
-  ] = useState(null);
-
-  const [
-
-    selectedOption,
-
-    setSelectedOption,
-
-  ] = useState(null);
-
-  const [popupQty, setPopupQty] =
-
-    useState(1);
-
-  const filteredProducts =
-
-    useMemo(() => {
-
-      const keyword =
-
-        searchText
-
-          .trim()
-
-          .toLowerCase();
-
-      if (!keyword) {
-
-        return products;
-
-      }
-
-      return products.filter(
-
-        (product) =>
-
-          product.name
-
-            .toLowerCase()
-
-            .includes(keyword)
-
-      );
-
-    }, [
-
-      products,
-
-      searchText,
-
-    ]);
-
   function saveProducts(
 
     newProducts
@@ -216,11 +156,7 @@ function App() {
 
       PRODUCTS_KEY,
 
-      JSON.stringify(
-
-        newProducts
-
-      )
+      JSON.stringify(newProducts)
 
     );
 
@@ -232,21 +168,18 @@ function App() {
 
   ) {
 
-    saveProducts(
+    const newProducts =
 
-      products.map(
+      products.map((product) =>
+product.id === updatedProduct.id
 
-        (product) =>
-product.id ===
-updatedProduct.id
+          ? updatedProduct
 
-            ? updatedProduct
+          : product
 
-            : product
+      );
 
-      )
-
-    );
+    saveProducts(newProducts);
 
   }
 
@@ -262,11 +195,7 @@ updatedProduct.id
 
       STOCK_KEY,
 
-      JSON.stringify(
-
-        newInventory
-
-      )
+      JSON.stringify(newInventory)
 
     );
 
@@ -338,6 +267,20 @@ updatedProduct.id
 
     );
 
+    const price = Number(
+
+      option?.price ??
+
+        product.price ??
+
+        0
+
+    );
+
+    const optionName =
+
+      option?.name || "ปกติ";
+
     const cost = Number(
 
       product.cost || 0
@@ -351,12 +294,9 @@ updatedProduct.id
         currentCart.find(
 
           (item) =>
-item.id ===
-product.id &&
+item.id === product.id &&
 
-            item.option ===
-
-              option.name
+            item.option === optionName
 
         );
 
@@ -365,12 +305,9 @@ product.id &&
         return currentCart.map(
 
           (item) =>
-item.id ===
-product.id &&
+item.id === product.id &&
 
-            item.option ===
-
-              option.name
+            item.option === optionName
 
               ? {
 
@@ -380,13 +317,7 @@ product.id &&
 
                     product.name,
 
-                  price:
-
-                    Number(
-
-                      option.price
-
-                    ),
+                  price,
 
                   cost,
 
@@ -410,137 +341,23 @@ product.id &&
 
         {
 
-          id:
-product.id,
+          id: product.id,
 
-          name:
+          name: product.name,
 
-            product.name,
+          option: optionName,
 
-          option:
-
-            option.name,
-
-          price:
-
-            Number(
-
-              option.price
-
-            ),
+          price,
 
           cost,
 
-          qty:
-
-            safeQty,
+          qty: safeQty,
 
         },
 
       ];
 
     });
-
-  }
-
-  function openProduct(product) {
-
-    const hasOption =
-
-      product.hasOption === true ||
-
-      product.hasOptions === true;
-
-    if (
-
-      !hasOption ||
-
-      !product.options?.length
-
-    ) {
-
-      addToCart(
-
-        product,
-
-        {
-
-          name: "ปกติ",
-
-          price:
-
-            product.price,
-
-        }
-
-      );
-
-      return;
-
-    }
-
-    const normalOption =
-
-      product.options.find(
-
-        (option) =>
-option.id === "normal"
-
-      ) ||
-
-      product.options[0];
-
-    setSelectedProduct(
-
-      product
-
-    );
-
-    setSelectedOption(
-
-      normalOption
-
-    );
-
-    setPopupQty(1);
-
-  }
-
-  function closePopup() {
-
-    setSelectedProduct(null);
-
-    setSelectedOption(null);
-
-    setPopupQty(1);
-
-  }
-
-  function confirmPopup() {
-
-    if (
-
-      !selectedProduct ||
-
-      !selectedOption
-
-    ) {
-
-      return;
-
-    }
-
-    addToCart(
-
-      selectedProduct,
-
-      selectedOption,
-
-      popupQty
-
-    );
-
-    closePopup();
 
   }
 
@@ -600,7 +417,11 @@ option.id === "normal"
 
                 qty:
 
-                  item.qty + 1,
+                  Number(
+
+                    item.qty
+
+                  ) + 1,
 
               }
 
@@ -630,7 +451,11 @@ option.id === "normal"
 
                   qty:
 
-                    item.qty - 1,
+                    Number(
+
+                      item.qty
+
+                    ) - 1,
 
                 }
 
@@ -672,7 +497,9 @@ option.id === "normal"
 
       (sum, item) =>
 
-        sum + item.qty,
+        sum +
+
+        Number(item.qty || 0),
 
       0
 
@@ -686,9 +513,17 @@ option.id === "normal"
 
         sum +
 
-        item.price *
+        Number(
 
-          item.qty,
+          item.price || 0
+
+        ) *
+
+          Number(
+
+            item.qty || 0
+
+          ),
 
       0
 
@@ -730,7 +565,7 @@ option.id === "normal"
 
         (soldByProduct[item.id] || 0) +
 
-        item.qty;
+        Number(item.qty || 0);
 
     });
 
@@ -770,6 +605,18 @@ option.id === "normal"
 
       cart.map((item) => {
 
+        const quantity =
+
+          Number(item.qty || 0);
+
+        const unitPrice =
+
+          Number(
+
+            item.price || 0
+
+          );
+
         const unitCost =
 
           Number(
@@ -780,20 +627,15 @@ option.id === "normal"
 
         const lineTotal =
 
-          item.price *
-
-          item.qty;
+          unitPrice * quantity;
 
         const lineCost =
 
-          unitCost *
-
-          item.qty;
+          unitCost * quantity;
 
         return {
 
-          productId:
-item.id,
+          productId: item.id,
 
           productName:
 
@@ -803,15 +645,11 @@ item.id,
 
             item.option,
 
-          unitPrice:
-
-            item.price,
+          unitPrice,
 
           unitCost,
 
-          quantity:
-
-            item.qty,
+          quantity,
 
           lineTotal,
 
@@ -835,7 +673,11 @@ item.id,
 
           sum +
 
-          item.lineCost,
+          Number(
+
+            item.lineCost || 0
+
+          ),
 
         0
 
@@ -849,7 +691,7 @@ item.id,
 
       billId:
 
-        `DB-${now.getTime()}`,
+        createBillId(),
 
       soldAt:
 
@@ -881,7 +723,9 @@ item.id,
 
       totalProfit:
 
-        total - totalCost,
+        total -
+
+        totalCost,
 
       items:
 
@@ -925,7 +769,7 @@ item.id,
 
     window.alert(
 
-      `ขายสำเร็จ\nยอดรวม ${total} บาท`
+      `ขายสำเร็จ\nเลขบิล ${sale.billId}\nยอดรวม ${total.toLocaleString()} บาท`
 
     );
 
@@ -952,592 +796,51 @@ item.id,
   function renderPOS() {
 
     return (
-<div className="app">
-<main className="product-panel">
-<header className="main-header">
-<h1>
+<POSPage
 
-              Dadboy POS
-</h1>
+        products={products}
 
-            {!ownerMode && (
-<div className="header-buttons">
-<button
+        inventory={inventory}
 
-                  className="stock-menu-button"
+        cart={cart}
 
-                  type="button"
+        onAddToCart={
 
-                  onClick={() =>
+          addToCart
 
-                    setPage("stock")
+        }
 
-                  }
->
+        onChangeCartQty={
 
-                  รับสินค้าเข้า
-</button>
-<button
+          changeCartQty
 
-                  className="product-menu-button"
+        }
 
-                  type="button"
+        onIncreaseQty={
 
-                  onClick={() =>
+          increaseQty
 
-                    setLoginOpen(true)
+        }
 
-                  }
->
+        onDecreaseQty={
 
-                  โหมดเจ้าของร้าน
-</button>
-</div>
+          decreaseQty
 
-            )}
-</header>
-<input
+        }
 
-            className="search-input"
+        onRemoveItem={
 
-            type="search"
+          removeItem
 
-            placeholder="ค้นหาสินค้า..."
+        }
 
-            value={searchText}
+        onOpenPayment={
 
-            onChange={(event) =>
+          openPayment
 
-              setSearchText(
+        }
 
-                event.target.value
-
-              )
-
-            }
-
-          />
-<div className="product-grid">
-
-            {filteredProducts.map(
-
-              (product) => {
-
-                const normalPrice =
-
-                  product.options?.find(
-
-                    (option) =>
-option.id ===
-
-                      "normal"
-
-                  )?.price ??
-
-                  product.options?.[0]
-
-                    ?.price ??
-
-                  product.price;
-
-                const stock =
-
-                  getStock(
-product.id
-
-                  );
-
-                return (
-<article
-
-                    className="product-card"
-
-                    key={product.id}
-
-                    onClick={() =>
-
-                      openProduct(
-
-                        product
-
-                      )
-
-                    }
->
-<div className="product-image-box">
-
-                      {product.image ? (
-<img
-
-                          className="product-image"
-
-                          src={
-
-                            product.image
-
-                          }
-
-                          alt={
-
-                            product.name
-
-                          }
-
-                        />
-
-                      ) : (
-<span>
-
-                          ไม่มีรูป
-</span>
-
-                      )}
-</div>
-<div className="product-name">
-
-                      {product.name}
-</div>
-<div className="product-price">
-
-                      {normalPrice} บาท
-</div>
-<div
-
-                      className={
-
-                        stock < 0
-
-                          ? "stock-text stock-negative"
-
-                          : "stock-text"
-
-                      }
->
-
-                      คงเหลือ {stock}
-</div>
-</article>
-
-                );
-
-              }
-
-            )}
-</div>
-</main>
-<aside className="cart-panel">
-<div className="cart-header">
-<h2>
-
-              🛒 ตะกร้า
-</h2>
-<span className="cart-badge">
-
-              {totalQty}
-</span>
-</div>
-<div className="cart-list">
-
-            {cart.length === 0 ? (
-<p className="empty-cart">
-
-                ยังไม่มีสินค้า
-</p>
-
-            ) : (
-
-              cart.map(
-
-                (
-
-                  item,
-
-                  index
-
-                ) => (
-<div
-
-                    className="cart-item"
-
-                    key={`${item.id}-${item.option}`}
->
-<div className="cart-item-header">
-<div>
-<strong>
-
-                          {item.name}
-</strong>
-<div className="cart-option">
-
-                          {item.option}
-
-                          {" · "}
-
-                          {item.price} บาท
-</div>
-</div>
-<button
-
-                        className="remove-button"
-
-                        type="button"
-
-                        onClick={() =>
-
-                          removeItem(
-
-                            index
-
-                          )
-
-                        }
->
-
-                        ลบ
-</button>
-</div>
-<div className="cart-item-bottom">
-<div className="quantity-controls">
-<button
-
-                          type="button"
-
-                          onClick={() =>
-
-                            decreaseQty(
-
-                              index
-
-                            )
-
-                          }
->
-
-                          −
-</button>
-<input
-
-                          className="quantity-input"
-
-                          type="number"
-
-                          min="1"
-
-                          value={
-
-                            item.qty
-
-                          }
-
-                          onChange={(
-
-                            event
-
-                          ) =>
-
-                            changeCartQty(
-
-                              index,
-
-                              event.target
-
-                                .value
-
-                            )
-
-                          }
-
-                        />
-<button
-
-                          type="button"
-
-                          onClick={() =>
-
-                            increaseQty(
-
-                              index
-
-                            )
-
-                          }
->
-
-                          +
-</button>
-</div>
-<strong>
-
-                        {item.price *
-
-                          item.qty}{" "}
-
-                        บาท
-</strong>
-</div>
-</div>
-
-                )
-
-              )
-
-            )}
-</div>
-<div className="grand-total">
-<span>
-
-              รวมทั้งหมด
-</span>
-<span>
-
-              {total} บาท
-</span>
-</div>
-<button
-
-            className="pay-button"
-
-            type="button"
-
-            disabled={
-
-              cart.length === 0
-
-            }
-
-            onClick={
-
-              openPayment
-
-            }
->
-
-            คิดเงิน
-</button>
-</aside>
-
-        {selectedProduct &&
-
-          selectedOption && (
-<div
-
-              className="popup-overlay"
-
-              onClick={
-
-                closePopup
-
-              }
->
-<div
-
-                className="popup"
-
-                onClick={(
-
-                  event
-
-                ) =>
-
-                  event.stopPropagation()
-
-                }
->
-<h2>
-
-                  {
-
-                    selectedProduct.name
-
-                  }
-</h2>
-<div className="option-list">
-
-                  {selectedProduct.options.map(
-
-                    (option) => (
-<label
-
-                        className={
-selectedOption.id ===
-option.id
-
-                            ? "option-button selected-option"
-
-                            : "option-button"
-
-                        }
-
-                        key={
-option.id
-
-                        }
->
-<span>
-<input
-
-                            type="radio"
-
-                            name="product-option"
-
-                            checked={
-selectedOption.id ===
-option.id
-
-                            }
-
-                            onChange={() =>
-
-                              setSelectedOption(
-
-                                option
-
-                              )
-
-                            }
-
-                          />
-
-                          {" "}
-
-                          {option.name}
-</span>
-<strong>
-
-                          {option.price} บาท
-</strong>
-</label>
-
-                    )
-
-                  )}
-</div>
-<div className="popup-quantity">
-<button
-
-                    type="button"
-
-                    onClick={() =>
-
-                      setPopupQty(
-
-                        (qty) =>
-
-                          Math.max(
-
-                            1,
-
-                            Number(qty) -
-
-                              1
-
-                          )
-
-                      )
-
-                    }
->
-
-                    −
-</button>
-<input
-
-                    className="quantity-input"
-
-                    type="number"
-
-                    min="1"
-
-                    value={
-
-                      popupQty
-
-                    }
-
-                    onChange={(
-
-                      event
-
-                    ) =>
-
-                      setPopupQty(
-
-                        Math.max(
-
-                          1,
-
-                          Number(
-
-                            event.target
-
-                              .value
-
-                          ) || 1
-
-                        )
-
-                      )
-
-                    }
-
-                  />
-<button
-
-                    type="button"
-
-                    onClick={() =>
-
-                      setPopupQty(
-
-                        (qty) =>
-
-                          Number(qty) +
-
-                          1
-
-                      )
-
-                    }
->
-
-                    +
-</button>
-</div>
-<button
-
-                  className="pay-button"
-
-                  type="button"
-
-                  onClick={
-
-                    confirmPopup
-
-                  }
->
-
-                  เพิ่มลงตะกร้า
-</button>
-<button
-
-                  className="cancel-button"
-
-                  type="button"
-
-                  onClick={
-
-                    closePopup
-
-                  }
->
-
-                  ยกเลิก
-</button>
-</div>
-</div>
-
-          )}
-</div>
+      />
 
     );
 
@@ -1545,7 +848,11 @@ option.id
 
   function renderOwnerPage() {
 
-    if (page === "dashboard") {
+    if (
+
+      page === "dashboard"
+
+    ) {
 
       return (
 <DashboardPage />
@@ -1554,7 +861,11 @@ option.id
 
     }
 
-    if (page === "reports") {
+    if (
+
+      page === "reports"
+
+    ) {
 
       return (
 <ReportPage />
@@ -1563,7 +874,11 @@ option.id
 
     }
 
-    if (page === "bills") {
+    if (
+
+      page === "bills"
+
+    ) {
 
       return (
 <BillsPage />
@@ -1572,14 +887,26 @@ option.id
 
     }
 
-    if (page === "products") {
+    if (
+
+      page === "products"
+
+    ) {
 
       return (
 <ProductManager
 
-          products={products}
+          products={
 
-          inventory={inventory}
+            products
+
+          }
+
+          inventory={
+
+            inventory
+
+          }
 
           onSaveProduct={
 
@@ -1599,14 +926,26 @@ option.id
 
     }
 
-    if (page === "stock") {
+    if (
+
+      page === "stock"
+
+    ) {
 
       return (
 <StockManager
 
-          products={products}
+          products={
 
-          inventory={inventory}
+            products
+
+          }
+
+          inventory={
+
+            inventory
+
+          }
 
           onAddStock={
 
@@ -1626,7 +965,11 @@ option.id
 
     }
 
-    if (page === "settings") {
+    if (
+
+      page === "settings"
+
+    ) {
 
       return (
 <div className="owner-placeholder-page">
@@ -1710,8 +1053,48 @@ option.id
 </div>
 
       ) : (
+<>
+<div className="employee-pos-topbar">
+<strong>
 
-        renderPOS()
+              Dadboy POS
+</strong>
+<div>
+<button
+
+                className="stock-menu-button"
+
+                type="button"
+
+                onClick={() =>
+
+                  setPage("stock")
+
+                }
+>
+
+                รับสินค้าเข้า
+</button>
+<button
+
+                className="product-menu-button"
+
+                type="button"
+
+                onClick={() =>
+
+                  setLoginOpen(true)
+
+                }
+>
+
+                โหมดเจ้าของร้าน
+</button>
+</div>
+</div>
+
+          {renderPOS()}
+</>
 
       )}
 <OwnerLogin
