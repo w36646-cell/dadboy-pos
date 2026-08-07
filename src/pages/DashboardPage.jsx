@@ -20,9 +20,15 @@ function readStorage(key, fallback) {
 
   try {
 
-    const saved = localStorage.getItem(key);
+    const saved =
 
-    return saved ? JSON.parse(saved) : fallback;
+      localStorage.getItem(key);
+
+    return saved
+
+      ? JSON.parse(saved)
+
+      : fallback;
 
   } catch {
 
@@ -34,7 +40,11 @@ function readStorage(key, fallback) {
 
 function formatDateKey(date) {
 
-  return date.toLocaleDateString("en-CA");
+  return date.toLocaleDateString(
+
+    "en-CA"
+
+  );
 
 }
 
@@ -44,29 +54,37 @@ function summarize(saleList) {
 
     (result, sale) => {
 
-      result.totalAmount += Number(
+      result.totalAmount +=
 
-        sale.totalAmount || 0
+        Number(
 
-      );
+          sale.totalAmount || 0
 
-      result.totalCost += Number(
+        );
 
-        sale.totalCost || 0
+      result.totalCost +=
 
-      );
+        Number(
 
-      result.totalProfit += Number(
+          sale.totalCost || 0
 
-        sale.totalProfit || 0
+        );
 
-      );
+      result.totalProfit +=
 
-      result.totalQty += Number(
+        Number(
 
-        sale.totalQty || 0
+          sale.totalProfit || 0
 
-      );
+        );
+
+      result.totalQty +=
+
+        Number(
+
+          sale.totalQty || 0
+
+        );
 
       return result;
 
@@ -88,47 +106,97 @@ function summarize(saleList) {
 
 }
 
-function DashboardPage() {
+function DashboardPage({
 
-  const [sales, setSales] = useState(() =>
+  onOpenStock,
 
-    readStorage(SALES_KEY, [])
+}) {
+
+  const [sales, setSales] =
+
+    useState(() =>
+
+      readStorage(
+
+        SALES_KEY,
+
+        []
+
+      )
+
+    );
+
+  const [
+
+    inventory,
+
+    setInventory,
+
+  ] = useState(() =>
+
+    readStorage(
+
+      STOCK_KEY,
+
+      {}
+
+    )
 
   );
 
-  const [inventory, setInventory] =
+  const [
 
-    useState(() =>
+    products,
 
-      readStorage(STOCK_KEY, {})
+    setProducts,
 
-    );
+  ] = useState(() =>
 
-  const [products, setProducts] =
+    readStorage(
 
-    useState(() =>
+      PRODUCTS_KEY,
 
-      readStorage(PRODUCTS_KEY, [])
+      []
 
-    );
+    )
+
+  );
 
   function reloadDashboardData() {
 
     setSales(
 
-      readStorage(SALES_KEY, [])
+      readStorage(
+
+        SALES_KEY,
+
+        []
+
+      )
 
     );
 
     setInventory(
 
-      readStorage(STOCK_KEY, {})
+      readStorage(
+
+        STOCK_KEY,
+
+        {}
+
+      )
 
     );
 
     setProducts(
 
-      readStorage(PRODUCTS_KEY, [])
+      readStorage(
+
+        PRODUCTS_KEY,
+
+        []
+
+      )
 
     );
 
@@ -136,11 +204,13 @@ function DashboardPage() {
 
   useEffect(() => {
 
-    const timer = setInterval(() => {
+    const timer =
 
-      reloadDashboardData();
+      setInterval(() => {
 
-    }, 2000);
+        reloadDashboardData();
+
+      }, 2000);
 
     window.addEventListener(
 
@@ -184,23 +254,37 @@ function DashboardPage() {
 
   const now = new Date();
 
-  const today = formatDateKey(now);
+  const today =
 
-  const todaySales = useMemo(() => {
+    formatDateKey(now);
 
-    return sales.filter(
+  const todaySales =
 
-      (sale) => sale.soldDate === today
+    useMemo(() => {
 
-    );
+      return sales.filter(
 
-  }, [sales, today]);
+        (sale) =>
 
-  const summary = useMemo(() => {
+          sale.soldDate ===
 
-    return summarize(todaySales);
+          today
 
-  }, [todaySales]);
+      );
+
+    }, [sales, today]);
+
+  const summary =
+
+    useMemo(() => {
+
+      return summarize(
+
+        todaySales
+
+      );
+
+    }, [todaySales]);
 
   const averageBill =
 
@@ -226,329 +310,524 @@ function DashboardPage() {
 
       : 0;
 
-  const topProducts = useMemo(() => {
+  const topProducts =
 
-    const result = {};
+    useMemo(() => {
 
-    todaySales.forEach((sale) => {
+      const result = {};
 
-      sale.items?.forEach((item) => {
+      todaySales.forEach(
 
-        const key =
+        (sale) => {
 
-          `${item.productId}-${item.option}`;
+          sale.items?.forEach(
 
-        if (!result[key]) {
+            (item) => {
 
-          result[key] = {
+              const key =
 
-            name: item.productName,
+                `${item.productId}-${item.option}`;
 
-            option: item.option,
+              if (!result[key]) {
 
-            quantity: 0,
+                result[key] = {
 
-            amount: 0,
+                  name:
 
-          };
+                    item.productName,
 
-        }
+                  option:
 
-        result[key].quantity += Number(
+                    item.option,
 
-          item.quantity || 0
+                  quantity: 0,
 
-        );
+                  amount: 0,
 
-        result[key].amount += Number(
+                };
 
-          item.lineTotal || 0
+              }
 
-        );
+              result[
 
-      });
+                key
 
-    });
+              ].quantity +=
 
-    return Object.values(result)
+                Number(
 
-      .sort(
+                  item.quantity ||
 
-        (a, b) =>
+                    0
 
-          b.quantity - a.quantity
+                );
 
-      )
+              result[
 
-      .slice(0, 5);
+                key
 
-  }, [todaySales]);
+              ].amount +=
 
-  const lowStockProducts = useMemo(() => {
+                Number(
 
-    return products
+                  item.lineTotal ||
 
-      .map((product) => ({
+                    0
 
-        ...product,
-
-        stock: Number(
-
-          inventory[product.id] ??
-
-            product.stock ??
-
-            50
-
-        ),
-
-      }))
-
-      .filter(
-
-        (product) =>
-
-          product.stock <= 5
-
-      )
-
-      .sort(
-
-        (a, b) =>
-
-          a.stock - b.stock
-
-      )
-
-      .slice(0, 10);
-
-  }, [products, inventory]);
-
-  const stockValue = useMemo(() => {
-
-    return products.reduce(
-
-      (total, product) => {
-
-        const stock = Number(
-
-          inventory[product.id] ??
-
-            product.stock ??
-
-            0
-
-        );
-
-        const cost = Number(
-
-          product.cost || 0
-
-        );
-
-        return (
-
-          total +
-
-          Math.max(stock, 0) *
-
-            cost
-
-        );
-
-      },
-
-      0
-
-    );
-
-  }, [products, inventory]);
-
-  const hourlySales = useMemo(() => {
-
-    const hours = Array.from(
-
-      { length: 16 },
-
-      (_, index) => ({
-
-        hour: index + 7,
-
-        amount: 0,
-
-      })
-
-    );
-
-    todaySales.forEach((sale) => {
-
-      const saleDate = new Date(
-
-        sale.soldAt
-
-      );
-
-      if (
-
-        Number.isNaN(
-
-          saleDate.getTime()
-
-        )
-
-      ) {
-
-        return;
-
-      }
-
-      const hour =
-
-        saleDate.getHours();
-
-      const target =
-
-        hours.find(
-
-          (item) =>
-
-            item.hour === hour
-
-        );
-
-      if (target) {
-
-        target.amount += Number(
-
-          sale.totalAmount || 0
-
-        );
-
-      }
-
-    });
-
-    return hours;
-
-  }, [todaySales]);
-
-  const maxHourlyAmount = Math.max(
-
-    1,
-
-    ...hourlySales.map(
-
-      (item) => item.amount
-
-    )
-
-  );
-
-  const last7Days = useMemo(() => {
-
-    const result = [];
-
-    for (
-
-      let index = 6;
-
-      index >= 0;
-
-      index -= 1
-
-    ) {
-
-      const date = new Date();
-
-      date.setHours(0, 0, 0, 0);
-
-      date.setDate(
-
-        date.getDate() - index
-
-      );
-
-      const key =
-
-        formatDateKey(date);
-
-      const daySales =
-
-        sales.filter(
-
-          (sale) =>
-
-            sale.soldDate === key
-
-        );
-
-      const daySummary =
-
-        summarize(daySales);
-
-      result.push({
-
-        key,
-
-        label:
-
-          date.toLocaleDateString(
-
-            "th-TH",
-
-            {
-
-              weekday: "short",
+                );
 
             }
 
-          ),
+          );
 
-        amount:
+        }
 
-          daySummary.totalAmount,
+      );
 
-        profit:
+      return Object.values(
 
-          daySummary.totalProfit,
+        result
 
-      });
+      )
+
+        .sort(
+
+          (a, b) =>
+
+            b.quantity -
+
+            a.quantity
+
+        )
+
+        .slice(0, 5);
+
+    }, [todaySales]);
+
+  const lowStockProducts =
+
+    useMemo(() => {
+
+      return products
+
+        .map((product) => {
+
+          const stock =
+
+            Number(
+
+              inventory[
+product.id
+
+              ] ??
+
+                product.stock ??
+
+                50
+
+            );
+
+          const minStock =
+
+            Number(
+
+              product.minStock ??
+
+                5
+
+            );
+
+          const trackStock =
+
+            product.trackStock !==
+
+            false;
+
+          return {
+
+            ...product,
+
+            stock,
+
+            minStock,
+
+            trackStock,
+
+          };
+
+        })
+
+        .filter(
+
+          (product) =>
+
+            product.trackStock &&
+
+            product.stock <=
+
+              product.minStock
+
+        )
+
+        .sort((a, b) => {
+
+          const aGap =
+
+            a.stock -
+
+            a.minStock;
+
+          const bGap =
+
+            b.stock -
+
+            b.minStock;
+
+          return aGap - bGap;
+
+        });
+
+    }, [
+
+      products,
+
+      inventory,
+
+    ]);
+
+  const stockValue =
+
+    useMemo(() => {
+
+      return products.reduce(
+
+        (
+
+          total,
+
+          product
+
+        ) => {
+
+          const stock =
+
+            Number(
+
+              inventory[
+product.id
+
+              ] ??
+
+                product.stock ??
+
+                0
+
+            );
+
+          const cost =
+
+            Number(
+
+              product.cost || 0
+
+            );
+
+          return (
+
+            total +
+
+            Math.max(
+
+              stock,
+
+              0
+
+            ) *
+
+              cost
+
+          );
+
+        },
+
+        0
+
+      );
+
+    }, [
+
+      products,
+
+      inventory,
+
+    ]);
+
+  const hourlySales =
+
+    useMemo(() => {
+
+      const hours =
+
+        Array.from(
+
+          {
+
+            length: 16,
+
+          },
+
+          (_, index) => ({
+
+            hour:
+
+              index + 7,
+
+            amount: 0,
+
+          })
+
+        );
+
+      todaySales.forEach(
+
+        (sale) => {
+
+          const saleDate =
+
+            new Date(
+
+              sale.soldAt
+
+            );
+
+          if (
+
+            Number.isNaN(
+
+              saleDate.getTime()
+
+            )
+
+          ) {
+
+            return;
+
+          }
+
+          const hour =
+
+            saleDate.getHours();
+
+          const target =
+
+            hours.find(
+
+              (item) =>
+
+                item.hour ===
+
+                hour
+
+            );
+
+          if (target) {
+
+            target.amount +=
+
+              Number(
+
+                sale.totalAmount ||
+
+                  0
+
+              );
+
+          }
+
+        }
+
+      );
+
+      return hours;
+
+    }, [todaySales]);
+
+  const maxHourlyAmount =
+
+    Math.max(
+
+      1,
+
+      ...hourlySales.map(
+
+        (item) =>
+
+          item.amount
+
+      )
+
+    );
+
+  const last7Days =
+
+    useMemo(() => {
+
+      const result = [];
+
+      for (
+
+        let index = 6;
+
+        index >= 0;
+
+        index -= 1
+
+      ) {
+
+        const date =
+
+          new Date();
+
+        date.setHours(
+
+          0,
+
+          0,
+
+          0,
+
+          0
+
+        );
+
+        date.setDate(
+
+          date.getDate() -
+
+            index
+
+        );
+
+        const key =
+
+          formatDateKey(
+
+            date
+
+          );
+
+        const daySales =
+
+          sales.filter(
+
+            (sale) =>
+
+              sale.soldDate ===
+
+              key
+
+          );
+
+        const daySummary =
+
+          summarize(
+
+            daySales
+
+          );
+
+        result.push({
+
+          key,
+
+          label:
+
+            date.toLocaleDateString(
+
+              "th-TH",
+
+              {
+
+                weekday:
+
+                  "short",
+
+              }
+
+            ),
+
+          amount:
+
+            daySummary.totalAmount,
+
+          profit:
+
+            daySummary.totalProfit,
+
+        });
+
+      }
+
+      return result;
+
+    }, [sales]);
+
+  const max7DayAmount =
+
+    Math.max(
+
+      1,
+
+      ...last7Days.map(
+
+        (day) =>
+
+          day.amount
+
+      )
+
+    );
+
+  const max7DayProfit =
+
+    Math.max(
+
+      1,
+
+      ...last7Days.map(
+
+        (day) =>
+
+          day.profit
+
+      )
+
+    );
+
+  function goToStock() {
+
+    if (
+
+      typeof onOpenStock ===
+
+      "function"
+
+    ) {
+
+      onOpenStock();
 
     }
 
-    return result;
-
-  }, [sales]);
-
-  const max7DayAmount = Math.max(
-
-    1,
-
-    ...last7Days.map(
-
-      (day) => day.amount
-
-    )
-
-  );
-
-  const max7DayProfit = Math.max(
-
-    1,
-
-    ...last7Days.map(
-
-      (day) => day.profit
-
-    )
-
-  );
+  }
 
   return (
 <div className="db-page">
 <div className="db-header">
 <div>
-<h1>Dashboard</h1>
+<h1>
+
+            Dashboard
+</h1>
 <p>
 
             ภาพรวมร้านวันนี้
@@ -560,26 +839,120 @@ function DashboardPage() {
           LIVE
 </div>
 </div>
+
+      {lowStockProducts.length >
+
+        0 && (
+<button
+
+          type="button"
+
+          className="db-stock-alert"
+
+          onClick={
+
+            goToStock
+
+          }
+>
+<div className="db-stock-alert-icon">
+
+            ⚠️
+</div>
+<div className="db-stock-alert-content">
+<strong>
+
+              สินค้าใกล้หมด{" "}
+
+              {
+
+                lowStockProducts.length
+
+              }{" "}
+
+              รายการ
+</strong>
+<span>
+
+              {lowStockProducts
+
+                .slice(0, 3)
+
+                .map(
+
+                  (product) =>
+
+                    `${product.name} ${product.stock}/${product.minStock}`
+
+                )
+
+                .join(
+
+                  " • "
+
+                )}
+
+              {lowStockProducts.length >
+
+              3
+
+                ? ` • +${
+
+                    lowStockProducts.length -
+
+                    3
+
+                  } รายการ`
+
+                : ""}
+</span>
+</div>
+<div className="db-stock-alert-arrow">
+
+            ›
+</div>
+</button>
+
+      )}
 <div className="db-summary-grid">
 <div className="db-card">
-<span>ยอดขายวันนี้</span>
+<span>
+
+            ยอดขายวันนี้
+</span>
 <strong>
 
-            {summary.totalAmount.toLocaleString()} บาท
+            {summary.totalAmount.toLocaleString()}{" "}
+
+            บาท
 </strong>
 </div>
 <div className="db-card">
-<span>กำไรวันนี้</span>
+<span>
+
+            กำไรวันนี้
+</span>
 <strong>
 
-            {summary.totalProfit.toLocaleString()} บาท
+            {summary.totalProfit.toLocaleString()}{" "}
+
+            บาท
 </strong>
 </div>
 <div className="db-card">
-<span>จำนวนบิล</span>
+<span>
+
+            จำนวนบิล
+</span>
 <strong>
 
-            {todaySales.length} บิล
+            {
+
+              todaySales.length
+
+            }{" "}
+
+            บิล
 </strong>
 <small>
 
@@ -591,7 +964,9 @@ function DashboardPage() {
 
               {
 
-                maximumFractionDigits: 0,
+                maximumFractionDigits:
+
+                  0,
 
               }
 
@@ -601,46 +976,91 @@ function DashboardPage() {
 </small>
 </div>
 <div className="db-card">
-<span>ขายได้ทั้งหมด</span>
+<span>
+
+            ขายได้ทั้งหมด
+</span>
 <strong>
 
-            {summary.totalQty} ชิ้น
+            {
+
+              summary.totalQty
+
+            }{" "}
+
+            ชิ้น
 </strong>
 <small>
 
             Margin{" "}
 
-            {margin.toFixed(1)}%
+            {margin.toFixed(
+
+              1
+
+            )}
+
+            %
 </small>
 </div>
 </div>
 <div className="db-kpi-grid">
 <div className="db-kpi">
-<span>มูลค่าสต๊อก</span>
+<span>
+
+            มูลค่าสต๊อก
+</span>
 <strong>
 
-            {stockValue.toLocaleString()} บาท
+            {stockValue.toLocaleString()}{" "}
+
+            บาท
 </strong>
 </div>
 <div className="db-kpi">
-<span>สินค้าขายดี</span>
+<span>
+
+            สินค้าขายดี
+</span>
 <strong>
 
-            {topProducts[0]?.name || "-"}
+            {topProducts[0]
+
+              ?.name ||
+
+              "-"}
 </strong>
 </div>
 <div className="db-kpi">
-<span>สินค้าใกล้หมด</span>
+<span>
+
+            สินค้าใกล้หมด
+</span>
 <strong>
 
-            {lowStockProducts.length} รายการ
+            {
+
+              lowStockProducts.length
+
+            }{" "}
+
+            รายการ
 </strong>
 </div>
 <div className="db-kpi">
-<span>สินค้าทั้งหมด</span>
+<span>
+
+            สินค้าทั้งหมด
+</span>
 <strong>
 
-            {products.length} รายการ
+            {
+
+              products.length
+
+            }{" "}
+
+            รายการ
 </strong>
 </div>
 </div>
@@ -653,7 +1073,9 @@ function DashboardPage() {
 </h2>
 </div>
 
-          {topProducts.length === 0 ? (
+          {topProducts.length ===
+
+          0 ? (
 <div className="db-empty">
 
               ยังไม่มีข้อมูลการขาย
@@ -663,7 +1085,13 @@ function DashboardPage() {
 
             topProducts.map(
 
-              (item, index) => (
+              (
+
+                item,
+
+                index
+
+              ) => (
 <div
 
                   className="db-ranking"
@@ -672,26 +1100,44 @@ function DashboardPage() {
 >
 <div className="db-rank">
 
-                    {index + 1}
+                    {index +
+
+                      1}
 </div>
 <div className="db-product">
 <strong>
 
-                      {item.name}
+                      {
+
+                        item.name
+
+                      }
 </strong>
 <span>
 
-                      {item.option}
+                      {
+
+                        item.option
+
+                      }
 </span>
 </div>
 <div className="db-product-value">
 <strong>
 
-                      {item.quantity} ชิ้น
+                      {
+
+                        item.quantity
+
+                      }{" "}
+
+                      ชิ้น
 </strong>
 <span>
 
-                      {item.amount.toLocaleString()} บาท
+                      {item.amount.toLocaleString()}{" "}
+
+                      บาท
 </span>
 </div>
 </div>
@@ -710,7 +1156,9 @@ function DashboardPage() {
 </h2>
 </div>
 
-          {lowStockProducts.length === 0 ? (
+          {lowStockProducts.length ===
+
+          0 ? (
 <div className="db-empty">
 
               ไม่มีสินค้าใกล้หมด
@@ -721,21 +1169,38 @@ function DashboardPage() {
             lowStockProducts.map(
 
               (product) => (
-<div
+<button
 
-                  className="db-low-stock"
+                  type="button"
 
-                  key={product.id}
+                  className="db-low-stock db-low-stock-button"
+
+                  key={
+product.id
+
+                  }
+
+                  onClick={
+
+                    goToStock
+
+                  }
 >
 <strong>
 
-                    {product.name}
+                    {
+
+                      product.name
+
+                    }
 </strong>
 <span
 
                     className={
 
-                      product.stock < 0
+                      product.stock <=
+
+                      0
 
                         ? "negative"
 
@@ -744,9 +1209,13 @@ function DashboardPage() {
                     }
 >
 
-                    {product.stock}
+                    {
+
+                      product.stock
+
+                    }
 </span>
-</div>
+</button>
 
               )
 
@@ -764,61 +1233,77 @@ function DashboardPage() {
 </div>
 <div className="db-hourly-list">
 
-          {hourlySales.map((item) => (
+          {hourlySales.map(
+
+            (item) => (
 <div
 
-              className="db-hour-row"
+                className="db-hour-row"
 
-              key={item.hour}
->
-<span>
-
-                {String(
+                key={
 
                   item.hour
 
-                ).padStart(2, "0")}
+                }
+>
+<span>
 
-                :00
+                  {String(
+
+                    item.hour
+
+                  ).padStart(
+
+                    2,
+
+                    "0"
+
+                  )}
+
+                  :00
 </span>
 <div className="db-hour-track">
 <div
 
-                  className="db-hour-bar"
+                    className="db-hour-bar"
 
-                  style={{
+                    style={{
 
-                    width: `${
+                      width: `${
 
-                      item.amount > 0
+                        item.amount >
 
-                        ? Math.max(
+                        0
 
-                            3,
+                          ? Math.max(
 
-                            (item.amount /
+                              3,
 
-                              maxHourlyAmount) *
+                              (item.amount /
 
-                              100
+                                maxHourlyAmount) *
 
-                          )
+                                100
 
-                        : 0
+                            )
 
-                    }%`,
+                          : 0
 
-                  }}
+                      }%`,
 
-                />
+                    }}
+
+                  />
 </div>
 <strong>
 
-                {item.amount.toLocaleString()}
+                  {item.amount.toLocaleString()}
 </strong>
 </div>
 
-          ))}
+            )
+
+          )}
 </div>
 </section>
 <div className="db-chart-grid">
@@ -831,55 +1316,69 @@ function DashboardPage() {
 </div>
 <div className="db-seven-chart">
 
-            {last7Days.map((day) => (
+            {last7Days.map(
+
+              (day) => (
 <div
 
-                className="db-day"
+                  className="db-day"
 
-                key={day.key}
+                  key={
+
+                    day.key
+
+                  }
 >
 <div className="db-day-area">
 <div
 
-                    className="db-day-bar"
+                      className="db-day-bar"
 
-                    style={{
+                      style={{
 
-                      height: `${
+                        height: `${
 
-                        day.amount > 0
+                          day.amount >
 
-                          ? Math.max(
+                          0
 
-                              3,
+                            ? Math.max(
 
-                              (day.amount /
+                                3,
 
-                                max7DayAmount) *
+                                (day.amount /
 
-                                100
+                                  max7DayAmount) *
 
-                            )
+                                  100
 
-                          : 0
+                              )
 
-                      }%`,
+                            : 0
 
-                    }}
+                        }%`,
 
-                  />
+                      }}
+
+                    />
 </div>
 <strong>
 
-                  {day.amount.toLocaleString()}
+                    {day.amount.toLocaleString()}
 </strong>
 <span>
 
-                  {day.label}
+                    {
+
+                      day.label
+
+                    }
 </span>
 </div>
 
-            ))}
+              )
+
+            )}
 </div>
 </section>
 <section className="db-box">
@@ -891,55 +1390,69 @@ function DashboardPage() {
 </div>
 <div className="db-seven-chart">
 
-            {last7Days.map((day) => (
+            {last7Days.map(
+
+              (day) => (
 <div
 
-                className="db-day"
+                  className="db-day"
 
-                key={day.key}
+                  key={
+
+                    day.key
+
+                  }
 >
 <div className="db-day-area">
 <div
 
-                    className="db-day-bar profit"
+                      className="db-day-bar profit"
 
-                    style={{
+                      style={{
 
-                      height: `${
+                        height: `${
 
-                        day.profit > 0
+                          day.profit >
 
-                          ? Math.max(
+                          0
 
-                              3,
+                            ? Math.max(
 
-                              (day.profit /
+                                3,
 
-                                max7DayProfit) *
+                                (day.profit /
 
-                                100
+                                  max7DayProfit) *
 
-                            )
+                                  100
 
-                          : 0
+                              )
 
-                      }%`,
+                            : 0
 
-                    }}
+                        }%`,
 
-                  />
+                      }}
+
+                    />
 </div>
 <strong>
 
-                  {day.profit.toLocaleString()}
+                    {day.profit.toLocaleString()}
 </strong>
 <span>
 
-                  {day.label}
+                    {
+
+                      day.label
+
+                    }
 </span>
 </div>
 
-            ))}
+              )
+
+            )}
 </div>
 </section>
 </div>

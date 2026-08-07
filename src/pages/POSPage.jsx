@@ -22,83 +22,181 @@ function POSPage({
 
 }) {
 
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] =
 
-  const [selectedProduct, setSelectedProduct] =
+    useState("");
 
-    useState(null);
+  const [
 
-  const [selectedOption, setSelectedOption] =
+    selectedProduct,
 
-    useState(null);
+    setSelectedProduct,
 
-  const [popupQty, setPopupQty] = useState(1);
+  ] = useState(null);
 
-  const filteredProducts = useMemo(() => {
+  const [
 
-    const keyword =
+    selectedOption,
 
-      searchText.trim().toLowerCase();
+    setSelectedOption,
 
-    if (!keyword) {
+  ] = useState(null);
 
-      return products;
+  const [popupQty, setPopupQty] =
 
-    }
+    useState(1);
 
-    return products.filter((product) =>
+  const filteredProducts =
 
-      product.name
+    useMemo(() => {
 
-        .toLowerCase()
+      const keyword =
 
-        .includes(keyword)
+        searchText
+
+          .trim()
+
+          .toLowerCase();
+
+      if (!keyword) {
+
+        return products;
+
+      }
+
+      return products.filter(
+
+        (product) =>
+
+          product.name
+
+            .toLowerCase()
+
+            .includes(keyword)
+
+      );
+
+    }, [
+
+      products,
+
+      searchText,
+
+    ]);
+
+  const totalQty =
+
+    cart.reduce(
+
+      (sum, item) =>
+
+        sum +
+
+        Number(
+
+          item.qty || 0
+
+        ),
+
+      0
 
     );
 
-  }, [products, searchText]);
+  const total =
 
-  const totalQty = cart.reduce(
+    cart.reduce(
 
-    (sum, item) =>
+      (sum, item) =>
 
-      sum + Number(item.qty || 0),
+        sum +
 
-    0
+        Number(
 
-  );
+          item.price || 0
 
-  const total = cart.reduce(
+        ) *
 
-    (sum, item) =>
+          Number(
 
-      sum +
+            item.qty || 0
 
-      Number(item.price || 0) *
+          ),
 
-        Number(item.qty || 0),
+      0
 
-    0
+    );
 
-  );
+  function getStock(
 
-  function getStock(productId) {
+    productId
+
+  ) {
 
     return Number(
 
-      inventory[productId] ?? 50
+      inventory[
+
+        productId
+
+      ] ?? 50
 
     );
 
   }
 
-  function openProduct(product) {
+  function isLowStock(
+
+    product,
+
+    stock
+
+  ) {
+
+    const trackStock =
+
+      product.trackStock !==
+
+      false;
+
+    if (!trackStock) {
+
+      return false;
+
+    }
+
+    const minStock =
+
+      Number(
+
+        product.minStock ??
+
+          5
+
+      );
+
+    return (
+
+      stock <= minStock
+
+    );
+
+  }
+
+  function openProduct(
+
+    product
+
+  ) {
 
     const hasOption =
 
-      product.hasOption === true ||
+      product.hasOption ===
 
-      product.hasOptions === true;
+        true ||
+
+      product.hasOptions ===
+
+        true;
 
     if (
 
@@ -116,7 +214,9 @@ function POSPage({
 
           name: "ปกติ",
 
-          price: product.price,
+          price:
+
+            product.price,
 
         },
 
@@ -133,13 +233,25 @@ function POSPage({
       product.options.find(
 
         (option) =>
-option.id === "normal"
+option.id ===
 
-      ) || product.options[0];
+          "normal"
 
-    setSelectedProduct(product);
+      ) ||
 
-    setSelectedOption(normalOption);
+      product.options[0];
+
+    setSelectedProduct(
+
+      product
+
+    );
+
+    setSelectedOption(
+
+      normalOption
+
+    );
 
     setPopupQty(1);
 
@@ -147,9 +259,17 @@ option.id === "normal"
 
   function closePopup() {
 
-    setSelectedProduct(null);
+    setSelectedProduct(
 
-    setSelectedOption(null);
+      null
+
+    );
+
+    setSelectedOption(
+
+      null
+
+    );
 
     setPopupQty(1);
 
@@ -185,7 +305,11 @@ option.id === "normal"
 
   function handlePayment() {
 
-    if (cart.length === 0) {
+    if (
+
+      cart.length === 0
+
+    ) {
 
       return;
 
@@ -200,10 +324,21 @@ option.id === "normal"
 <main className="product-panel">
 <header className="pos-page-header">
 <div>
-<h1>ขายสินค้า</h1>
+<h1>
+
+              ขายสินค้า
+</h1>
 <p>
 
-              สินค้า {filteredProducts.length} รายการ
+              สินค้า{" "}
+
+              {
+
+                filteredProducts.length
+
+              }{" "}
+
+              รายการ
 </p>
 </div>
 </header>
@@ -215,13 +350,19 @@ option.id === "normal"
 
           placeholder="ค้นหาสินค้า..."
 
-          value={searchText}
+          value={
+
+            searchText
+
+          }
 
           onChange={(event) =>
 
             setSearchText(
 
-              event.target.value
+              event.target
+
+                .value
 
             )
 
@@ -229,7 +370,9 @@ option.id === "normal"
 
         />
 
-        {filteredProducts.length === 0 ? (
+        {filteredProducts.length ===
+
+        0 ? (
 <div className="no-product">
 
             ไม่พบสินค้า
@@ -261,7 +404,20 @@ option.id ===
 
                 const stock =
 
-                  getStock(product.id);
+                  getStock(
+product.id
+
+                  );
+
+                const lowStock =
+
+                  isLowStock(
+
+                    product,
+
+                    stock
+
+                  );
 
                 return (
 <button
@@ -270,11 +426,18 @@ option.id ===
 
                     className="product-card product-card-touch"
 
-                    key={product.id}
+                    key={
+product.id
+
+                    }
 
                     onClick={() =>
 
-                      openProduct(product)
+                      openProduct(
+
+                        product
+
+                      )
 
                     }
 >
@@ -285,7 +448,11 @@ option.id ===
 
                           className="product-image"
 
-                          src={product.image}
+                          src={
+
+                            product.image
+
+                          }
 
                           alt={
 
@@ -295,7 +462,11 @@ option.id ===
 
                           }
 
-                          onError={(event) => {
+                          onError={(
+
+                            event
+
+                          ) => {
 
                             event.currentTarget.style.display =
 
@@ -315,17 +486,27 @@ option.id ===
 </div>
 <div className="product-name">
 
-                      {product.name}
+                      {
+
+                        product.name
+
+                      }
 </div>
 <div className="product-price">
 
-                      {normalPrice} บาท
+                      {
+
+                        normalPrice
+
+                      }{" "}
+
+                      บาท
 </div>
 <div
 
                       className={
 
-                        stock < 0
+                        lowStock
 
                           ? "stock-text stock-negative"
 
@@ -334,7 +515,9 @@ option.id ===
                       }
 >
 
-                      คงเหลือ {stock}
+                      คงเหลือ{" "}
+
+                      {stock}
 </div>
 </button>
 
@@ -349,7 +532,10 @@ option.id ===
 </main>
 <aside className="cart-panel">
 <div className="cart-header">
-<h2>ตะกร้า</h2>
+<h2>
+
+            ตะกร้า
+</h2>
 <span className="cart-badge">
 
             {totalQty}
@@ -357,7 +543,9 @@ option.id ===
 </div>
 <div className="cart-list">
 
-          {cart.length === 0 ? (
+          {cart.length ===
+
+          0 ? (
 <p className="empty-cart">
 
               ยังไม่มีสินค้า
@@ -367,7 +555,13 @@ option.id ===
 
             cart.map(
 
-              (item, index) => (
+              (
+
+                item,
+
+                index
+
+              ) => (
 <div
 
                   className="cart-item"
@@ -378,13 +572,29 @@ option.id ===
 <div>
 <strong>
 
-                        {item.name}
+                        {
+
+                          item.name
+
+                        }
 </strong>
 <div className="cart-option">
 
-                        {item.option} ·{" "}
+                        {
 
-                        {item.price} บาท
+                          item.option
+
+                        }{" "}
+
+                        ·{" "}
+
+                        {
+
+                          item.price
+
+                        }{" "}
+
+                        บาท
 </div>
 </div>
 <button
@@ -395,7 +605,11 @@ option.id ===
 
                       onClick={() =>
 
-                        onRemoveItem(index)
+                        onRemoveItem(
+
+                          index
+
+                        )
 
                       }
 >
@@ -430,15 +644,25 @@ option.id ===
 
                         min="1"
 
-                        value={item.qty}
+                        value={
 
-                        onChange={(event) =>
+                          item.qty
+
+                        }
+
+                        onChange={(
+
+                          event
+
+                        ) =>
 
                           onChangeCartQty(
 
                             index,
 
-                            event.target.value
+                            event.target
+
+                              .value
 
                           )
 
@@ -485,10 +709,15 @@ option.id ===
           )}
 </div>
 <div className="grand-total">
-<span>รวมทั้งหมด</span>
 <span>
 
-            {total.toLocaleString()} บาท
+            รวมทั้งหมด
+</span>
+<span>
+
+            {total.toLocaleString()}{" "}
+
+            บาท
 </span>
 </div>
 <button
@@ -499,11 +728,17 @@ option.id ===
 
           disabled={
 
-            cart.length === 0
+            cart.length ===
+
+            0
 
           }
 
-          onClick={handlePayment}
+          onClick={
+
+            handlePayment
+
+          }
 >
 
           คิดเงิน
@@ -517,13 +752,21 @@ option.id ===
 
             className="popup-overlay"
 
-            onClick={closePopup}
+            onClick={
+
+              closePopup
+
+            }
 >
 <div
 
               className="popup"
 
-              onClick={(event) =>
+              onClick={(
+
+                event
+
+              ) =>
 
                 event.stopPropagation()
 
@@ -531,7 +774,11 @@ option.id ===
 >
 <h2>
 
-                {selectedProduct.name}
+                {
+
+                  selectedProduct.name
+
+                }
 </h2>
 <div className="option-list">
 
@@ -550,7 +797,10 @@ option.id
 
                       }
 
-                      key={option.id}
+                      key={
+option.id
+
+                      }
 >
 <span>
 <input
@@ -579,11 +829,21 @@ option.id
 
                         {" "}
 
-                        {option.name}
+                        {
+
+                          option.name
+
+                        }
 </span>
 <strong>
 
-                        {option.price} บาท
+                        {
+
+                          option.price
+
+                        }{" "}
+
+                        บาท
 </strong>
 </label>
 
@@ -600,7 +860,11 @@ option.id
 
                     setPopupQty(
 
-                      (quantity) =>
+                      (
+
+                        quantity
+
+                      ) =>
 
                         Math.max(
 
@@ -610,7 +874,9 @@ option.id
 
                             quantity
 
-                          ) - 1
+                          ) -
+
+                            1
 
                         )
 
@@ -629,9 +895,17 @@ option.id
 
                   min="1"
 
-                  value={popupQty}
+                  value={
 
-                  onChange={(event) =>
+                    popupQty
+
+                  }
+
+                  onChange={(
+
+                    event
+
+                  ) =>
 
                     setPopupQty(
 
@@ -641,7 +915,11 @@ option.id
 
                         Number(
 
-                          event.target.value
+                          event
+
+                            .target
+
+                            .value
 
                         ) || 1
 
@@ -660,7 +938,11 @@ option.id
 
                     setPopupQty(
 
-                      (quantity) =>
+                      (
+
+                        quantity
+
+                      ) =>
 
                         Number(
 
@@ -688,7 +970,11 @@ option.id
 
                   ) *
 
-                  Number(popupQty)
+                  Number(
+
+                    popupQty
+
+                  )
 
                 ).toLocaleString()}{" "}
 
@@ -715,7 +1001,11 @@ option.id
 
                 type="button"
 
-                onClick={closePopup}
+                onClick={
+
+                  closePopup
+
+                }
 >
 
                 ยกเลิก

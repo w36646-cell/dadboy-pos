@@ -711,4 +711,127 @@
   }
 
 }
+ /* ===== Low stock alert ===== */
+
+.db-stock-alert {
+
+  width: 100%;
+
+  margin-bottom: 14px;
+
+  padding: 13px 15px;
+
+  display: grid;
+
+  grid-template-columns:
+
+    40px minmax(0, 1fr) 28px;
+
+  align-items: center;
+
+  gap: 10px;
+
+  border: 1px solid #f0c36a;
+
+  border-radius: 13px;
+
+  background: #fff7df;
+
+  color: #333;
+
+  text-align: left;
+
+  cursor: pointer;
+
+}
+
+.db-stock-alert:hover {
+
+  background: #fff1c7;
+
+}
+
+.db-stock-alert-icon {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 24px;
+
+}
+
+.db-stock-alert-content {
+
+  min-width: 0;
+
+}
+
+.db-stock-alert-content strong {
+
+  display: block;
+
+  color: #9a6700;
+
+  font-size: 14px;
+
+}
+
+.db-stock-alert-content span {
+
+  display: block;
+
+  margin-top: 3px;
+
+  overflow: hidden;
+
+  color: #80662f;
+
+  font-size: 11px;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+}
+
+.db-stock-alert-arrow {
+
+  font-size: 28px;
+
+  line-height: 1;
+
+  text-align: center;
+
+  color: #9a6700;
+
+}
+
+@media (max-width: 520px) {
+
+  .db-stock-alert {
+
+    grid-template-columns:
+
+      34px minmax(0, 1fr) 24px;
+
+    padding: 11px 12px;
+
+  }
+
+  .db-stock-alert-icon {
+
+    font-size: 21px;
+
+  }
+
+  .db-stock-alert-content strong {
+
+    font-size: 13px;
+
+  }
+
+}
  

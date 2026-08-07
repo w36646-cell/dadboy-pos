@@ -30,6 +30,10 @@ function ProductManager({
 
     image: "",
 
+    minStock: 5,
+
+    trackStock: true,
+
     hasOption: false,
 
     normalPrice: 0,
@@ -72,7 +76,8 @@ function ProductManager({
 
       product.options?.find(
 
-        (option) => option.id === "normal"
+        (option) =>
+option.id === "normal"
 
       );
 
@@ -80,7 +85,8 @@ function ProductManager({
 
       product.options?.find(
 
-        (option) => option.id === "cup"
+        (option) =>
+option.id === "cup"
 
       );
 
@@ -88,7 +94,8 @@ function ProductManager({
 
       product.options?.find(
 
-        (option) => option.id === "ownCup"
+        (option) =>
+option.id === "ownCup"
 
       );
 
@@ -102,39 +109,75 @@ function ProductManager({
 
     setForm({
 
-      name: product.name || "",
+      name:
 
-      category: product.category || "",
+        product.name || "",
 
-      price: Number(product.price || 0),
+      category:
 
-      cost: Number(product.cost || 0),
+        product.category || "",
 
-      image: product.image || "",
+      price:
+
+        Number(
+
+          product.price || 0
+
+        ),
+
+      cost:
+
+        Number(
+
+          product.cost || 0
+
+        ),
+
+      image:
+
+        product.image || "",
+
+      minStock:
+
+        Number(
+
+          product.minStock ?? 5
+
+        ),
+
+      trackStock:
+
+        product.trackStock !== false,
 
       hasOption,
 
-      normalPrice: Number(
+      normalPrice:
 
-        normalOption?.price ??
+        Number(
 
-          product.price ??
+          normalOption?.price ??
 
-          0
+            product.price ??
 
-      ),
+            0
 
-      cupPrice: Number(
+        ),
 
-        cupOption?.price ?? 25
+      cupPrice:
 
-      ),
+        Number(
 
-      ownCupPrice: Number(
+          cupOption?.price ?? 25
 
-        ownCupOption?.price ?? 20
+        ),
 
-      ),
+      ownCupPrice:
+
+        Number(
+
+          ownCupOption?.price ?? 20
+
+        ),
 
     });
 
@@ -164,17 +207,23 @@ function ProductManager({
 
     }
 
-    const reader = new FileReader();
+    const reader =
+
+      new FileReader();
 
     reader.onload = () => {
 
-      const source = String(
+      const source =
 
-        reader.result
+        String(
 
-      );
+          reader.result
 
-      const image = new Image();
+        );
+
+      const image =
+
+        new Image();
 
       image.onload = () => {
 
@@ -194,9 +243,15 @@ function ProductManager({
 
         const context =
 
-          canvas.getContext("2d");
+          canvas.getContext(
 
-        context.fillStyle = "#ffffff";
+            "2d"
+
+          );
+
+        context.fillStyle =
+
+          "#ffffff";
 
         context.fillRect(
 
@@ -210,29 +265,43 @@ function ProductManager({
 
         );
 
-        const scale = Math.min(
+        const scale =
 
-          400 / image.width,
+          Math.min(
 
-          400 / image.height
+            400 /
 
-        );
+              image.width,
+
+            400 /
+
+              image.height
+
+          );
 
         const width =
 
-          image.width * scale;
+          image.width *
+
+          scale;
 
         const height =
 
-          image.height * scale;
+          image.height *
+
+          scale;
 
         const x =
 
-          (size - width) / 2;
+          (size - width) /
+
+          2;
 
         const y =
 
-          (size - height) / 2;
+          (size - height) /
+
+          2;
 
         context.drawImage(
 
@@ -268,7 +337,11 @@ function ProductManager({
 
     };
 
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(
+
+      file
+
+    );
 
   }
 
@@ -292,97 +365,163 @@ function ProductManager({
 
     }
 
-    const normalPrice = Number(
+    const normalPrice =
 
-      form.hasOption
+      Number(
 
-        ? form.normalPrice
+        form.hasOption
 
-        : form.price
+          ? form.normalPrice
 
-    );
+          : form.price
 
-    const cost = Math.max(
+      );
 
-      0,
+    const cost =
 
-      Number(form.cost) || 0
+      Math.max(
 
-    );
+        0,
+
+        Number(
+
+          form.cost
+
+        ) || 0
+
+      );
+
+    const minStock =
+
+      Math.max(
+
+        0,
+
+        Number(
+
+          form.minStock
+
+        ) || 0
+
+      );
 
     const updatedProduct = {
 
       ...editingProduct,
 
-      name: form.name.trim(),
+      name:
+
+        form.name.trim(),
 
       category:
 
         form.category.trim(),
 
-      price: normalPrice,
+      price:
+
+        normalPrice,
 
       cost,
 
-      image: form.image,
+      image:
 
-      hasOption: form.hasOption,
+        form.image,
 
-      options: form.hasOption
+      minStock,
 
-        ? [
+      trackStock:
 
-            {
+        Boolean(
 
-              id: "normal",
+          form.trackStock
 
-              name: "ปกติ",
+        ),
 
-              price: normalPrice,
+      hasOption:
 
-            },
+        form.hasOption,
 
-            {
+      options:
 
-              id: "cup",
+        form.hasOption
 
-              name: "ใส่แก้ว",
+          ? [
 
-              price: Number(
+              {
 
-                form.cupPrice
+                id:
 
-              ),
+                  "normal",
 
-            },
+                name:
 
-            {
+                  "ปกติ",
 
-              id: "ownCup",
+                price:
 
-              name:
+                  normalPrice,
 
-                "เอาแก้วมาเอง",
+              },
 
-              price: Number(
+              {
 
-                form.ownCupPrice
+                id:
 
-              ),
+                  "cup",
 
-            },
+                name:
 
-          ]
+                  "ใส่แก้ว",
 
-        : [],
+                price:
+
+                  Number(
+
+                    form.cupPrice
+
+                  ),
+
+              },
+
+              {
+
+                id:
+
+                  "ownCup",
+
+                name:
+
+                  "เอาแก้วมาเอง",
+
+                price:
+
+                  Number(
+
+                    form.ownCupPrice
+
+                  ),
+
+              },
+
+            ]
+
+          : [],
 
     };
 
     delete updatedProduct.hasOptions;
 
-    onSaveProduct(updatedProduct);
+    onSaveProduct(
 
-    setEditingProduct(null);
+      updatedProduct
+
+    );
+
+    setEditingProduct(
+
+      null
+
+    );
 
     window.alert(
 
@@ -396,12 +535,15 @@ function ProductManager({
 <div className="product-manager">
 <div className="manager-header">
 <div>
-<h1>จัดการสินค้า</h1>
+<h1>
+
+            จัดการสินค้า
+</h1>
 <p>
 
             แก้ชื่อ ราคา ต้นทุน รูป
 
-            และตัวเลือกสินค้า
+            และการติดตามสต๊อก
 </p>
 </div>
 <button
@@ -443,129 +585,208 @@ function ProductManager({
 <thead>
 <tr>
 <th>รูป</th>
-<th>ชื่อสินค้า</th>
-<th>ราคาขาย</th>
-<th>ต้นทุน</th>
-<th>คงเหลือ</th>
-<th>จัดการ</th>
+<th>
+
+                  ชื่อสินค้า
+</th>
+<th>
+
+                  ราคาขาย
+</th>
+<th>
+
+                  ต้นทุน
+</th>
+<th>
+
+                  คงเหลือ
+</th>
+<th>
+
+                  Min
+</th>
+<th>
+
+                  Tracking
+</th>
+<th>
+
+                  จัดการ
+</th>
 </tr>
 </thead>
 <tbody>
 
-              {list.map((item) => {
+              {list.map(
 
-                const stock =
+                (item) => {
 
-                  Number(
+                  const stock =
 
-                    inventory[
+                    Number(
+
+                      inventory[
 item.id
 
-                    ] ?? 50
+                      ] ?? 50
 
-                  );
+                    );
 
-                const normalPrice =
+                  const normalPrice =
 
-                  item.options?.find(
+                    item.options?.find(
 
-                    (option) =>
+                      (option) =>
 option.id ===
 
-                      "normal"
+                        "normal"
 
-                  )?.price ??
+                    )?.price ??
 
-                  item.price;
+                    item.price;
 
-                const cost =
+                  const cost =
 
-                  Number(
+                    Number(
 
-                    item.cost || 0
+                      item.cost || 0
 
-                  );
+                    );
 
-                return (
-<tr key={item.id}>
+                  const minStock =
+
+                    Number(
+
+                      item.minStock ??
+
+                        5
+
+                    );
+
+                  const trackStock =
+
+                    item.trackStock !==
+
+                    false;
+
+                  const isLow =
+
+                    trackStock &&
+
+                    stock <=
+
+                      minStock;
+
+                  return (
+<tr
+
+                      key={
+item.id
+
+                      }
+>
 <td>
 <div className="manager-image-box">
 
-                        {item.image ? (
+                          {item.image ? (
 <img
 
-                            src={
+                              src={
 
-                              item.image
+                                item.image
 
-                            }
+                              }
 
-                            alt={
+                              alt={
 
-                              item.name
+                                item.name
 
-                            }
+                              }
 
-                          />
+                            />
 
-                        ) : (
+                          ) : (
 <span>
 
-                            ไม่มีรูป
+                              ไม่มีรูป
 </span>
 
-                        )}
+                          )}
 </div>
 </td>
 <td>
 
-                      {item.name}
+                        {item.name}
 </td>
 <td>
 
-                      {normalPrice} บาท
+                        {
+
+                          normalPrice
+
+                        }{" "}
+
+                        บาท
 </td>
 <td>
 
-                      {cost} บาท
+                        {cost} บาท
 </td>
 <td
 
-                      className={
+                        className={
 
-                        stock < 0
+                          isLow
 
-                          ? "stock-negative"
+                            ? "stock-negative"
 
-                          : ""
-
-                      }
->
-
-                      {stock}
-</td>
-<td>
-<button
-
-                        className="edit-product-button"
-
-                        type="button"
-
-                        onClick={() =>
-
-                          openEdit(item)
+                            : ""
 
                         }
 >
 
-                        แก้ไข
+                        {stock}
+</td>
+<td>
+
+                        {minStock}
+</td>
+<td>
+
+                        {trackStock
+
+                          ? "เปิด"
+
+                          : "ปิด"}
+</td>
+<td>
+<button
+
+                          className="edit-product-button"
+
+                          type="button"
+
+                          onClick={() =>
+
+                            openEdit(
+
+                              item
+
+                            )
+
+                          }
+>
+
+                          แก้ไข
 </button>
 </td>
 </tr>
 
-                );
+                  );
 
-              })}
+                }
+
+              )}
 </tbody>
 </table>
 </div>
@@ -591,7 +812,11 @@ option.id ===
 
                 className="manager-input"
 
-                value={form.name}
+                value={
+
+                  form.name
+
+                }
 
                 onChange={(event) =>
 
@@ -599,7 +824,9 @@ option.id ===
 
                     "name",
 
-                    event.target.value
+                    event.target
+
+                      .value
 
                   )
 
@@ -614,7 +841,11 @@ option.id ===
 
                 className="manager-input"
 
-                value={form.category}
+                value={
+
+                  form.category
+
+                }
 
                 onChange={(event) =>
 
@@ -622,7 +853,9 @@ option.id ===
 
                     "category",
 
-                    event.target.value
+                    event.target
+
+                      .value
 
                   )
 
@@ -643,7 +876,11 @@ option.id ===
 
                 step="0.01"
 
-                value={form.cost}
+                value={
+
+                  form.cost
+
+                }
 
                 onChange={(event) =>
 
@@ -651,7 +888,9 @@ option.id ===
 
                     "cost",
 
-                    event.target.value
+                    event.target
+
+                      .value
 
                   )
 
@@ -675,9 +914,17 @@ option.id ===
 
                     step="0.01"
 
-                    value={form.price}
+                    value={
 
-                    onChange={(event) =>
+                      form.price
+
+                    }
+
+                    onChange={(
+
+                      event
+
+                    ) =>
 
                       updateField(
 
@@ -745,7 +992,11 @@ option.id ===
 
                     }
 
-                    onChange={(event) =>
+                    onChange={(
+
+                      event
+
+                    ) =>
 
                       updateField(
 
@@ -778,7 +1029,11 @@ option.id ===
 
                     }
 
-                    onChange={(event) =>
+                    onChange={(
+
+                      event
+
+                    ) =>
 
                       updateField(
 
@@ -811,7 +1066,11 @@ option.id ===
 
                     }
 
-                    onChange={(event) =>
+                    onChange={(
+
+                      event
+
+                    ) =>
 
                       updateField(
 
@@ -829,6 +1088,90 @@ option.id ===
 </div>
 
               )}
+<hr />
+<h3>
+
+                การติดตามสต๊อก
+</h3>
+<label className="manager-checkbox">
+<input
+
+                  type="checkbox"
+
+                  checked={
+
+                    form.trackStock
+
+                  }
+
+                  onChange={(event) =>
+
+                    updateField(
+
+                      "trackStock",
+
+                      event.target
+
+                        .checked
+
+                    )
+
+                  }
+
+                />
+
+                ติดตามและแจ้งเตือนสต๊อก
+</label>
+
+              {form.trackStock && (
+<>
+<label className="manager-label">
+
+                    Min Stock
+</label>
+<input
+
+                    className="manager-input"
+
+                    type="number"
+
+                    min="0"
+
+                    step="1"
+
+                    value={
+
+                      form.minStock
+
+                    }
+
+                    onChange={(
+
+                      event
+
+                    ) =>
+
+                      updateField(
+
+                        "minStock",
+
+                        event.target
+
+                          .value
+
+                      )
+
+                    }
+
+                  />
+<small>
+
+                    ระบบจะแจ้งเตือนเมื่อคงเหลือเท่ากับหรือต่ำกว่าจำนวนนี้
+</small>
+</>
+
+              )}
+<hr />
 <label className="manager-label">
 
                 ที่อยู่ไฟล์รูป
@@ -837,7 +1180,11 @@ option.id ===
 
                 className="manager-input"
 
-                value={form.image}
+                value={
+
+                  form.image
+
+                }
 
                 placeholder="/images/ชื่อรูป.png"
 
@@ -847,7 +1194,9 @@ option.id ===
 
                     "image",
 
-                    event.target.value
+                    event.target
+
+                      .value
 
                   )
 
@@ -876,7 +1225,11 @@ option.id ===
                 {form.image ? (
 <img
 
-                    src={form.image}
+                    src={
+
+                      form.image
+
+                    }
 
                     alt="ตัวอย่างสินค้า"
 

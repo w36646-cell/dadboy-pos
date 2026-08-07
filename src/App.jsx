@@ -26,17 +26,35 @@ import "./styles/App.css";
 
 import "./components/PaymentPopup.css";
 
-const STOCK_KEY = "dadboy_inventory_v2";
+const STOCK_KEY =
 
-const SALES_KEY = "dadboy_sales_v1";
+  "dadboy_inventory_v2";
 
-const PRODUCTS_KEY = "dadboy_products_v1";
+const SALES_KEY =
 
-function readStorage(key, fallback) {
+  "dadboy_sales_v1";
+
+const PRODUCTS_KEY =
+
+  "dadboy_products_v1";
+
+function readStorage(
+
+  key,
+
+  fallback
+
+) {
 
   try {
 
-    const saved = localStorage.getItem(key);
+    const saved =
+
+      localStorage.getItem(
+
+        key
+
+      );
 
     return saved
 
@@ -54,15 +72,21 @@ function readStorage(key, fallback) {
 
 function loadProducts() {
 
-  const saved = readStorage(
+  const saved =
 
-    PRODUCTS_KEY,
+    readStorage(
 
-    null
+      PRODUCTS_KEY,
 
-  );
+      null
 
-  return Array.isArray(saved)
+    );
+
+  return Array.isArray(
+
+    saved
+
+  )
 
     ? saved
 
@@ -70,21 +94,29 @@ function loadProducts() {
 
 }
 
-function loadInventory(productList) {
+function loadInventory(
 
-  const saved = readStorage(
+  productList
 
-    STOCK_KEY,
+) {
 
-    null
+  const saved =
 
-  );
+    readStorage(
+
+      STOCK_KEY,
+
+      null
+
+    );
 
   if (
 
     saved &&
 
-    typeof saved === "object"
+    typeof saved ===
+
+      "object"
 
   ) {
 
@@ -94,15 +126,24 @@ function loadInventory(productList) {
 
   const result = {};
 
-  productList.forEach((product) => {
+  productList.forEach(
 
-    result[product.id] = Number(
+    (product) => {
 
-      product.stock ?? 50
+      result[
+product.id
 
-    );
+      ] = Number(
 
-  });
+        product.stock ??
+
+          50
+
+      );
+
+    }
+
+  );
 
   return result;
 
@@ -110,19 +151,37 @@ function loadInventory(productList) {
 
 function App() {
 
-  const initialProducts = loadProducts();
+  const initialProducts =
 
-  const [products, setProducts] =
+    loadProducts();
 
-    useState(initialProducts);
+  const [
 
-  const [inventory, setInventory] =
+    products,
 
-    useState(() =>
+    setProducts,
 
-      loadInventory(initialProducts)
+  ] = useState(
 
-    );
+    initialProducts
+
+  );
+
+  const [
+
+    inventory,
+
+    setInventory,
+
+  ] = useState(() =>
+
+    loadInventory(
+
+      initialProducts
+
+    )
+
+  );
 
   const [cart, setCart] =
 
@@ -132,17 +191,29 @@ function App() {
 
     useState("pos");
 
-  const [ownerMode, setOwnerMode] =
+  const [
 
-    useState(false);
+    ownerMode,
 
-  const [loginOpen, setLoginOpen] =
+    setOwnerMode,
 
-    useState(false);
+  ] = useState(false);
 
-  const [paymentOpen, setPaymentOpen] =
+  const [
 
-    useState(false);
+    loginOpen,
+
+    setLoginOpen,
+
+  ] = useState(false);
+
+  const [
+
+    paymentOpen,
+
+    setPaymentOpen,
+
+  ] = useState(false);
 
   function saveProducts(
 
@@ -150,13 +221,21 @@ function App() {
 
   ) {
 
-    setProducts(newProducts);
+    setProducts(
+
+      newProducts
+
+    );
 
     localStorage.setItem(
 
       PRODUCTS_KEY,
 
-      JSON.stringify(newProducts)
+      JSON.stringify(
+
+        newProducts
+
+      )
 
     );
 
@@ -170,16 +249,23 @@ function App() {
 
     const newProducts =
 
-      products.map((product) =>
-product.id === updatedProduct.id
+      products.map(
 
-          ? updatedProduct
+        (product) =>
+product.id ===
+updatedProduct.id
 
-          : product
+            ? updatedProduct
+
+            : product
 
       );
 
-    saveProducts(newProducts);
+    saveProducts(
+
+      newProducts
+
+    );
 
   }
 
@@ -189,23 +275,39 @@ product.id === updatedProduct.id
 
   ) {
 
-    setInventory(newInventory);
+    setInventory(
+
+      newInventory
+
+    );
 
     localStorage.setItem(
 
       STOCK_KEY,
 
-      JSON.stringify(newInventory)
+      JSON.stringify(
+
+        newInventory
+
+      )
 
     );
 
   }
 
-  function getStock(productId) {
+  function getStock(
+
+    productId
+
+  ) {
 
     return Number(
 
-      inventory[productId] ?? 50
+      inventory[
+
+        productId
+
+      ] ?? 50
 
     );
 
@@ -225,7 +327,11 @@ product.id === updatedProduct.id
 
     if (
 
-      !Number.isFinite(safeQty) ||
+      !Number.isFinite(
+
+        safeQty
+
+      ) ||
 
       safeQty <= 0
 
@@ -241,9 +347,11 @@ product.id === updatedProduct.id
 
       [productId]:
 
-        getStock(productId) +
+        getStock(
 
-        safeQty,
+          productId
+
+        ) + safeQty,
 
     });
 
@@ -259,105 +367,134 @@ product.id === updatedProduct.id
 
   ) {
 
-    const safeQty = Math.max(
+    const safeQty =
 
-      1,
+      Math.max(
 
-      Number(quantity) || 1
+        1,
 
-    );
+        Number(
 
-    const price = Number(
+          quantity
 
-      option?.price ??
+        ) || 1
 
-        product.price ??
+      );
 
-        0
+    const price =
 
-    );
+      Number(
+
+        option?.price ??
+
+          product.price ??
+
+          0
+
+      );
 
     const optionName =
 
-      option?.name || "ปกติ";
+      option?.name ||
 
-    const cost = Number(
+      "ปกติ";
 
-      product.cost || 0
+    const cost =
 
-    );
+      Number(
 
-    setCart((currentCart) => {
+        product.cost || 0
 
-      const found =
+      );
 
-        currentCart.find(
+    setCart(
 
-          (item) =>
-item.id === product.id &&
+      (currentCart) => {
 
-            item.option === optionName
+        const found =
 
-        );
+          currentCart.find(
 
-      if (found) {
+            (item) =>
+item.id ===
+product.id &&
 
-        return currentCart.map(
+              item.option ===
 
-          (item) =>
-item.id === product.id &&
+                optionName
 
-            item.option === optionName
+          );
 
-              ? {
+        if (found) {
 
-                  ...item,
+          return currentCart.map(
 
-                  name:
+            (item) =>
+item.id ===
+product.id &&
 
-                    product.name,
+              item.option ===
 
-                  price,
+                optionName
 
-                  cost,
+                ? {
 
-                  qty:
+                    ...item,
 
-                    item.qty +
+                    name:
 
-                    safeQty,
+                      product.name,
 
-                }
+                    price,
 
-              : item
+                    cost,
 
-        );
+                    qty:
+
+                      item.qty +
+
+                      safeQty,
+
+                  }
+
+                : item
+
+          );
+
+        }
+
+        return [
+
+          ...currentCart,
+
+          {
+
+            id:
+product.id,
+
+            name:
+
+              product.name,
+
+            option:
+
+              optionName,
+
+            price,
+
+            cost,
+
+            qty:
+
+              safeQty,
+
+          },
+
+        ];
 
       }
 
-      return [
-
-        ...currentCart,
-
-        {
-
-          id: product.id,
-
-          name: product.name,
-
-          option: optionName,
-
-          price,
-
-          cost,
-
-          qty: safeQty,
-
-        },
-
-      ];
-
-    });
+    );
 
   }
 
@@ -369,81 +506,79 @@ item.id === product.id &&
 
   ) {
 
-    const safeQty = Math.max(
+    const safeQty =
 
-      1,
+      Math.max(
 
-      Number(quantity) || 1
+        1,
 
-    );
+        Number(
 
-    setCart((currentCart) =>
+          quantity
 
-      currentCart.map(
+        ) || 1
 
-        (item, itemIndex) =>
+      );
 
-          itemIndex === index
+    setCart(
 
-            ? {
+      (currentCart) =>
 
-                ...item,
+        currentCart.map(
 
-                qty: safeQty,
+          (
 
-              }
+            item,
 
-            : item
+            itemIndex
 
-      )
+          ) =>
 
-    );
+            itemIndex ===
 
-  }
+            index
 
-  function increaseQty(index) {
+              ? {
 
-    setCart((currentCart) =>
+                  ...item,
 
-      currentCart.map(
+                  qty:
 
-        (item, itemIndex) =>
+                    safeQty,
 
-          itemIndex === index
+                }
 
-            ? {
+              : item
 
-                ...item,
-
-                qty:
-
-                  Number(
-
-                    item.qty
-
-                  ) + 1,
-
-              }
-
-            : item
-
-      )
+        )
 
     );
 
   }
 
-  function decreaseQty(index) {
+  function increaseQty(
 
-    setCart((currentCart) =>
+    index
 
-      currentCart
+  ) {
 
-        .map(
+    setCart(
 
-          (item, itemIndex) =>
+      (currentCart) =>
 
-            itemIndex === index
+        currentCart.map(
+
+          (
+
+            item,
+
+            itemIndex
+
+          ) =>
+
+            itemIndex ===
+
+            index
 
               ? {
 
@@ -455,7 +590,7 @@ item.id === product.id &&
 
                       item.qty
 
-                    ) - 1,
+                    ) + 1,
 
                 }
 
@@ -463,29 +598,91 @@ item.id === product.id &&
 
         )
 
-        .filter(
+    );
 
-          (item) =>
+  }
 
-            item.qty > 0
+  function decreaseQty(
 
-        )
+    index
+
+  ) {
+
+    setCart(
+
+      (currentCart) =>
+
+        currentCart
+
+          .map(
+
+            (
+
+              item,
+
+              itemIndex
+
+            ) =>
+
+              itemIndex ===
+
+              index
+
+                ? {
+
+                    ...item,
+
+                    qty:
+
+                      Number(
+
+                        item.qty
+
+                      ) - 1,
+
+                  }
+
+                : item
+
+          )
+
+          .filter(
+
+            (item) =>
+
+              item.qty > 0
+
+          )
 
     );
 
   }
 
-  function removeItem(index) {
+  function removeItem(
 
-    setCart((currentCart) =>
+    index
 
-      currentCart.filter(
+  ) {
 
-        (_, itemIndex) =>
+    setCart(
 
-          itemIndex !== index
+      (currentCart) =>
 
-      )
+        currentCart.filter(
+
+          (
+
+            _,
+
+            itemIndex
+
+          ) =>
+
+            itemIndex !==
+
+            index
+
+        )
 
     );
 
@@ -499,7 +696,11 @@ item.id === product.id &&
 
         sum +
 
-        Number(item.qty || 0),
+        Number(
+
+          item.qty || 0
+
+        ),
 
       0
 
@@ -531,43 +732,79 @@ item.id === product.id &&
 
   function openPayment() {
 
-    if (cart.length === 0) {
+    if (
+
+      cart.length === 0
+
+    ) {
 
       return;
 
     }
 
-    setPaymentOpen(true);
+    setPaymentOpen(
+
+      true
+
+    );
 
   }
 
   function closePayment() {
 
-    setPaymentOpen(false);
+    setPaymentOpen(
+
+      false
+
+    );
 
   }
 
   function completeSale() {
 
-    if (cart.length === 0) {
+    if (
 
-      setPaymentOpen(false);
+      cart.length === 0
+
+    ) {
+
+      setPaymentOpen(
+
+        false
+
+      );
 
       return;
 
     }
 
-    const soldByProduct = {};
+    const soldByProduct =
 
-    cart.forEach((item) => {
+      {};
 
-      soldByProduct[item.id] =
+    cart.forEach(
 
-        (soldByProduct[item.id] || 0) +
+      (item) => {
 
-        Number(item.qty || 0);
+        soldByProduct[
+item.id
 
-    });
+        ] =
+
+          (soldByProduct[
+item.id
+
+          ] || 0) +
+
+          Number(
+
+            item.qty || 0
+
+          );
+
+      }
+
+    );
 
     const newInventory = {
 
@@ -581,9 +818,19 @@ item.id === product.id &&
 
     ).forEach(
 
-      ([productId, quantity]) => {
+      ([
 
-        newInventory[productId] =
+        productId,
+
+        quantity,
+
+      ]) => {
+
+        newInventory[
+
+          productId
+
+        ] =
 
           Number(
 
@@ -595,7 +842,11 @@ item.id === product.id &&
 
           ) -
 
-          Number(quantity);
+          Number(
+
+            quantity
+
+          );
 
       }
 
@@ -603,67 +854,80 @@ item.id === product.id &&
 
     const saleItems =
 
-      cart.map((item) => {
+      cart.map(
 
-        const quantity =
+        (item) => {
 
-          Number(item.qty || 0);
+          const quantity =
 
-        const unitPrice =
+            Number(
 
-          Number(
+              item.qty || 0
 
-            item.price || 0
+            );
 
-          );
+          const unitPrice =
 
-        const unitCost =
+            Number(
 
-          Number(
+              item.price || 0
 
-            item.cost || 0
+            );
 
-          );
+          const unitCost =
 
-        const lineTotal =
+            Number(
 
-          unitPrice * quantity;
+              item.cost || 0
 
-        const lineCost =
+            );
 
-          unitCost * quantity;
+          const lineTotal =
 
-        return {
+            unitPrice *
 
-          productId: item.id,
+            quantity;
 
-          productName:
+          const lineCost =
 
-            item.name,
+            unitCost *
 
-          option:
+            quantity;
 
-            item.option,
+          return {
 
-          unitPrice,
+            productId:
+item.id,
 
-          unitCost,
+            productName:
 
-          quantity,
+              item.name,
 
-          lineTotal,
+            option:
 
-          lineCost,
+              item.option,
 
-          lineProfit:
+            unitPrice,
 
-            lineTotal -
+            unitCost,
+
+            quantity,
+
+            lineTotal,
 
             lineCost,
 
-        };
+            lineProfit:
 
-      });
+              lineTotal -
+
+              lineCost,
+
+          };
+
+        }
+
+      );
 
     const totalCost =
 
@@ -675,7 +939,9 @@ item.id === product.id &&
 
           Number(
 
-            item.lineCost || 0
+            item.lineCost ||
+
+              0
 
           ),
 
@@ -765,7 +1031,11 @@ item.id === product.id &&
 
     setCart([]);
 
-    setPaymentOpen(false);
+    setPaymentOpen(
+
+      false
+
+    );
 
     window.alert(
 
@@ -781,7 +1051,11 @@ item.id === product.id &&
 
     setLoginOpen(false);
 
-    setPage("dashboard");
+    setPage(
+
+      "dashboard"
+
+    );
 
   }
 
@@ -798,9 +1072,17 @@ item.id === product.id &&
     return (
 <POSPage
 
-        products={products}
+        products={
 
-        inventory={inventory}
+          products
+
+        }
+
+        inventory={
+
+          inventory
+
+        }
 
         cart={cart}
 
@@ -850,12 +1132,26 @@ item.id === product.id &&
 
     if (
 
-      page === "dashboard"
+      page ===
+
+      "dashboard"
 
     ) {
 
       return (
-<DashboardPage />
+<DashboardPage
+
+          onOpenStock={() =>
+
+            setPage(
+
+              "stock"
+
+            )
+
+          }
+
+        />
 
       );
 
@@ -863,7 +1159,9 @@ item.id === product.id &&
 
     if (
 
-      page === "reports"
+      page ===
+
+      "reports"
 
     ) {
 
@@ -876,7 +1174,9 @@ item.id === product.id &&
 
     if (
 
-      page === "bills"
+      page ===
+
+      "bills"
 
     ) {
 
@@ -889,7 +1189,9 @@ item.id === product.id &&
 
     if (
 
-      page === "products"
+      page ===
+
+      "products"
 
     ) {
 
@@ -916,7 +1218,11 @@ item.id === product.id &&
 
           onClose={() =>
 
-            setPage("pos")
+            setPage(
+
+              "pos"
+
+            )
 
           }
 
@@ -928,7 +1234,9 @@ item.id === product.id &&
 
     if (
 
-      page === "stock"
+      page ===
+
+      "stock"
 
     ) {
 
@@ -955,7 +1263,11 @@ item.id === product.id &&
 
           onClose={() =>
 
-            setPage("pos")
+            setPage(
+
+              "pos"
+
+            )
 
           }
 
@@ -967,7 +1279,9 @@ item.id === product.id &&
 
     if (
 
-      page === "settings"
+      page ===
+
+      "settings"
 
     ) {
 
@@ -1002,9 +1316,17 @@ item.id === product.id &&
     return (
 <StockManager
 
-        products={products}
+        products={
 
-        inventory={inventory}
+          products
+
+        }
+
+        inventory={
+
+          inventory
+
+        }
 
         onAddStock={
 
@@ -1031,7 +1353,11 @@ item.id === product.id &&
 <div className="owner-app-shell">
 <OwnerSidebar
 
-            currentPage={page}
+            currentPage={
+
+              page
+
+            }
 
             onChangePage={
 
@@ -1068,7 +1394,11 @@ item.id === product.id &&
 
                 onClick={() =>
 
-                  setPage("stock")
+                  setPage(
+
+                    "stock"
+
+                  )
 
                 }
 >
@@ -1083,7 +1413,11 @@ item.id === product.id &&
 
                 onClick={() =>
 
-                  setLoginOpen(true)
+                  setLoginOpen(
+
+                    true
+
+                  )
 
                 }
 >
@@ -1099,7 +1433,11 @@ item.id === product.id &&
       )}
 <OwnerLogin
 
-        open={loginOpen}
+        open={
+
+          loginOpen
+
+        }
 
         onSuccess={
 
@@ -1109,14 +1447,22 @@ item.id === product.id &&
 
         onClose={() =>
 
-          setLoginOpen(false)
+          setLoginOpen(
+
+            false
+
+          )
 
         }
 
       />
 <PaymentPopup
 
-        open={paymentOpen}
+        open={
+
+          paymentOpen
+
+        }
 
         total={total}
 
