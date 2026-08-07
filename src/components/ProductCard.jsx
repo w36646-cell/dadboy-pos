@@ -1,129 +1,64 @@
-function ProductCard({
-
-  product,
-
-  stock,
-
-  onClick,
-
-  onAdd,
-
-}) {
-
-  if (!product) {
-
-    return null;
-
-  }
-
-  const normalOption =
-
-    product.options?.find(
-
-      (option) => option.id === "normal"
-
-    ) || product.options?.[0];
-
-  const displayPrice =
-
-    normalOption?.price ??
-
-    product.price ??
-
-    0;
-
-  const displayStock =
-
-    stock === undefined || stock === null
-
-      ? product.stock ?? 50
-
-      : stock;
-
-  function handleClick() {
-
-    if (typeof onClick === "function") {
-
-      onClick(product);
-
-      return;
-
-    }
-
-    if (typeof onAdd === "function") {
-
-      onAdd(product);
-
-    }
-
-  }
+function ProductCard({ product, onClick }) {
 
   return (
-<button
 
-      type="button"
+    <div className="product-card">
 
-      className="product-card product-card-touch"
+      <div className="product-image">
 
-      onClick={handleClick}
->
+        {product.image ? (
 
-      {product.image ? (
-<img
+          <img
+            src={product.image}
+            alt={product.name}
+          />
 
-          className="product-image"
+        ) : (
 
-          src={product.image}
+          <div className="no-image">
 
-          alt={product.name || "สินค้า"}
+            ไม่มีรูป
 
-          onError={(event) => {
+          </div>
 
-            event.currentTarget.style.display =
+        )}
 
-              "none";
+      </div>
 
-          }}
+      <div className="product-name">
 
-        />
+        {product.name}
 
-      ) : (
-<div className="product-image-placeholder">
+      </div>
 
-          ไม่มีรูป
-</div>
+      <div className="product-price">
 
-      )}
-<div className="product-card-overlay">
-<div className="product-name">
+        {product.hasOption
+          ? product.options[0].price
+          : product.price
+        } บาท
 
-          {product.name}
-</div>
-<div className="product-price">
+      </div>
 
-          {displayPrice} บาท
-</div>
-<div
+      <div className="product-stock">
 
-          className={
+        คงเหลือ {product.stock}
 
-            Number(displayStock) < 0
+      </div>
 
-              ? "stock-text stock-negative"
+      <button
+        className="add-btn"
+        onClick={onClick}
+      >
 
-              : "stock-text"
+        เพิ่ม
 
-          }
->
+      </button>
 
-          คงเหลือ {displayStock}
-</div>
-</div>
-</button>
+    </div>
 
   );
 
 }
 
 export default ProductCard;
- 

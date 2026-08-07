@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react";
 
-import ProductCard from "../components/ProductCard";
-
 function POSPage({
 
   products,
@@ -25,8 +23,6 @@ function POSPage({
 }) {
 
   const [searchText, setSearchText] = useState("");
-
-  const [searchOpen, setSearchOpen] = useState(false);
 
   const [selectedProduct, setSelectedProduct] =
 
@@ -58,7 +54,7 @@ function POSPage({
 
   const totalQty = cart.reduce(
 
-    (sum, item) => sum + Number(item.qty || 0),
+    (sum, item) => sum + item.qty,
 
     0
 
@@ -66,13 +62,7 @@ function POSPage({
 
   const total = cart.reduce(
 
-    (sum, item) =>
-
-      sum +
-
-      Number(item.price || 0) *
-
-        Number(item.qty || 0),
+    (sum, item) => sum + item.price * item.qty,
 
     0
 
@@ -86,39 +76,29 @@ function POSPage({
 
   function openProduct(product) {
 
-    const options = Array.isArray(product.options)
-
-      ? product.options
-
-      : [];
-
-    const needsPopup =
+    const hasOption =
 
       product.hasOption === true ||
 
       product.hasOptions === true;
 
-    if (!needsPopup || options.length === 0) {
+    if (!hasOption || !product.options?.length) {
 
-      const normalOption =
+      onAddToCart(
 
-        options.find(
+        product,
 
-          (option) => option.id === "normal"
-
-        ) ||
-
-        options[0] || {
-
-          id: "normal",
+        {
 
           name: "ปกติ",
 
           price: product.price,
 
-        };
+        },
 
-      onAddToCart(product, normalOption, 1);
+        1
+
+      );
 
       return;
 
@@ -126,11 +106,11 @@ function POSPage({
 
     const normalOption =
 
-      options.find(
+      product.options.find(
 
         (option) => option.id === "normal"
 
-      ) || options[0];
+      ) || product.options[0];
 
     setSelectedProduct(product);
 
@@ -175,98 +155,142 @@ function POSPage({
   return (
 <div className="pos-page">
 <main className="product-panel">
-<div className="pos-topbar">
-<div className="pos-count">
+<header className="pos-page-header">
+<div>
+<h1>ขายสินค้า</h1>
+<p>
 
-            {filteredProducts.length} รายการ
+              สินค้า {filteredProducts.length} รายการ
+</p>
 </div>
-<button
-
-            type="button"
-
-            className="search-icon-button"
-
-            onClick={() => {
-
-              setSearchOpen((value) => !value);
-
-              if (searchOpen) {
-
-                setSearchText("");
-
-              }
-
-            }}
-
-            aria-label="ค้นหาสินค้า"
->
-
-            🔍
-</button>
-</div>
-
-        {searchOpen && (
-<div className="search-popup-row">
+</header>
 <input
 
-              className="search-input"
+          className="search-input"
 
-              type="search"
+          type="search"
 
-              placeholder="ค้นหาสินค้า..."
+          placeholder="ค้นหาสินค้า..."
 
-              value={searchText}
+          value={searchText}
 
-              onChange={(event) =>
+          onChange={(event) =>
 
-                setSearchText(event.target.value)
+            setSearchText(event.target.value)
 
-              }
+          }
 
-              autoFocus
+        />
 
-            />
-<button
+        {filteredProducts.length === 0 ? (
+<div className="no-product">
 
-              type="button"
+            ไม่พบสินค้า
+</div>
 
-              className="search-close-button"
+        ) : (
+<div className="product-grid">
 
-              onClick={() => {
+            {filteredProducts.map((product) => {
 
-                setSearchOpen(false);
+              const normalPrice =
 
-                setSearchText("");
+                product.options?.find(
 
-              }}
+                  (option) =>
+option.id === "normal"
+
+                )?.price ??
+
+                product.options?.[0]?.price ??
+
+                product.price;
+
+              const stock = getStock(product.id);
+
+              return (
+<article
+
+                  className="product-card"
+
+                  key={product.id}
+>
+<div className="product-image-box">
+
+                    {product.image ? (
+<img
+
+                        className="product-image"
+
+                        src={product.image}
+
+                        alt={product.name}
+
+                        onError={(event) => {
+
+                          event.currentTarget.style.display =
+
+                            "none";
+
+                        }}
+
+                      />
+
+                    ) : (
+<span>ไม่มีรูป</span>
+
+                    )}
+</div>
+<div className="product-name">
+
+                    {product.name}
+</div>
+<div className="product-price">
+
+                    {normalPrice} บาท
+</div>
+<div
+
+                    className={
+
+                      stock < 0
+
+                        ? "stock-text stock-negative"
+
+                        : "stock-text"
+
+                    }
 >
 
-              ✕
+                    คงเหลือ {stock}
+</div>
+<button
+
+                    className="add-button"
+
+                    type="button"
+
+                    onClick={() =>
+
+                      openProduct(product)
+
+                    }
+>
+
+                    เพิ่ม
 </button>
+</article>
+
+              );
+
+            })}
 </div>
 
         )}
-<div className="product-grid compact-product-grid">
-
-          {filteredProducts.map((product) => (
-<ProductCard
-
-              key={product.id}
-
-              product={product}
-
-              stock={getStock(product.id)}
-
-              onClick={openProduct}
-
-            />
-
-          ))}
-</div>
 </main>
 <aside className="cart-panel">
 <div className="cart-header">
-<h2>ตะกร้า</h2>
+<h2>🛒 ตะกร้า</h2>
 <span className="cart-badge">
 
             {totalQty}
@@ -334,8 +358,6 @@ function POSPage({
 
                       type="number"
 
-                      inputMode="numeric"
-
                       min="1"
 
                       value={item.qty}
@@ -369,11 +391,7 @@ function POSPage({
 </div>
 <strong>
 
-                    {Number(item.price) *
-
-                      Number(item.qty)}{" "}
-
-                    บาท
+                    {item.price * item.qty} บาท
 </strong>
 </div>
 </div>
@@ -384,10 +402,7 @@ function POSPage({
 </div>
 <div className="grand-total">
 <span>รวมทั้งหมด</span>
-<strong>
-
-            {total.toLocaleString()} บาท
-</strong>
+<span>{total} บาท</span>
 </div>
 <button
 
@@ -422,14 +437,16 @@ function POSPage({
             }
 >
 <h2>{selectedProduct.name}</h2>
+<p>
+
+              กดเพิ่มได้เลยสำหรับราคาปกติ
+</p>
 <div className="option-list">
 
               {selectedProduct.options.map(
 
                 (option) => (
 <label
-
-                    key={option.id}
 
                     className={
 selectedOption.id === option.id
@@ -439,6 +456,8 @@ selectedOption.id === option.id
                         : "option-button"
 
                     }
+
+                    key={option.id}
 >
 <span>
 <input
@@ -481,9 +500,15 @@ selectedOption.id === option.id
 
                 onClick={() =>
 
-                  setPopupQty((qty) =>
+                  setPopupQty((quantity) =>
 
-                    Math.max(1, Number(qty) - 1)
+                    Math.max(
+
+                      1,
+
+                      Number(quantity) - 1
+
+                    )
 
                   )
 
@@ -499,8 +524,6 @@ selectedOption.id === option.id
                 type="number"
 
                 min="1"
-
-                inputMode="numeric"
 
                 value={popupQty}
 
@@ -529,7 +552,9 @@ selectedOption.id === option.id
 
                   setPopupQty(
 
-                    (qty) => Number(qty) + 1
+                    (quantity) =>
+
+                      Number(quantity) + 1
 
                   )
 
@@ -543,11 +568,7 @@ selectedOption.id === option.id
 
               รวม{" "}
 
-              {Number(selectedOption.price) *
-
-                Number(popupQty)}{" "}
-
-              บาท
+              {selectedOption.price * popupQty} บาท
 </div>
 <button
 

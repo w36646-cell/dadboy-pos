@@ -1,18 +1,16 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import defaultProducts from "./data/products";
 
-import POSPage from "./pages/POSPage";
-
-import DashboardPage from "./pages/DashboardPage";
+import StockManager from "./components/StockManager";
 
 import ProductManager from "./components/ProductManager";
 
-import StockManager from "./components/StockManager";
+import DashboardPage from "./pages/DashboardPage";
+
+import ReportPage from "./pages/ReportPage";
 
 import OwnerLogin from "./components/OwnerLogin";
-
-import Sidebar from "./components/Sidebar";
 
 import "./styles/App.css";
 
@@ -28,11 +26,7 @@ function readStorage(key, fallback) {
 
     const saved = localStorage.getItem(key);
 
-    return saved
-
-      ? JSON.parse(saved)
-
-      : fallback;
+    return saved ? JSON.parse(saved) : fallback;
 
   } catch {
 
@@ -44,13 +38,7 @@ function readStorage(key, fallback) {
 
 function loadProducts() {
 
-  const saved = readStorage(
-
-    PRODUCTS_KEY,
-
-    null
-
-  );
+  const saved = readStorage(PRODUCTS_KEY, null);
 
   return Array.isArray(saved)
 
@@ -62,21 +50,9 @@ function loadProducts() {
 
 function loadInventory(productList) {
 
-  const saved = readStorage(
+  const saved = readStorage(STOCK_KEY, null);
 
-    STOCK_KEY,
-
-    null
-
-  );
-
-  if (
-
-    saved &&
-
-    typeof saved === "object"
-
-  ) {
+  if (saved && typeof saved === "object") {
 
     return saved;
 
@@ -86,11 +62,7 @@ function loadInventory(productList) {
 
   productList.forEach((product) => {
 
-    result[product.id] = Number(
-
-      product.stock ?? 50
-
-    );
+    result[product.id] = Number(product.stock ?? 50);
 
   });
 
@@ -100,9 +72,7 @@ function loadInventory(productList) {
 
 function App() {
 
-  const initialProducts =
-
-    loadProducts();
+  const initialProducts = loadProducts();
 
   const [products, setProducts] =
 
@@ -110,37 +80,47 @@ function App() {
 
   const [inventory, setInventory] =
 
-    useState(() =>
+    useState(() => loadInventory(initialProducts));
 
-      loadInventory(
+  const [page, setPage] = useState("pos");
 
-        initialProducts
+  const [ownerMode, setOwnerMode] = useState(false);
 
-      )
+  const [loginOpen, setLoginOpen] = useState(false);
+
+  const [cart, setCart] = useState([]);
+
+  const [searchText, setSearchText] = useState("");
+
+  const [selectedProduct, setSelectedProduct] =
+
+    useState(null);
+
+  const [selectedOption, setSelectedOption] =
+
+    useState(null);
+
+  const [popupQty, setPopupQty] = useState(1);
+
+  const filteredProducts = useMemo(() => {
+
+    const keyword = searchText.trim().toLowerCase();
+
+    if (!keyword) {
+
+      return products;
+
+    }
+
+    return products.filter((product) =>
+
+      product.name.toLowerCase().includes(keyword)
 
     );
 
-  const [cart, setCart] =
+  }, [products, searchText]);
 
-    useState([]);
-
-  const [page, setPage] =
-
-    useState("pos");
-
-  const [ownerMode, setOwnerMode] =
-
-    useState(false);
-
-  const [loginOpen, setLoginOpen] =
-
-    useState(false);
-
-  function saveProducts(
-
-    newProducts
-
-  ) {
+  function saveProducts(newProducts) {
 
     setProducts(newProducts);
 
@@ -148,9 +128,22 @@ function App() {
 
       PRODUCTS_KEY,
 
-      JSON.stringify(
+      JSON.stringify(newProducts)
 
-        newProducts
+    );
+
+  }
+
+  function saveProduct(updatedProduct) {
+
+    saveProducts(
+
+      products.map((product) =>
+product.id === updatedProduct.id
+
+          ? updatedProduct
+
+          : product
 
       )
 
@@ -158,35 +151,7 @@ function App() {
 
   }
 
-  function saveProduct(
-
-    updatedProduct
-
-  ) {
-
-    const newProducts =
-
-      products.map(
-
-        (product) =>
-product.id ===
-updatedProduct.id
-
-            ? updatedProduct
-
-            : product
-
-      );
-
-    saveProducts(newProducts);
-
-  }
-
-  function saveInventory(
-
-    newInventory
-
-  ) {
+  function saveInventory(newInventory) {
 
     setInventory(newInventory);
 
@@ -194,11 +159,7 @@ updatedProduct.id
 
       STOCK_KEY,
 
-      JSON.stringify(
-
-        newInventory
-
-      )
+      JSON.stringify(newInventory)
 
     );
 
@@ -206,37 +167,15 @@ updatedProduct.id
 
   function getStock(productId) {
 
-    return Number(
-
-      inventory[
-
-        productId
-
-      ] ?? 50
-
-    );
+    return Number(inventory[productId] ?? 50);
 
   }
 
-  function addStock(
+  function addStock(productId, quantity) {
 
-    productId,
+    const safeQty = Number(quantity);
 
-    quantity
-
-  ) {
-
-    const qty =
-
-      Number(quantity);
-
-    if (
-
-      !Number.isFinite(qty) ||
-
-      qty <= 0
-
-    ) {
+    if (!Number.isFinite(safeQty) || safeQty <= 0) {
 
       return;
 
@@ -246,11 +185,7 @@ updatedProduct.id
 
       ...inventory,
 
-      [productId]:
-
-        getStock(productId) +
-
-        qty,
+      [productId]: getStock(productId) + safeQty,
 
     });
 
@@ -266,7 +201,7 @@ updatedProduct.id
 
   ) {
 
-    const qty = Math.max(
+    const safeQty = Math.max(
 
       1,
 
@@ -274,121 +209,145 @@ updatedProduct.id
 
     );
 
-    const price =
+    const cost = Number(product.cost || 0);
 
-      Number(
+    setCart((currentCart) => {
 
-        option?.price ??
+      const found = currentCart.find(
 
-          product.price ??
+        (item) =>
+item.id === product.id &&
 
-          0
-
-      );
-
-    const optionName =
-
-      option?.name ??
-
-      "ปกติ";
-
-    const cost =
-
-      Number(
-
-        product.cost || 0
+          item.option === option.name
 
       );
 
-    setCart(
+      if (found) {
 
-      (currentCart) => {
+        return currentCart.map((item) =>
+item.id === product.id &&
 
-        const found =
+          item.option === option.name
 
-          currentCart.find(
+            ? {
 
-            (item) =>
-item.id ===
-product.id &&
+                ...item,
 
-              item.option ===
+                name: product.name,
 
-                optionName
+                price: Number(option.price),
 
-          );
+                cost,
 
-        if (found) {
+                qty: item.qty + safeQty,
 
-          return currentCart.map(
+              }
 
-            (item) =>
-item.id ===
-product.id &&
+            : item
 
-              item.option ===
-
-                optionName
-
-                ? {
-
-                    ...item,
-
-                    qty:
-
-                      item.qty +
-
-                      qty,
-
-                  }
-
-                : item
-
-          );
-
-        }
-
-        return [
-
-          ...currentCart,
-
-          {
-
-            id: product.id,
-
-            name:
-
-              product.name,
-
-            option:
-
-              optionName,
-
-            price,
-
-            cost,
-
-            qty,
-
-          },
-
-        ];
+        );
 
       }
 
-    );
+      return [
+
+        ...currentCart,
+
+        {
+
+          id: product.id,
+
+          name: product.name,
+
+          option: option.name,
+
+          price: Number(option.price),
+
+          cost,
+
+          qty: safeQty,
+
+        },
+
+      ];
+
+    });
 
   }
 
-  function changeCartQty(
+  function openProduct(product) {
 
-    index,
+    const hasOption =
 
-    quantity
+      product.hasOption === true ||
 
-  ) {
+      product.hasOptions === true;
 
-    const qty = Math.max(
+    if (!hasOption || !product.options?.length) {
+
+      addToCart(product, {
+
+        name: "ปกติ",
+
+        price: product.price,
+
+      });
+
+      return;
+
+    }
+
+    const normalOption =
+
+      product.options.find(
+
+        (option) => option.id === "normal"
+
+      ) || product.options[0];
+
+    setSelectedProduct(product);
+
+    setSelectedOption(normalOption);
+
+    setPopupQty(1);
+
+  }
+
+  function closePopup() {
+
+    setSelectedProduct(null);
+
+    setSelectedOption(null);
+
+    setPopupQty(1);
+
+  }
+
+  function confirmPopup() {
+
+    if (!selectedProduct || !selectedOption) {
+
+      return;
+
+    }
+
+    addToCart(
+
+      selectedProduct,
+
+      selectedOption,
+
+      popupQty
+
+    );
+
+    closePopup();
+
+  }
+
+  function changeCartQty(index, quantity) {
+
+    const safeQty = Math.max(
 
       1,
 
@@ -396,29 +355,17 @@ product.id &&
 
     );
 
-    setCart(
+    setCart((currentCart) =>
 
-      (currentCart) =>
+      currentCart.map((item, itemIndex) =>
 
-        currentCart.map(
+        itemIndex === index
 
-          (item, itemIndex) =>
+          ? { ...item, qty: safeQty }
 
-            itemIndex ===
+          : item
 
-            index
-
-              ? {
-
-                  ...item,
-
-                  qty,
-
-                }
-
-              : item
-
-        )
+      )
 
     );
 
@@ -426,33 +373,17 @@ product.id &&
 
   function increaseQty(index) {
 
-    setCart(
+    setCart((currentCart) =>
 
-      (currentCart) =>
+      currentCart.map((item, itemIndex) =>
 
-        currentCart.map(
+        itemIndex === index
 
-          (item, itemIndex) =>
+          ? { ...item, qty: item.qty + 1 }
 
-            itemIndex ===
+          : item
 
-            index
-
-              ? {
-
-                  ...item,
-
-                  qty:
-
-                    item.qty +
-
-                    1,
-
-                }
-
-              : item
-
-        )
+      )
 
     );
 
@@ -460,49 +391,21 @@ product.id &&
 
   function decreaseQty(index) {
 
-    setCart(
+    setCart((currentCart) =>
 
-      (currentCart) =>
+      currentCart
 
-        currentCart
+        .map((item, itemIndex) =>
 
-          .map(
+          itemIndex === index
 
-            (
+            ? { ...item, qty: item.qty - 1 }
 
-              item,
+            : item
 
-              itemIndex
+        )
 
-            ) =>
-
-              itemIndex ===
-
-              index
-
-                ? {
-
-                    ...item,
-
-                    qty:
-
-                      item.qty -
-
-                      1,
-
-                  }
-
-                : item
-
-          )
-
-          .filter(
-
-            (item) =>
-
-              item.qty > 0
-
-          )
+        .filter((item) => item.qty > 0)
 
     );
 
@@ -510,105 +413,65 @@ product.id &&
 
   function removeItem(index) {
 
-    setCart(
+    setCart((currentCart) =>
 
-      (currentCart) =>
+      currentCart.filter(
 
-        currentCart.filter(
+        (_, itemIndex) => itemIndex !== index
 
-          (
-
-            _,
-
-            itemIndex
-
-          ) =>
-
-            itemIndex !==
-
-            index
-
-        )
+      )
 
     );
 
   }
 
+  const totalQty = cart.reduce(
+
+    (sum, item) => sum + item.qty,
+
+    0
+
+  );
+
+  const total = cart.reduce(
+
+    (sum, item) =>
+
+      sum + item.price * item.qty,
+
+    0
+
+  );
+
   function completeSale() {
 
-    if (
-
-      cart.length === 0
-
-    ) {
+    if (cart.length === 0) {
 
       return;
 
     }
 
-    const soldByProduct =
+    const soldByProduct = {};
 
-      {};
+    cart.forEach((item) => {
 
-    cart.forEach(
+      soldByProduct[item.id] =
 
-      (item) => {
+        (soldByProduct[item.id] || 0) +
 
-        soldByProduct[
-item.id
+        item.qty;
 
-        ] =
+    });
 
-          (soldByProduct[
-item.id
+    const newInventory = { ...inventory };
 
-          ] || 0) +
+    Object.entries(soldByProduct).forEach(
 
-          Number(
+      ([productId, quantity]) => {
 
-            item.qty
+        newInventory[productId] =
 
-          );
-
-      }
-
-    );
-
-    const newInventory = {
-
-      ...inventory,
-
-    };
-
-    Object.entries(
-
-      soldByProduct
-
-    ).forEach(
-
-      ([
-
-        productId,
-
-        quantity,
-
-      ]) => {
-
-        newInventory[
-
-          productId
-
-        ] =
-
-          Number(
-
-            newInventory[
-
-              productId
-
-            ] ?? 50
-
-          ) -
+          Number(newInventory[productId] ?? 50) -
 
           Number(quantity);
 
@@ -616,206 +479,95 @@ item.id
 
     );
 
-    const saleItems =
+    const saleItems = cart.map((item) => {
 
-      cart.map(
+      const unitCost = Number(item.cost || 0);
 
-        (item) => {
+      const lineTotal =
 
-          const qty =
+        item.price * item.qty;
 
-            Number(
+      const lineCost =
 
-              item.qty
+        unitCost * item.qty;
 
-            );
+      return {
 
-          const unitPrice =
+        productId: item.id,
 
-            Number(
+        productName: item.name,
 
-              item.price
+        option: item.option,
 
-            );
+        unitPrice: item.price,
 
-          const unitCost =
+        unitCost,
 
-            Number(
+        quantity: item.qty,
 
-              item.cost || 0
+        lineTotal,
 
-            );
+        lineCost,
 
-          const lineTotal =
+        lineProfit: lineTotal - lineCost,
 
-            unitPrice *
+      };
 
-            qty;
+    });
 
-          const lineCost =
+    const totalCost = saleItems.reduce(
 
-            unitCost *
+      (sum, item) => sum + item.lineCost,
 
-            qty;
+      0
 
-          return {
+    );
 
-            productId:
-item.id,
-
-            productName:
-
-              item.name,
-
-            option:
-
-              item.option,
-
-            unitPrice,
-
-            unitCost,
-
-            quantity: qty,
-
-            lineTotal,
-
-            lineCost,
-
-            lineProfit:
-
-              lineTotal -
-
-              lineCost,
-
-          };
-
-        }
-
-      );
-
-    const totalQty =
-
-      saleItems.reduce(
-
-        (sum, item) =>
-
-          sum +
-
-          item.quantity,
-
-        0
-
-      );
-
-    const totalAmount =
-
-      saleItems.reduce(
-
-        (sum, item) =>
-
-          sum +
-
-          item.lineTotal,
-
-        0
-
-      );
-
-    const totalCost =
-
-      saleItems.reduce(
-
-        (sum, item) =>
-
-          sum +
-
-          item.lineCost,
-
-        0
-
-      );
-
-    const now =
-
-      new Date();
+    const now = new Date();
 
     const sale = {
 
-      billId:
+      billId: `DB-${now.getTime()}`,
 
-        `DB-${now.getTime()}`,
-
-      soldAt:
-
-        now.toISOString(),
+      soldAt: now.toISOString(),
 
       soldDate:
 
-        now.toLocaleDateString(
-
-          "en-CA"
-
-        ),
+        now.toLocaleDateString("en-CA"),
 
       soldTime:
 
-        now.toLocaleTimeString(
-
-          "th-TH"
-
-        ),
+        now.toLocaleTimeString("th-TH"),
 
       totalQty,
 
-      totalAmount,
+      totalAmount: total,
 
       totalCost,
 
-      totalProfit:
-
-        totalAmount -
-
-        totalCost,
+      totalProfit: total - totalCost,
 
       items: saleItems,
 
     };
 
-    const sales =
-
-      readStorage(
-
-        SALES_KEY,
-
-        []
-
-      );
+    const sales = readStorage(SALES_KEY, []);
 
     localStorage.setItem(
 
       SALES_KEY,
 
-      JSON.stringify([
-
-        ...sales,
-
-        sale,
-
-      ])
+      JSON.stringify([...sales, sale])
 
     );
 
-    saveInventory(
-
-      newInventory
-
-    );
+    saveInventory(newInventory);
 
     setCart([]);
 
     window.alert(
 
-      `บันทึกบิลสำเร็จ\nยอดรวม ${totalAmount} บาท`
+      `บันทึกบิลสำเร็จ\nยอดรวม ${total} บาท`
 
     );
 
@@ -827,11 +579,7 @@ item.id,
 
     setLoginOpen(false);
 
-    setPage(
-
-      "dashboard"
-
-    );
+    setPage("dashboard");
 
   }
 
@@ -843,203 +591,55 @@ item.id,
 
   }
 
-  function renderPage() {
-
-    if (
-
-      page ===
-
-        "dashboard" &&
-
-      ownerMode
-
-    ) {
-
-      return (
-<DashboardPage />
-
-      );
-
-    }
-
-    if (
-
-      page ===
-
-        "products" &&
-
-      ownerMode
-
-    ) {
-
-      return (
-<ProductManager
-
-          products={
-
-            products
-
-          }
-
-          inventory={
-
-            inventory
-
-          }
-
-          onSaveProduct={
-
-            saveProduct
-
-          }
-
-          onClose={() =>
-
-            setPage("pos")
-
-          }
-
-        />
-
-      );
-
-    }
-
-    if (
-
-      page === "stock"
-
-    ) {
-
-      return (
-<StockManager
-
-          products={
-
-            products
-
-          }
-
-          inventory={
-
-            inventory
-
-          }
-
-          onAddStock={
-
-            addStock
-
-          }
-
-          onClose={() =>
-
-            setPage("pos")
-
-          }
-
-        />
-
-      );
-
-    }
-
-    if (
-
-      page === "reports"
-
-    ) {
-
-      return (
-<div className="page">
-<h1>
-
-            รายงาน
-</h1>
-<p>
-
-            กำลังพัฒนา
-</p>
-</div>
-
-      );
-
-    }
-
-    if (
-
-      page === "settings"
-
-    ) {
-
-      return (
-<div className="page">
-<h1>
-
-            ตั้งค่า
-</h1>
-<p>
-
-            กำลังพัฒนา
-</p>
-</div>
-
-      );
-
-    }
+  if (page === "dashboard" && ownerMode) {
 
     return (
-<POSPage
+<DashboardPage />
 
-        products={
+    );
 
-          products
+  }
 
-        }
+  if (page === "reports" && ownerMode) {
 
-        inventory={
+    return (
+<ReportPage />
 
-          inventory
+    );
 
-        }
+  }
 
-        cart={cart}
+  if (page === "products" && ownerMode) {
 
-        onAddToCart={
+    return (
+<ProductManager
 
-          addToCart
+        products={products}
 
-        }
+        inventory={inventory}
 
-        onChangeCartQty={
+        onSaveProduct={saveProduct}
 
-          changeCartQty
+        onClose={() => setPage("pos")}
 
-        }
+      />
 
-        onIncreaseQty={
+    );
 
-          increaseQty
+  }
 
-        }
+  if (page === "stock") {
 
-        onDecreaseQty={
+    return (
+<StockManager
 
-          decreaseQty
+        products={products}
 
-        }
+        inventory={inventory}
 
-        onRemoveItem={
+        onAddStock={addStock}
 
-          removeItem
-
-        }
-
-        onCompleteSale={
-
-          completeSale
-
-        }
+        onClose={() => setPage("pos")}
 
       />
 
@@ -1049,72 +649,530 @@ item.id,
 
   return (
 <>
-<div className="app-shell">
-<Sidebar
+<div className="app">
+<main className="product-panel">
+<header className="main-header">
+<h1>Dadboy POS</h1>
+<div className="header-buttons">
 
-          currentPage={
+              {ownerMode ? (
+<>
+<button
 
-            page
+                    className="product-menu-button"
 
-          }
+                    type="button"
 
-          ownerMode={
+                    onClick={() =>
 
-            ownerMode
+                      setPage("dashboard")
 
-          }
+                    }
+>
 
-          onChangePage={
+                    Dashboard
+</button>
+<button
 
-            setPage
+                    className="product-menu-button"
 
-          }
+                    type="button"
 
-          onOwnerLogin={() =>
+                    onClick={() =>
 
-            setLoginOpen(
+                      setPage("reports")
 
-              true
+                    }
+>
 
-            )
+                    รายงาน
+</button>
+<button
 
-          }
+                    className="product-menu-button"
 
-          onOwnerLogout={
+                    type="button"
 
-            exitOwnerMode
+                    onClick={() =>
 
-          }
+                      setPage("products")
 
-        />
-<div className="app-content">
+                    }
+>
 
-          {renderPage()}
+                    จัดการสินค้า
+</button>
+<button
+
+                    className="stock-menu-button"
+
+                    type="button"
+
+                    onClick={() =>
+
+                      setPage("stock")
+
+                    }
+>
+
+                    รับสินค้าเข้า
+</button>
+<button
+
+                    className="remove-button"
+
+                    type="button"
+
+                    onClick={exitOwnerMode}
+>
+
+                    ออกจากโหมดเจ้าของ
+</button>
+</>
+
+              ) : (
+<>
+<button
+
+                    className="stock-menu-button"
+
+                    type="button"
+
+                    onClick={() =>
+
+                      setPage("stock")
+
+                    }
+>
+
+                    รับสินค้าเข้า
+</button>
+<button
+
+                    className="product-menu-button"
+
+                    type="button"
+
+                    onClick={() =>
+
+                      setLoginOpen(true)
+
+                    }
+>
+
+                    โหมดเจ้าของร้าน
+</button>
+</>
+
+              )}
 </div>
+</header>
+<input
+
+            className="search-input"
+
+            type="search"
+
+            placeholder="ค้นหาสินค้า..."
+
+            value={searchText}
+
+            onChange={(event) =>
+
+              setSearchText(event.target.value)
+
+            }
+
+          />
+<div className="product-grid">
+
+            {filteredProducts.map((product) => {
+
+              const normalPrice =
+
+                product.options?.find(
+
+                  (option) =>
+option.id === "normal"
+
+                )?.price ??
+
+                product.options?.[0]?.price ??
+
+                product.price;
+
+              const stock = getStock(product.id);
+
+              return (
+<article
+
+                  className="product-card"
+
+                  key={product.id}
+>
+<div className="product-image-box">
+
+                    {product.image ? (
+<img
+
+                        className="product-image"
+
+                        src={product.image}
+
+                        alt={product.name}
+
+                      />
+
+                    ) : (
+<span>ไม่มีรูป</span>
+
+                    )}
+</div>
+<div className="product-name">
+
+                    {product.name}
+</div>
+<div className="product-price">
+
+                    {normalPrice} บาท
+</div>
+<div
+
+                    className={
+
+                      stock < 0
+
+                        ? "stock-text stock-negative"
+
+                        : "stock-text"
+
+                    }
+>
+
+                    คงเหลือ {stock}
+</div>
+<button
+
+                    className="add-button"
+
+                    type="button"
+
+                    onClick={() =>
+
+                      openProduct(product)
+
+                    }
+>
+
+                    เพิ่ม
+</button>
+</article>
+
+              );
+
+            })}
+</div>
+</main>
+<aside className="cart-panel">
+<div className="cart-header">
+<h2>🛒 ตะกร้า</h2>
+<span className="cart-badge">
+
+              {totalQty}
+</span>
+</div>
+<div className="cart-list">
+
+            {cart.length === 0 ? (
+<p className="empty-cart">
+
+                ยังไม่มีสินค้า
+</p>
+
+            ) : (
+
+              cart.map((item, index) => (
+<div
+
+                  className="cart-item"
+
+                  key={`${item.id}-${item.option}`}
+>
+<div className="cart-item-header">
+<div>
+<strong>{item.name}</strong>
+<div className="cart-option">
+
+                        {item.option} ·{" "}
+
+                        {item.price} บาท
+</div>
+</div>
+<button
+
+                      className="remove-button"
+
+                      type="button"
+
+                      onClick={() =>
+
+                        removeItem(index)
+
+                      }
+>
+
+                      ลบ
+</button>
+</div>
+<div className="cart-item-bottom">
+<div className="quantity-controls">
+<button
+
+                        type="button"
+
+                        onClick={() =>
+
+                          decreaseQty(index)
+
+                        }
+>
+
+                        −
+</button>
+<input
+
+                        className="quantity-input"
+
+                        type="number"
+
+                        min="1"
+
+                        value={item.qty}
+
+                        onChange={(event) =>
+
+                          changeCartQty(
+
+                            index,
+
+                            event.target.value
+
+                          )
+
+                        }
+
+                      />
+<button
+
+                        type="button"
+
+                        onClick={() =>
+
+                          increaseQty(index)
+
+                        }
+>
+
+                        +
+</button>
+</div>
+<strong>
+
+                      {item.price * item.qty} บาท
+</strong>
+</div>
+</div>
+
+              ))
+
+            )}
+</div>
+<div className="grand-total">
+<span>รวมทั้งหมด</span>
+<span>{total} บาท</span>
+</div>
+<button
+
+            className="pay-button"
+
+            type="button"
+
+            disabled={cart.length === 0}
+
+            onClick={completeSale}
+>
+
+            คิดเงิน
+</button>
+</aside>
+
+        {selectedProduct && selectedOption && (
+<div
+
+            className="popup-overlay"
+
+            onClick={closePopup}
+>
+<div
+
+              className="popup"
+
+              onClick={(event) =>
+
+                event.stopPropagation()
+
+              }
+>
+<h2>{selectedProduct.name}</h2>
+<div className="option-list">
+
+                {selectedProduct.options.map(
+
+                  (option) => (
+<label
+
+                      className={
+selectedOption.id === option.id
+
+                          ? "option-button selected-option"
+
+                          : "option-button"
+
+                      }
+
+                      key={option.id}
+>
+<span>
+<input
+
+                          type="radio"
+
+                          name="product-option"
+
+                          checked={
+selectedOption.id === option.id
+
+                          }
+
+                          onChange={() =>
+
+                            setSelectedOption(option)
+
+                          }
+
+                        />
+
+                        {" "}
+
+                        {option.name}
+</span>
+<strong>
+
+                        {option.price} บาท
+</strong>
+</label>
+
+                  )
+
+                )}
+</div>
+<div className="popup-quantity">
+<button
+
+                  type="button"
+
+                  onClick={() =>
+
+                    setPopupQty((qty) =>
+
+                      Math.max(1, Number(qty) - 1)
+
+                    )
+
+                  }
+>
+
+                  −
+</button>
+<input
+
+                  className="quantity-input"
+
+                  type="number"
+
+                  min="1"
+
+                  value={popupQty}
+
+                  onChange={(event) =>
+
+                    setPopupQty(
+
+                      Math.max(
+
+                        1,
+
+                        Number(event.target.value) || 1
+
+                      )
+
+                    )
+
+                  }
+
+                />
+<button
+
+                  type="button"
+
+                  onClick={() =>
+
+                    setPopupQty((qty) =>
+
+                      Number(qty) + 1
+
+                    )
+
+                  }
+>
+
+                  +
+</button>
+</div>
+<button
+
+                className="pay-button"
+
+                type="button"
+
+                onClick={confirmPopup}
+>
+
+                เพิ่มลงตะกร้า
+</button>
+<button
+
+                className="cancel-button"
+
+                type="button"
+
+                onClick={closePopup}
+>
+
+                ยกเลิก
+</button>
+</div>
+</div>
+
+        )}
 </div>
 <OwnerLogin
 
-        open={
+        open={loginOpen}
 
-          loginOpen
+        onSuccess={enterOwnerMode}
 
-        }
-
-        onSuccess={
-
-          enterOwnerMode
-
-        }
-
-        onClose={() =>
-
-          setLoginOpen(
-
-            false
-
-          )
-
-        }
+        onClose={() => setLoginOpen(false)}
 
       />
 </>

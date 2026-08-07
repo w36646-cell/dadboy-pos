@@ -1,0 +1,714 @@
+.db-page {
+
+  min-height: 100vh;
+
+  padding: 18px;
+
+  background: #f5f6f8;
+
+  color: #222;
+
+}
+
+.db-header {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 16px;
+
+}
+
+.db-header h1 {
+
+  margin: 0;
+
+  font-size: 28px;
+
+}
+
+.db-header p {
+
+  margin: 4px 0 0;
+
+  color: #777;
+
+}
+
+.db-header-right {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+}
+
+.db-date {
+
+  padding: 8px 12px;
+
+  border-radius: 10px;
+
+  background: white;
+
+  font-size: 13px;
+
+}
+
+.db-live {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 7px 10px;
+
+  border-radius: 20px;
+
+  background: white;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+}
+
+.db-live span {
+
+  width: 8px;
+
+  height: 8px;
+
+  border-radius: 50%;
+
+  background: #16a34a;
+
+}
+
+.db-summary-grid {
+
+  display: grid;
+
+  grid-template-columns:
+
+    repeat(4, minmax(0, 1fr));
+
+  gap: 12px;
+
+  margin-bottom: 12px;
+
+}
+
+.db-card {
+
+  padding: 18px;
+
+  border-radius: 15px;
+
+  background: white;
+
+  box-shadow:
+
+    0 2px 10px
+
+    rgba(0, 0, 0, 0.06);
+
+}
+
+.db-card span {
+
+  display: block;
+
+  color: #777;
+
+  font-size: 13px;
+
+}
+
+.db-card strong {
+
+  display: block;
+
+  margin: 7px 0;
+
+  font-size: 25px;
+
+}
+
+.db-card small {
+
+  font-size: 11px;
+
+  color: #777;
+
+}
+
+.db-up {
+
+  color: #16803c !important;
+
+}
+
+.db-down {
+
+  color: #c62828 !important;
+
+}
+
+.db-danger {
+
+  color: #c62828;
+
+}
+
+.db-kpi-grid {
+
+  display: grid;
+
+  grid-template-columns:
+
+    repeat(4, minmax(0, 1fr));
+
+  gap: 10px;
+
+  margin-bottom: 14px;
+
+}
+
+.db-kpi {
+
+  min-width: 0;
+
+  padding: 13px 15px;
+
+  border-radius: 12px;
+
+  background: white;
+
+}
+
+.db-kpi span,
+
+.db-kpi small {
+
+  display: block;
+
+}
+
+.db-kpi span {
+
+  color: #777;
+
+  font-size: 12px;
+
+}
+
+.db-kpi strong {
+
+  display: block;
+
+  margin: 5px 0 3px;
+
+  overflow: hidden;
+
+  font-size: 17px;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+}
+
+.db-kpi small {
+
+  color: #888;
+
+  font-size: 10px;
+
+}
+
+.db-main-grid {
+
+  display: grid;
+
+  grid-template-columns:
+
+    1.4fr 1fr;
+
+  gap: 14px;
+
+}
+
+.db-box {
+
+  padding: 17px;
+
+  border-radius: 15px;
+
+  background: white;
+
+  box-shadow:
+
+    0 2px 10px
+
+    rgba(0, 0, 0, 0.06);
+
+}
+
+.db-box-title {
+
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 12px;
+
+}
+
+.db-box-title h2 {
+
+  margin: 0;
+
+  font-size: 18px;
+
+}
+
+.db-box-title p {
+
+  margin: 4px 0 0;
+
+  color: #888;
+
+  font-size: 12px;
+
+}
+
+.db-empty {
+
+  padding: 25px;
+
+  text-align: center;
+
+  color: #888;
+
+}
+
+.db-ranking {
+
+  display: grid;
+
+  grid-template-columns:
+
+    38px minmax(0, 1fr) auto;
+
+  gap: 9px;
+
+  align-items: center;
+
+  padding: 9px 0;
+
+  border-bottom:
+
+    1px solid #eee;
+
+}
+
+.db-ranking:last-child {
+
+  border-bottom: 0;
+
+}
+
+.db-rank {
+
+  width: 30px;
+
+  height: 30px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #eee;
+
+  font-weight: 800;
+
+}
+
+.db-product {
+
+  min-width: 0;
+
+}
+
+.db-product strong,
+
+.db-product span,
+
+.db-product-value strong,
+
+.db-product-value span {
+
+  display: block;
+
+}
+
+.db-product strong {
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+}
+
+.db-product span,
+
+.db-product-value span {
+
+  margin-top: 2px;
+
+  color: #888;
+
+  font-size: 11px;
+
+}
+
+.db-product-value {
+
+  text-align: right;
+
+}
+
+.db-low-stock {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 10px 0;
+
+  border-bottom:
+
+    1px solid #eee;
+
+}
+
+.db-low-stock:last-child {
+
+  border-bottom: 0;
+
+}
+
+.db-low-stock span {
+
+  min-width: 38px;
+
+  padding: 5px 8px;
+
+  border-radius: 20px;
+
+  background: #fff3cd;
+
+  text-align: center;
+
+  font-weight: 800;
+
+}
+
+.db-low-stock span.negative {
+
+  background: #ffebee;
+
+  color: #c62828;
+
+}
+
+.db-hourly {
+
+  margin-top: 14px;
+
+}
+
+.db-hourly-list {
+
+  display: grid;
+
+  gap: 7px;
+
+}
+
+.db-hour-row {
+
+  display: grid;
+
+  grid-template-columns:
+
+    50px minmax(0, 1fr) 70px;
+
+  gap: 8px;
+
+  align-items: center;
+
+  font-size: 11px;
+
+}
+
+.db-hour-track {
+
+  height: 11px;
+
+  overflow: hidden;
+
+  border-radius: 20px;
+
+  background: #eee;
+
+}
+
+.db-hour-bar {
+
+  height: 100%;
+
+  border-radius: 20px;
+
+  background: #333;
+
+  transition: width 0.3s ease;
+
+}
+
+.db-hour-row strong {
+
+  text-align: right;
+
+}
+
+.db-chart-grid {
+
+  display: grid;
+
+  grid-template-columns:
+
+    repeat(2, minmax(0, 1fr));
+
+  gap: 14px;
+
+  margin-top: 14px;
+
+}
+
+.db-seven-chart {
+
+  height: 220px;
+
+  display: grid;
+
+  grid-template-columns:
+
+    repeat(7, minmax(0, 1fr));
+
+  gap: 7px;
+
+}
+
+.db-day {
+
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-rows:
+
+    minmax(0, 1fr) auto auto;
+
+  gap: 3px;
+
+  text-align: center;
+
+}
+
+.db-day-area {
+
+  display: flex;
+
+  align-items: flex-end;
+
+  justify-content: center;
+
+  overflow: hidden;
+
+  border-radius: 7px;
+
+  background: #f1f1f1;
+
+}
+
+.db-day-bar {
+
+  width: 65%;
+
+  border-radius:
+
+    5px 5px 0 0;
+
+  background: #333;
+
+  transition: height 0.3s ease;
+
+}
+
+.db-day-bar.profit {
+
+  background: #666;
+
+}
+
+.db-day strong {
+
+  overflow: hidden;
+
+  font-size: 10px;
+
+  text-overflow: ellipsis;
+
+}
+
+.db-day span {
+
+  color: #777;
+
+  font-size: 10px;
+
+}
+
+@media (max-width: 950px) {
+
+  .db-summary-grid,
+
+  .db-kpi-grid {
+
+    grid-template-columns:
+
+      repeat(2, minmax(0, 1fr));
+
+  }
+
+  .db-main-grid,
+
+  .db-chart-grid {
+
+    grid-template-columns: 1fr;
+
+  }
+
+}
+
+@media (max-width: 520px) {
+
+  .db-page {
+
+    padding: 10px;
+
+  }
+
+  .db-header {
+
+    align-items: flex-start;
+
+  }
+
+  .db-header h1 {
+
+    font-size: 22px;
+
+  }
+
+  .db-date {
+
+    display: none;
+
+  }
+
+  .db-summary-grid {
+
+    gap: 7px;
+
+  }
+
+  .db-card {
+
+    padding: 12px;
+
+  }
+
+  .db-card strong {
+
+    font-size: 18px;
+
+  }
+
+  .db-kpi-grid {
+
+    gap: 7px;
+
+  }
+
+  .db-kpi {
+
+    padding: 10px;
+
+  }
+
+  .db-kpi strong {
+
+    font-size: 14px;
+
+  }
+
+  .db-box {
+
+    padding: 12px;
+
+  }
+
+  .db-seven-chart {
+
+    height: 180px;
+
+    gap: 4px;
+
+  }
+
+  .db-hour-row {
+
+    grid-template-columns:
+
+      44px minmax(0, 1fr) 55px;
+
+  }
+
+}
+ 
