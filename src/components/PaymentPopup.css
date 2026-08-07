@@ -1,0 +1,130 @@
+.payment-overlay {
+
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 2000;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 16px;
+
+  background: rgba(0, 0, 0, 0.45);
+
+}
+
+.payment-popup {
+
+  width: min(420px, 100%);
+
+  padding: 22px;
+
+  border-radius: 18px;
+
+  background: #fff;
+
+  box-shadow:
+
+    0 20px 50px
+
+    rgba(0, 0, 0, 0.2);
+
+  text-align: center;
+
+}
+
+.payment-title {
+
+  font-size: 20px;
+
+  font-weight: 800;
+
+}
+
+.payment-total-label {
+
+  margin-top: 20px;
+
+  color: #777;
+
+  font-size: 13px;
+
+}
+
+.payment-total {
+
+  margin-top: 5px;
+
+  font-size: 38px;
+
+  font-weight: 900;
+
+  line-height: 1.1;
+
+}
+
+.payment-confirm-button {
+
+  width: 100%;
+
+  min-height: 52px;
+
+  margin-top: 24px;
+
+  border: 0;
+
+  border-radius: 12px;
+
+  background: #222;
+
+  color: #fff;
+
+  font-size: 17px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+}
+
+.payment-cancel-button {
+
+  width: 100%;
+
+  min-height: 46px;
+
+  margin-top: 8px;
+
+  border: 0;
+
+  border-radius: 12px;
+
+  background: #ededed;
+
+  color: #333;
+
+  cursor: pointer;
+
+}
+
+@media (max-width: 520px) {
+
+  .payment-popup {
+
+    padding: 18px;
+
+  }
+
+  .payment-total {
+
+    font-size: 32px;
+
+  }
+
+}
+ 

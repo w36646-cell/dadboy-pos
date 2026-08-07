@@ -10,6 +10,8 @@ import OwnerLogin from "./components/OwnerLogin";
 
 import OwnerSidebar from "./components/OwnerSidebar";
 
+import PaymentPopup from "./components/PaymentPopup";
+
 import DashboardPage from "./pages/DashboardPage";
 
 import ReportPage from "./pages/ReportPage";
@@ -17,6 +19,8 @@ import ReportPage from "./pages/ReportPage";
 import BillsPage from "./pages/BillsPage";
 
 import "./styles/App.css";
+
+import "./components/PaymentPopup.css";
 
 const STOCK_KEY = "dadboy_inventory_v2";
 
@@ -127,6 +131,10 @@ function App() {
     useState(false);
 
   const [loginOpen, setLoginOpen] =
+
+    useState(false);
+
+  const [paymentOpen, setPaymentOpen] =
 
     useState(false);
 
@@ -686,9 +694,29 @@ option.id === "normal"
 
     );
 
+  function openPayment() {
+
+    if (cart.length === 0) {
+
+      return;
+
+    }
+
+    setPaymentOpen(true);
+
+  }
+
+  function closePayment() {
+
+    setPaymentOpen(false);
+
+  }
+
   function completeSale() {
 
     if (cart.length === 0) {
+
+      setPaymentOpen(false);
 
       return;
 
@@ -893,9 +921,11 @@ item.id,
 
     setCart([]);
 
+    setPaymentOpen(false);
+
     window.alert(
 
-      `บันทึกบิลสำเร็จ\nยอดรวม ${total} บาท`
+      `ขายสำเร็จ\nยอดรวม ${total} บาท`
 
     );
 
@@ -1277,7 +1307,7 @@ product.id
 
             onClick={
 
-              completeSale
+              openPayment
 
             }
 >
@@ -1631,11 +1661,7 @@ option.id
 
         products={products}
 
-        inventory={
-
-          inventory
-
-        }
+        inventory={inventory}
 
         onAddStock={
 
@@ -1701,6 +1727,25 @@ option.id
         onClose={() =>
 
           setLoginOpen(false)
+
+        }
+
+      />
+<PaymentPopup
+
+        open={paymentOpen}
+
+        total={total}
+
+        onConfirm={
+
+          completeSale
+
+        }
+
+        onClose={
+
+          closePayment
 
         }
 
