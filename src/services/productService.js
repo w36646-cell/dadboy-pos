@@ -248,6 +248,130 @@ export async function uploadProductsToCloud(
 
 }
 
+export async function updateCloudStock(
+
+  productId,
+
+  stock
+
+) {
+
+  const safeStock =
+
+    Number(stock);
+
+  if (
+
+    !Number.isFinite(
+
+      safeStock
+
+    )
+
+  ) {
+
+    throw new Error(
+
+      "Invalid stock value"
+
+    );
+
+  }
+
+  const { data, error } =
+
+    await supabase
+
+      .from("products")
+
+      .update({
+
+        stock: safeStock,
+
+      })
+
+      .eq(
+
+        "id",
+
+        String(productId)
+
+      )
+
+      .select()
+
+      .single();
+
+  if (error) {
+
+    throw error;
+
+  }
+
+  return fromDatabase(data);
+
+}
+
+export async function updateManyCloudStocks(
+
+  inventory
+
+) {
+
+  const entries =
+
+    Object.entries(
+
+      inventory || {}
+
+    );
+
+  if (
+
+    entries.length === 0
+
+  ) {
+
+    return [];
+
+  }
+
+  const results = [];
+
+  for (
+
+    const [
+
+      productId,
+
+      stock,
+
+    ] of entries
+
+  ) {
+
+    const updated =
+
+      await updateCloudStock(
+
+        productId,
+
+        stock
+
+      );
+
+    results.push(
+
+      updated
+
+    );
+
+  }
+
+  return results;
+
+}
+
 export async function deleteCloudProduct(
 
   productId

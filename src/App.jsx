@@ -36,6 +36,10 @@ import {
 
   uploadProductsToCloud,
 
+  updateCloudStock,
+
+  updateManyCloudStocks,
+
 } from "./services/productService";
 
 import "./styles/App.css";
@@ -53,6 +57,10 @@ const SALES_KEY =
 const PRODUCTS_KEY =
 
   "dadboy_products_v1";
+
+const PENDING_STOCK_KEY =
+
+  "dadboy_pending_stock_sync_v1";
 
 function readStorage(
 
@@ -152,6 +160,34 @@ function loadInventory(
 
 }
 
+function inventoryFromProducts(
+
+  productList
+
+) {
+
+  const result = {};
+
+  productList.forEach(
+
+    (product) => {
+
+      result[product.id] =
+
+        Number(
+
+          product.stock ?? 0
+
+        );
+
+    }
+
+  );
+
+  return result;
+
+}
+
 function App() {
 
   const initialProducts =
@@ -230,9 +266,51 @@ function App() {
 
     let cancelled = false;
 
-    async function startCloudProducts() {
+    async function startCloud() {
 
       try {
+
+        /*
+
+          ถ้าครั้งก่อน Cloud sync ไม่สำเร็จ
+
+          ให้ลองส่ง Stock ในเครื่องขึ้น Cloud ก่อน
+
+        */
+
+        const hasPendingStock =
+
+          localStorage.getItem(
+
+            PENDING_STOCK_KEY
+
+          ) === "1";
+
+        if (hasPendingStock) {
+
+          const localInventory =
+
+            readStorage(
+
+              STOCK_KEY,
+
+              {}
+
+            );
+
+          await updateManyCloudStocks(
+
+            localInventory
+
+          );
+
+          localStorage.removeItem(
+
+            PENDING_STOCK_KEY
+
+          );
+
+        }
 
         const cloudProducts =
 
@@ -243,6 +321,12 @@ function App() {
           return;
 
         }
+
+        /*
+
+          Cloud มีสินค้าอยู่แล้ว
+
+        */
 
         if (
 
@@ -256,9 +340,23 @@ function App() {
 
         ) {
 
+          const cloudInventory =
+
+            inventoryFromProducts(
+
+              cloudProducts
+
+            );
+
           setProducts(
 
             cloudProducts
+
+          );
+
+          setInventory(
+
+            cloudInventory
 
           );
 
@@ -274,103 +372,145 @@ function App() {
 
           );
 
+          localStorage.setItem(
+
+            STOCK_KEY,
+
+            JSON.stringify(
+
+              cloudInventory
+
+            )
+
+          );
+
+          setCloudReady(true);
+
           console.log(
 
-            "Supabase: โหลดสินค้าจาก Cloud สำเร็จ",
+            "Supabase: Products + Stock โหลดสำเร็จ",
 
             cloudProducts.length
 
           );
 
-        } else {
-
-          const uploaded =
-
-            await uploadProductsToCloud(
-
-              initialProducts,
-
-              inventory
-
-            );
-
-          if (cancelled) {
-
-            return;
-
-          }
-
-          if (
-
-            Array.isArray(
-
-              uploaded
-
-            ) &&
-
-            uploaded.length > 0
-
-          ) {
-
-            setProducts(
-
-              uploaded
-
-            );
-
-            localStorage.setItem(
-
-              PRODUCTS_KEY,
-
-              JSON.stringify(
-
-                uploaded
-
-              )
-
-            );
-
-          }
-
-          console.log(
-
-            "Supabase: อัปโหลดสินค้าขึ้น Cloud ครั้งแรกสำเร็จ",
-
-            uploaded.length
-
-          );
+          return;
 
         }
 
+        /*
+
+          Cloud ยังว่าง
+
+          ส่งข้อมูลในเครื่องขึ้นครั้งแรก
+
+        */
+
+        const localInventory =
+
+          readStorage(
+
+            STOCK_KEY,
+
+            inventory
+
+          );
+
+        const uploaded =
+
+          await uploadProductsToCloud(
+
+            initialProducts,
+
+            localInventory
+
+          );
+
+        if (cancelled) {
+
+          return;
+
+        }
+
+        const uploadedInventory =
+
+          inventoryFromProducts(
+
+            uploaded
+
+          );
+
+        setProducts(
+
+          uploaded
+
+        );
+
+        setInventory(
+
+          uploadedInventory
+
+        );
+
+        localStorage.setItem(
+
+          PRODUCTS_KEY,
+
+          JSON.stringify(
+
+            uploaded
+
+          )
+
+        );
+
+        localStorage.setItem(
+
+          STOCK_KEY,
+
+          JSON.stringify(
+
+            uploadedInventory
+
+          )
+
+        );
+
         setCloudReady(true);
+
+        console.log(
+
+          "Supabase: อัปโหลด Products + Stock ครั้งแรกสำเร็จ",
+
+          uploaded.length
+
+        );
 
       } catch (error) {
 
         console.error(
 
-          "Supabase products error:",
+          "Supabase startup error:",
 
           error
 
         );
 
-        setCloudReady(false);
-
         /*
 
           ถ้า Cloud มีปัญหา
 
-          POS ยังใช้ LocalStorage ต่อได้
-
-          จึงไม่ทำให้หน้าขายหยุดทำงาน
+          โปรแกรมยังใช้ข้อมูลในเครื่องได้
 
         */
+
+        setCloudReady(false);
 
       }
 
     }
 
-    startCloudProducts();
+    startCloud();
 
     return () => {
 
@@ -430,14 +570,6 @@ updatedProduct.id
 
       );
 
-    /*
-
-      บันทึก LocalStorage ก่อน
-
-      เพื่อให้หน้าเว็บตอบสนองทันที
-
-    */
-
     saveProducts(
 
       newProducts
@@ -485,6 +617,8 @@ cloudProduct.id
 
       );
 
+      setCloudReady(true);
+
       console.log(
 
         "Supabase: บันทึกสินค้าสำเร็จ",
@@ -493,25 +627,15 @@ cloudProduct.id
 
       );
 
-      setCloudReady(true);
-
     } catch (error) {
 
       console.error(
 
-        "บันทึกสินค้าเข้า Supabase ไม่สำเร็จ:",
+        "Supabase save product error:",
 
         error
 
       );
-
-      /*
-
-        คืนค่าเดิม ถ้า Cloud บันทึกไม่สำเร็จ
-
-        ป้องกัน Local กับ Cloud ไม่ตรงกัน
-
-      */
 
       saveProducts(
 
@@ -519,31 +643,23 @@ cloudProduct.id
 
       );
 
+      setCloudReady(false);
+
       window.alert(
 
         "บันทึกสินค้าเข้า Cloud ไม่สำเร็จ\nข้อมูลถูกคืนค่าเดิมแล้ว"
 
       );
 
-      throw error;
-
     }
 
   }
 
-  function saveInventory(
+  function saveInventoryLocal(
 
     newInventory
 
   ) {
-
-    /*
-
-      ตอนนี้ Stock ยังใช้ LocalStorage
-
-      เราจะย้ายไป Cloud ในขั้นถัดไป
-
-    */
 
     setInventory(
 
@@ -577,13 +693,135 @@ cloudProduct.id
 
         productId
 
-      ] ?? 50
+      ] ?? 0
 
     );
 
   }
 
-  function addStock(
+  async function syncOneStock(
+
+    productId,
+
+    stock
+
+  ) {
+
+    try {
+
+      await updateCloudStock(
+
+        productId,
+
+        stock
+
+      );
+
+      setCloudReady(true);
+
+      console.log(
+
+        "Supabase: Stock updated",
+
+        productId,
+
+        stock
+
+      );
+
+      return true;
+
+    } catch (error) {
+
+      console.error(
+
+        "Supabase stock error:",
+
+        error
+
+      );
+
+      localStorage.setItem(
+
+        PENDING_STOCK_KEY,
+
+        "1"
+
+      );
+
+      setCloudReady(false);
+
+      return false;
+
+    }
+
+  }
+
+  async function syncAllStocks(
+
+    newInventory
+
+  ) {
+
+    try {
+
+      await updateManyCloudStocks(
+
+        newInventory
+
+      );
+
+      localStorage.removeItem(
+
+        PENDING_STOCK_KEY
+
+      );
+
+      setCloudReady(true);
+
+      console.log(
+
+        "Supabase: Stock ทั้งหมด sync สำเร็จ"
+
+      );
+
+      return true;
+
+    } catch (error) {
+
+      console.error(
+
+        "Supabase many stocks error:",
+
+        error
+
+      );
+
+      /*
+
+        บอกระบบว่ามี Stock รอ sync
+
+        รอบเปิดโปรแกรมครั้งถัดไปจะลองใหม่
+
+      */
+
+      localStorage.setItem(
+
+        PENDING_STOCK_KEY,
+
+        "1"
+
+      );
+
+      setCloudReady(false);
+
+      return false;
+
+    }
+
+  }
+
+  async function addStock(
 
     productId,
 
@@ -611,21 +849,57 @@ cloudProduct.id
 
     }
 
-    saveInventory({
+    const newStock =
+
+      getStock(
+
+        productId
+
+      ) + safeQty;
+
+    const newInventory = {
 
       ...inventory,
 
       [productId]:
 
-        getStock(
+        newStock,
 
-          productId
+    };
 
-        ) +
+    /*
 
-        safeQty,
+      บันทึกเครื่องก่อน
 
-    });
+      เพื่อให้หน้าจอเปลี่ยนทันที
+
+    */
+
+    saveInventoryLocal(
+
+      newInventory
+
+    );
+
+    const synced =
+
+      await syncOneStock(
+
+        productId,
+
+        newStock
+
+      );
+
+    if (!synced) {
+
+      window.alert(
+
+        "รับสินค้าเข้าแล้วในเครื่อง\nแต่ Cloud ยัง Sync ไม่สำเร็จ ระบบจะลองใหม่ภายหลัง"
+
+      );
+
+    }
 
   }
 
@@ -1036,7 +1310,7 @@ product.id,
 
   }
 
-  function completeSale() {
+  async function completeSale() {
 
     if (
 
@@ -1114,7 +1388,7 @@ item.id
 
               productId
 
-            ] ?? 50
+            ] ?? 0
 
           ) -
 
@@ -1285,6 +1559,14 @@ item.id,
 
       );
 
+    /*
+
+      บิลตอนนี้ยังเก็บ LocalStorage
+
+      Sales Cloud เราจะทำเป็นขั้นถัดไป
+
+    */
+
     localStorage.setItem(
 
       SALES_KEY,
@@ -1299,11 +1581,31 @@ item.id,
 
     );
 
-    saveInventory(
+    /*
+
+      ลด Stock ในเครื่องทันที
+
+    */
+
+    saveInventoryLocal(
 
       newInventory
 
     );
+
+    /*
+
+      ส่ง Stock ใหม่ขึ้น Supabase
+
+    */
+
+    const cloudSynced =
+
+      await syncAllStocks(
+
+        newInventory
+
+      );
 
     setCart([]);
 
@@ -1313,11 +1615,23 @@ item.id,
 
     );
 
-    window.alert(
+    if (cloudSynced) {
 
-      `ขายสำเร็จ\nเลขบิล ${sale.billId}\nยอดรวม ${total.toLocaleString()} บาท`
+      window.alert(
 
-    );
+        `ขายสำเร็จ\nเลขบิล ${sale.billId}\nยอดรวม ${total.toLocaleString()} บาท\nStock บันทึก Cloud แล้ว`
+
+      );
+
+    } else {
+
+      window.alert(
+
+        `ขายสำเร็จ\nเลขบิล ${sale.billId}\nยอดรวม ${total.toLocaleString()} บาท\n\nStock บันทึกในเครื่องแล้ว แต่ Cloud ยัง Sync ไม่สำเร็จ`
+
+      );
+
+    }
 
   }
 
