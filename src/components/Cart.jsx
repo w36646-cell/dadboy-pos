@@ -1,70 +1,94 @@
-function Cart({ cart, total }) {
+function Cart({
+
+  cart,
+
+  total,
+
+  increaseQty,
+
+  decreaseQty,
+
+  removeItem,
+
+}) {
 
   return (
-
-    <div className="cart">
-
-      <h2>ตะกร้าสินค้า</h2>
+<aside className="cart">
+<h2>🛒 ตะกร้าสินค้า</h2>
 
       {cart.length === 0 ? (
-
-        <p>ยังไม่มีสินค้า</p>
+<p className="empty-cart">ยังไม่มีสินค้า</p>
 
       ) : (
 
         cart.map((item, index) => (
+<div className="cart-item" key={`${item.id}-${item.option}`}>
+<div className="cart-info">
+<div className="cart-name">{item.name}</div>
+<div className="cart-option">{item.option}</div>
+<div className="cart-unit-price">
 
-          <div
-            key={index}
-            className="cart-item"
-          >
+                ราคา {item.price} บาท
+</div>
+</div>
+<div className="cart-controls">
+<button
 
-            <div className="cart-info">
+                className="qty-button"
 
-              <div className="cart-name">
+                onClick={() => decreaseQty(index)}
+>
 
-                {item.name}
+                −
+</button>
+<span className="cart-quantity">{item.qty}</span>
+<button
 
-              </div>
+                className="qty-button"
 
-              <div className="cart-option">
+                onClick={() => increaseQty(index)}
+>
 
-                {item.option}
-
-              </div>
-
-            </div>
-
-            <div className="cart-qty">
-
-              x{item.qty}
-
-            </div>
-
-            <div className="cart-price">
+                +
+</button>
+</div>
+<div className="cart-item-total">
 
               {item.price * item.qty} บาท
+</div>
+<button
 
-            </div>
+              className="remove-button"
 
-          </div>
+              onClick={() => removeItem(index)}
+>
+
+              ลบ
+</button>
+</div>
 
         ))
 
       )}
+<hr />
+<div className="grand-total">
+<span>รวมทั้งหมด</span>
+<span>{total} บาท</span>
+</div>
+<button
 
-      <hr />
+        className="pay-btn"
 
-      <h3>
+        disabled={cart.length === 0}
+>
 
-        รวม {total} บาท
-
-      </h3>
-
-    </div>
+        คิดเงิน
+</button>
+</aside>
 
   );
 
 }
 
 export default Cart;
+ 

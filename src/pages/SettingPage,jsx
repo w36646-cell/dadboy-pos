@@ -1,0 +1,14 @@
+function SettingsPage() {
+
+  return (
+<div className="page">
+<h1>ตั้งค่า</h1>
+<p>Coming Soon...</p>
+</div>
+
+  );
+
+}
+
+export default SettingsPage;
+ 

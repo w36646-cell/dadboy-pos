@@ -1,0 +1,1232 @@
+import {
+
+  useEffect,
+
+  useMemo,
+
+  useState,
+
+} from "react";
+
+import products from "./data/products";
+
+import StockManager from "./components/StockManager";
+
+import "./styles/App.css";
+
+const STOCK_KEY = "dadboy_inventory_v2";
+
+const SALES_KEY = "dadboy_sales_v1";
+
+function createInitialInventory() {
+
+  const result = {};
+
+  products.forEach((product) => {
+
+    result[product.id] = Number(
+
+      product.stock ?? 50
+
+    );
+
+  });
+
+  return result;
+
+}
+
+function loadInventory() {
+
+  try {
+
+    const saved =
+
+      localStorage.getItem(STOCK_KEY);
+
+    if (saved) {
+
+      return JSON.parse(saved);
+
+    }
+
+  } catch (error) {
+
+    console.error(
+
+      "โหลดสต๊อกไม่สำเร็จ",
+
+      error
+
+    );
+
+  }
+
+  return createInitialInventory();
+
+}
+
+function loadSales() {
+
+  try {
+
+    return JSON.parse(
+
+      localStorage.getItem(SALES_KEY) ||
+
+        "[]"
+
+    );
+
+  } catch (error) {
+
+    console.error(
+
+      "โหลดยอดขายไม่สำเร็จ",
+
+      error
+
+    );
+
+    return [];
+
+  }
+
+}
+
+function App() {
+
+  const [page, setPage] = useState("pos");
+
+  const [cart, setCart] = useState([]);
+
+  const [inventory, setInventory] =
+
+    useState(loadInventory);
+
+  const [searchText, setSearchText] =
+
+    useState("");
+
+  const [
+
+    selectedProduct,
+
+    setSelectedProduct,
+
+  ] = useState(null);
+
+  const [
+
+    selectedOption,
+
+    setSelectedOption,
+
+  ] = useState(null);
+
+  const [popupQty, setPopupQty] =
+
+    useState(1);
+
+  useEffect(() => {
+
+    localStorage.setItem(
+
+      STOCK_KEY,
+
+      JSON.stringify(inventory)
+
+    );
+
+  }, [inventory]);
+
+  const filteredProducts = useMemo(() => {
+
+    const keyword = searchText
+
+      .trim()
+
+      .toLowerCase();
+
+    if (!keyword) {
+
+      return products;
+
+    }
+
+    return products.filter((product) =>
+
+      product.name
+
+        .toLowerCase()
+
+        .includes(keyword)
+
+    );
+
+  }, [searchText]);
+
+  function getStock(productId) {
+
+    return Number(
+
+      inventory[productId] ?? 50
+
+    );
+
+  }
+
+  function addToCart(
+
+    product,
+
+    option,
+
+    quantity = 1
+
+  ) {
+
+    const safeQty = Math.max(
+
+      1,
+
+      Number(quantity) || 1
+
+    );
+
+    setCart((currentCart) => {
+
+      const found = currentCart.find(
+
+        (item) =>
+item.id === product.id &&
+
+          item.option === option.name
+
+      );
+
+      if (found) {
+
+        return currentCart.map((item) =>
+item.id === product.id &&
+
+          item.option === option.name
+
+            ? {
+
+                ...item,
+
+                qty:
+
+                  item.qty + safeQty,
+
+              }
+
+            : item
+
+        );
+
+      }
+
+      return [
+
+        ...currentCart,
+
+        {
+
+          id: product.id,
+
+          name: product.name,
+
+          option: option.name,
+
+          price: Number(option.price),
+
+          qty: safeQty,
+
+        },
+
+      ];
+
+    });
+
+  }
+
+  function openProduct(product) {
+
+    const hasOption =
+
+      product.hasOption === true ||
+
+      product.hasOptions === true;
+
+    if (
+
+      !hasOption ||
+
+      !product.options?.length
+
+    ) {
+
+      addToCart(product, {
+
+        name: "ปกติ",
+
+        price: product.price,
+
+      });
+
+      return;
+
+    }
+
+    const normalOption =
+
+      product.options.find(
+
+        (option) =>
+option.id === "normal"
+
+      ) || product.options[0];
+
+    setSelectedProduct(product);
+
+    setSelectedOption(normalOption);
+
+    setPopupQty(1);
+
+  }
+
+  function closePopup() {
+
+    setSelectedProduct(null);
+
+    setSelectedOption(null);
+
+    setPopupQty(1);
+
+  }
+
+  function confirmPopup() {
+
+    if (
+
+      !selectedProduct ||
+
+      !selectedOption
+
+    ) {
+
+      return;
+
+    }
+
+    addToCart(
+
+      selectedProduct,
+
+      selectedOption,
+
+      popupQty
+
+    );
+
+    closePopup();
+
+  }
+
+  function changeCartQty(
+
+    index,
+
+    newQuantity
+
+  ) {
+
+    const safeQty = Math.max(
+
+      1,
+
+      Number(newQuantity) || 1
+
+    );
+
+    setCart((currentCart) =>
+
+      currentCart.map(
+
+        (item, itemIndex) =>
+
+          itemIndex === index
+
+            ? {
+
+                ...item,
+
+                qty: safeQty,
+
+              }
+
+            : item
+
+      )
+
+    );
+
+  }
+
+  function increaseQty(index) {
+
+    setCart((currentCart) =>
+
+      currentCart.map(
+
+        (item, itemIndex) =>
+
+          itemIndex === index
+
+            ? {
+
+                ...item,
+
+                qty: item.qty + 1,
+
+              }
+
+            : item
+
+      )
+
+    );
+
+  }
+
+  function decreaseQty(index) {
+
+    setCart((currentCart) =>
+
+      currentCart
+
+        .map((item, itemIndex) =>
+
+          itemIndex === index
+
+            ? {
+
+                ...item,
+
+                qty: item.qty - 1,
+
+              }
+
+            : item
+
+        )
+
+        .filter(
+
+          (item) => item.qty > 0
+
+        )
+
+    );
+
+  }
+
+  function removeItem(index) {
+
+    setCart((currentCart) =>
+
+      currentCart.filter(
+
+        (_, itemIndex) =>
+
+          itemIndex !== index
+
+      )
+
+    );
+
+  }
+
+  function addStock(
+
+    productId,
+
+    quantity
+
+  ) {
+
+    const safeQty = Number(quantity);
+
+    if (
+
+      !Number.isFinite(safeQty) ||
+
+      safeQty <= 0
+
+    ) {
+
+      return;
+
+    }
+
+    setInventory(
+
+      (currentInventory) => ({
+
+        ...currentInventory,
+
+        [productId]:
+
+          Number(
+
+            currentInventory[
+
+              productId
+
+            ] ?? 50
+
+          ) + safeQty,
+
+      })
+
+    );
+
+  }
+
+  const totalQty = cart.reduce(
+
+    (sum, item) =>
+
+      sum + item.qty,
+
+    0
+
+  );
+
+  const total = cart.reduce(
+
+    (sum, item) =>
+
+      sum +
+
+      item.price * item.qty,
+
+    0
+
+  );
+
+  function completeSale() {
+
+    if (cart.length === 0) {
+
+      return;
+
+    }
+
+    const soldByProduct = {};
+
+    cart.forEach((item) => {
+
+      soldByProduct[item.id] =
+
+        (soldByProduct[item.id] ||
+
+          0) + item.qty;
+
+    });
+
+    const newInventory = {
+
+      ...inventory,
+
+    };
+
+    Object.entries(
+
+      soldByProduct
+
+    ).forEach(
+
+      ([productId, quantity]) => {
+
+        const oldStock = Number(
+
+          newInventory[productId] ??
+
+            50
+
+        );
+
+        newInventory[productId] =
+
+          oldStock -
+
+          Number(quantity);
+
+      }
+
+    );
+
+    const now = new Date();
+
+    const sale = {
+
+      billId: `DB-${now.getTime()}`,
+
+      soldAt: now.toISOString(),
+
+      soldDate:
+
+        now.toLocaleDateString(
+
+          "en-CA"
+
+        ),
+
+      soldTime:
+
+        now.toLocaleTimeString(
+
+          "th-TH"
+
+        ),
+
+      totalQty,
+
+      totalAmount: total,
+
+      items: cart.map((item) => ({
+
+        productId: item.id,
+
+        productName: item.name,
+
+        option: item.option,
+
+        unitPrice: item.price,
+
+        quantity: item.qty,
+
+        lineTotal:
+
+          item.price * item.qty,
+
+      })),
+
+    };
+
+    const oldSales = loadSales();
+
+    localStorage.setItem(
+
+      SALES_KEY,
+
+      JSON.stringify([
+
+        ...oldSales,
+
+        sale,
+
+      ])
+
+    );
+
+    setInventory(newInventory);
+
+    setCart([]);
+
+    window.alert(
+
+      `บันทึกบิลสำเร็จ\nยอดรวม ${total} บาท`
+
+    );
+
+  }
+
+  if (page === "stock") {
+
+    return (
+<StockManager
+
+        products={products}
+
+        inventory={inventory}
+
+        onAddStock={addStock}
+
+        onClose={() => setPage("pos")}
+
+      />
+
+    );
+
+  }
+
+  return (
+<div className="app">
+<main className="product-panel">
+<header className="main-header">
+<div>
+<h1>Dadboy POS</h1>
+</div>
+<button
+
+            className="stock-menu-button"
+
+            type="button"
+
+            onClick={() =>
+
+              setPage("stock")
+
+            }
+>
+
+            จัดการสต๊อก
+</button>
+</header>
+<input
+
+          className="search-input"
+
+          type="search"
+
+          placeholder="ค้นหาสินค้า..."
+
+          value={searchText}
+
+          onChange={(event) =>
+
+            setSearchText(
+
+              event.target.value
+
+            )
+
+          }
+
+        />
+<div className="product-grid">
+
+          {filteredProducts.map(
+
+            (product) => {
+
+              const normalPrice =
+
+                product.options?.find(
+
+                  (option) =>
+option.id ===
+
+                    "normal"
+
+                )?.price ??
+
+                product.options?.[0]
+
+                  ?.price ??
+
+                product.price;
+
+              const stock =
+
+                getStock(product.id);
+
+              const isNegative =
+
+                stock < 0;
+
+              return (
+<article
+
+                  className="product-card"
+
+                  key={product.id}
+>
+<div className="product-image-box">
+
+                    {product.image ? (
+<img
+
+                        className="product-image"
+
+                        src={
+
+                          product.image
+
+                        }
+
+                        alt={
+
+                          product.name
+
+                        }
+
+                        onError={(
+
+                          event
+
+                        ) => {
+
+                          event.currentTarget.style.display =
+
+                            "none";
+
+                        }}
+
+                      />
+
+                    ) : (
+<span>
+
+                        ไม่มีรูป
+</span>
+
+                    )}
+</div>
+<div className="product-name">
+
+                    {product.name}
+</div>
+<div className="product-price">
+
+                    {normalPrice} บาท
+</div>
+<div
+
+                    className={
+
+                      isNegative
+
+                        ? "stock-text stock-negative"
+
+                        : "stock-text"
+
+                    }
+>
+
+                    คงเหลือ {stock}
+</div>
+<button
+
+                    className="add-button"
+
+                    type="button"
+
+                    onClick={() =>
+
+                      openProduct(
+
+                        product
+
+                      )
+
+                    }
+>
+
+                    เพิ่ม
+</button>
+</article>
+
+              );
+
+            }
+
+          )}
+</div>
+</main>
+<aside className="cart-panel">
+<div className="cart-header">
+<h2>🛒 ตะกร้า</h2>
+<span className="cart-badge">
+
+            {totalQty}
+</span>
+</div>
+<div className="cart-list">
+
+          {cart.length === 0 ? (
+<p className="empty-cart">
+
+              ยังไม่มีสินค้า
+</p>
+
+          ) : (
+
+            cart.map(
+
+              (item, index) => (
+<div
+
+                  className="cart-item"
+
+                  key={`${item.id}-${item.option}`}
+>
+<div className="cart-item-header">
+<div>
+<strong>
+
+                        {item.name}
+</strong>
+<div className="cart-option">
+
+                        {item.option}
+
+                        {" · "}
+
+                        {item.price} บาท
+</div>
+</div>
+<button
+
+                      className="remove-button"
+
+                      type="button"
+
+                      onClick={() =>
+
+                        removeItem(
+
+                          index
+
+                        )
+
+                      }
+>
+
+                      ลบ
+</button>
+</div>
+<div className="cart-item-bottom">
+<div className="quantity-controls">
+<button
+
+                        type="button"
+
+                        onClick={() =>
+
+                          decreaseQty(
+
+                            index
+
+                          )
+
+                        }
+>
+
+                        −
+</button>
+<input
+
+                        className="quantity-input"
+
+                        type="number"
+
+                        min="1"
+
+                        value={item.qty}
+
+                        onChange={(
+
+                          event
+
+                        ) =>
+
+                          changeCartQty(
+
+                            index,
+
+                            event.target
+
+                              .value
+
+                          )
+
+                        }
+
+                      />
+<button
+
+                        type="button"
+
+                        onClick={() =>
+
+                          increaseQty(
+
+                            index
+
+                          )
+
+                        }
+>
+
+                        +
+</button>
+</div>
+<strong>
+
+                      {item.price *
+
+                        item.qty}{" "}
+
+                      บาท
+</strong>
+</div>
+</div>
+
+              )
+
+            )
+
+          )}
+</div>
+<div className="grand-total">
+<span>รวมทั้งหมด</span>
+<span>{total} บาท</span>
+</div>
+<button
+
+          className="pay-button"
+
+          type="button"
+
+          disabled={
+
+            cart.length === 0
+
+          }
+
+          onClick={completeSale}
+>
+
+          คิดเงิน
+</button>
+</aside>
+
+      {selectedProduct &&
+
+        selectedOption && (
+<div
+
+            className="popup-overlay"
+
+            onClick={closePopup}
+>
+<div
+
+              className="popup"
+
+              onClick={(event) =>
+
+                event.stopPropagation()
+
+              }
+>
+<h2>
+
+                {selectedProduct.name}
+</h2>
+<p>
+
+                กดเพิ่มได้เลยสำหรับ
+
+                ราคาปกติ
+</p>
+<div className="option-list">
+
+                {selectedProduct.options.map(
+
+                  (option) => (
+<label
+
+                      className={
+selectedOption.id ===
+option.id
+
+                          ? "option-button selected-option"
+
+                          : "option-button"
+
+                      }
+
+                      key={option.id}
+>
+<span>
+<input
+
+                          type="radio"
+
+                          name="product-option"
+
+                          checked={
+selectedOption.id ===
+option.id
+
+                          }
+
+                          onChange={() =>
+
+                            setSelectedOption(
+
+                              option
+
+                            )
+
+                          }
+
+                        />
+
+                        {" "}
+
+                        {option.name}
+</span>
+<strong>
+
+                        {option.price}{" "}
+
+                        บาท
+</strong>
+</label>
+
+                  )
+
+                )}
+</div>
+<div className="popup-quantity">
+<button
+
+                  type="button"
+
+                  onClick={() =>
+
+                    setPopupQty(
+
+                      (qty) =>
+
+                        Math.max(
+
+                          1,
+
+                          Number(qty) -
+
+                            1
+
+                        )
+
+                    )
+
+                  }
+>
+
+                  −
+</button>
+<input
+
+                  className="quantity-input"
+
+                  type="number"
+
+                  min="1"
+
+                  value={popupQty}
+
+                  onChange={(event) =>
+
+                    setPopupQty(
+
+                      Math.max(
+
+                        1,
+
+                        Number(
+
+                          event.target
+
+                            .value
+
+                        ) || 1
+
+                      )
+
+                    )
+
+                  }
+
+                  autoFocus
+
+                />
+<button
+
+                  type="button"
+
+                  onClick={() =>
+
+                    setPopupQty(
+
+                      (qty) =>
+
+                        Number(qty) +
+
+                        1
+
+                    )
+
+                  }
+>
+
+                  +
+</button>
+</div>
+<div className="popup-total">
+
+                รวม{" "}
+
+                {selectedOption.price *
+
+                  popupQty}{" "}
+
+                บาท
+</div>
+<button
+
+                className="pay-button"
+
+                type="button"
+
+                onClick={
+
+                  confirmPopup
+
+                }
+>
+
+                เพิ่มลงตะกร้า
+</button>
+<button
+
+                className="cancel-button"
+
+                type="button"
+
+                onClick={closePopup}
+>
+
+                ยกเลิก
+</button>
+</div>
+</div>
+
+        )}
+</div>
+
+  );
+
+}
+
+export default App;
+Product.id — Every product has an identity
+Verifiable identity for the physical world. Product.id is a working draft of one durable ID for every physical product — provenance, authenticity, ownership, and lifecycle.
+ 
