@@ -1,4 +1,10 @@
-import { useState } from "react";
+import {
+
+  useEffect,
+
+  useState,
+
+} from "react";
 
 import defaultProducts from "./data/products";
 
@@ -21,6 +27,16 @@ import ReportPage from "./pages/ReportPage";
 import BillsPage from "./pages/BillsPage";
 
 import createBillId from "./utils/createBillId";
+
+import {
+
+  getCloudProducts,
+
+  saveCloudProduct,
+
+  uploadProductsToCloud,
+
+} from "./services/productService";
 
 import "./styles/App.css";
 
@@ -50,11 +66,7 @@ function readStorage(
 
     const saved =
 
-      localStorage.getItem(
-
-        key
-
-      );
+      localStorage.getItem(key);
 
     return saved
 
@@ -82,11 +94,7 @@ function loadProducts() {
 
     );
 
-  return Array.isArray(
-
-    saved
-
-  )
+  return Array.isArray(saved)
 
     ? saved
 
@@ -114,9 +122,7 @@ function loadInventory(
 
     saved &&
 
-    typeof saved ===
-
-      "object"
+    typeof saved === "object"
 
   ) {
 
@@ -130,16 +136,13 @@ function loadInventory(
 
     (product) => {
 
-      result[
-product.id
+      result[product.id] =
 
-      ] = Number(
+        Number(
 
-        product.stock ??
+          product.stock ?? 50
 
-          50
-
-      );
+        );
 
     }
 
@@ -215,6 +218,168 @@ function App() {
 
   ] = useState(false);
 
+  const [
+
+    cloudReady,
+
+    setCloudReady,
+
+  ] = useState(false);
+
+  useEffect(() => {
+
+    let cancelled = false;
+
+    async function startCloudProducts() {
+
+      try {
+
+        const cloudProducts =
+
+          await getCloudProducts();
+
+        if (cancelled) {
+
+          return;
+
+        }
+
+        if (
+
+          Array.isArray(
+
+            cloudProducts
+
+          ) &&
+
+          cloudProducts.length > 0
+
+        ) {
+
+          setProducts(
+
+            cloudProducts
+
+          );
+
+          localStorage.setItem(
+
+            PRODUCTS_KEY,
+
+            JSON.stringify(
+
+              cloudProducts
+
+            )
+
+          );
+
+          console.log(
+
+            "Supabase: โหลดสินค้าจาก Cloud สำเร็จ",
+
+            cloudProducts.length
+
+          );
+
+        } else {
+
+          const uploaded =
+
+            await uploadProductsToCloud(
+
+              initialProducts,
+
+              inventory
+
+            );
+
+          if (cancelled) {
+
+            return;
+
+          }
+
+          if (
+
+            Array.isArray(
+
+              uploaded
+
+            ) &&
+
+            uploaded.length > 0
+
+          ) {
+
+            setProducts(
+
+              uploaded
+
+            );
+
+            localStorage.setItem(
+
+              PRODUCTS_KEY,
+
+              JSON.stringify(
+
+                uploaded
+
+              )
+
+            );
+
+          }
+
+          console.log(
+
+            "Supabase: อัปโหลดสินค้าขึ้น Cloud ครั้งแรกสำเร็จ",
+
+            uploaded.length
+
+          );
+
+        }
+
+        setCloudReady(true);
+
+      } catch (error) {
+
+        console.error(
+
+          "Supabase products error:",
+
+          error
+
+        );
+
+        setCloudReady(false);
+
+        /*
+
+          ถ้า Cloud มีปัญหา
+
+          POS ยังใช้ LocalStorage ต่อได้
+
+          จึงไม่ทำให้หน้าขายหยุดทำงาน
+
+        */
+
+      }
+
+    }
+
+    startCloudProducts();
+
+    return () => {
+
+      cancelled = true;
+
+    };
+
+  }, []);
+
   function saveProducts(
 
     newProducts
@@ -241,11 +406,15 @@ function App() {
 
   }
 
-  function saveProduct(
+  async function saveProduct(
 
     updatedProduct
 
   ) {
+
+    const oldProducts =
+
+      products;
 
     const newProducts =
 
@@ -261,11 +430,104 @@ updatedProduct.id
 
       );
 
+    /*
+
+      บันทึก LocalStorage ก่อน
+
+      เพื่อให้หน้าเว็บตอบสนองทันที
+
+    */
+
     saveProducts(
 
       newProducts
 
     );
+
+    try {
+
+      const cloudProduct =
+
+        await saveCloudProduct(
+
+          updatedProduct,
+
+          inventory[
+updatedProduct.id
+
+          ]
+
+        );
+
+      const syncedProducts =
+
+        newProducts.map(
+
+          (product) =>
+product.id ===
+cloudProduct.id
+
+              ? {
+
+                  ...product,
+
+                  ...cloudProduct,
+
+                }
+
+              : product
+
+        );
+
+      saveProducts(
+
+        syncedProducts
+
+      );
+
+      console.log(
+
+        "Supabase: บันทึกสินค้าสำเร็จ",
+
+        cloudProduct.name
+
+      );
+
+      setCloudReady(true);
+
+    } catch (error) {
+
+      console.error(
+
+        "บันทึกสินค้าเข้า Supabase ไม่สำเร็จ:",
+
+        error
+
+      );
+
+      /*
+
+        คืนค่าเดิม ถ้า Cloud บันทึกไม่สำเร็จ
+
+        ป้องกัน Local กับ Cloud ไม่ตรงกัน
+
+      */
+
+      saveProducts(
+
+        oldProducts
+
+      );
+
+      window.alert(
+
+        "บันทึกสินค้าเข้า Cloud ไม่สำเร็จ\nข้อมูลถูกคืนค่าเดิมแล้ว"
+
+      );
+
+      throw error;
+
+    }
 
   }
 
@@ -274,6 +536,14 @@ updatedProduct.id
     newInventory
 
   ) {
+
+    /*
+
+      ตอนนี้ Stock ยังใช้ LocalStorage
+
+      เราจะย้ายไป Cloud ในขั้นถัดไป
+
+    */
 
     setInventory(
 
@@ -351,7 +621,9 @@ updatedProduct.id
 
           productId
 
-        ) + safeQty,
+        ) +
+
+        safeQty,
 
     });
 
@@ -451,7 +723,11 @@ product.id &&
 
                     qty:
 
-                      item.qty +
+                      Number(
+
+                        item.qty
+
+                      ) +
 
                       safeQty,
 
@@ -1293,7 +1569,13 @@ item.id,
 </h1>
 <p>
 
-            เราจะทำหน้านี้ต่อ
+            Cloud:{" "}
+
+            {cloudReady
+
+              ? "เชื่อมต่อแล้ว"
+
+              : "กำลังใช้ข้อมูลสำรองในเครื่อง"}
 </p>
 </div>
 
