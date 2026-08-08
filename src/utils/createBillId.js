@@ -1,146 +1,176 @@
-const SALES_KEY = "dadboy_sales_v1";
-
-function readSales() {
-
-  try {
-
-    const saved =
-
-      localStorage.getItem(SALES_KEY);
-
-    return saved
-
-      ? JSON.parse(saved)
-
-      : [];
-
-  } catch {
-
-    return [];
-
-  }
-
-}
-
 function pad2(number) {
 
-  return String(number).padStart(2, "0");
+  return String(number).padStart(
+
+    2,
+
+    "0"
+
+  );
 
 }
 
 function createDateCode(date) {
 
-  const year = String(
+  const year =
 
-    date.getFullYear()
+    String(
 
-  ).slice(-2);
+      date.getFullYear()
 
-  const month = pad2(
+    ).slice(-2);
 
-    date.getMonth() + 1
+  const month =
 
-  );
+    pad2(
 
-  const day = pad2(
+      date.getMonth() + 1
 
-    date.getDate()
+    );
 
-  );
+  const day =
+
+    pad2(
+
+      date.getDate()
+
+    );
 
   return `${year}${month}${day}`;
 
 }
 
+function createTimeCode(date) {
+
+  const hour =
+
+    pad2(
+
+      date.getHours()
+
+    );
+
+  const minute =
+
+    pad2(
+
+      date.getMinutes()
+
+    );
+
+  const second =
+
+    pad2(
+
+      date.getSeconds()
+
+    );
+
+  return `${hour}${minute}${second}`;
+
+}
+
+function createRandomCode() {
+
+  /*
+
+    ใช้ crypto ถ้า Browser รองรับ
+
+    เพื่อให้หลายเครื่องสร้างเลขบิล
+
+    พร้อมกันแล้วไม่ชนกัน
+
+  */
+
+  if (
+
+    typeof crypto !==
+
+      "undefined" &&
+
+    typeof crypto.getRandomValues ===
+
+      "function"
+
+  ) {
+
+    const values =
+
+      new Uint32Array(1);
+
+    crypto.getRandomValues(
+
+      values
+
+    );
+
+    return values[0]
+
+      .toString(36)
+
+      .toUpperCase()
+
+      .slice(-3)
+
+      .padStart(
+
+        3,
+
+        "0"
+
+      );
+
+  }
+
+  /*
+
+    fallback สำหรับ Browser เก่า
+
+  */
+
+  return Math.random()
+
+    .toString(36)
+
+    .slice(2, 5)
+
+    .toUpperCase()
+
+    .padEnd(
+
+      3,
+
+      "0"
+
+    );
+
+}
+
 function createBillId() {
 
-  const now = new Date();
+  const now =
+
+    new Date();
 
   const dateCode =
 
     createDateCode(now);
 
-  const prefix =
+  const timeCode =
 
-    `DB${dateCode}-`;
+    createTimeCode(now);
 
-  const sales =
+  const randomCode =
 
-    readSales();
-
-  const todayBills =
-
-    sales.filter(
-
-      (sale) =>
-
-        String(
-
-          sale.billId || ""
-
-        ).startsWith(prefix)
-
-    );
-
-  let highestNumber = 0;
-
-  todayBills.forEach(
-
-    (sale) => {
-
-      const numberPart =
-
-        String(
-
-          sale.billId
-
-        ).replace(
-
-          prefix,
-
-          ""
-
-        );
-
-      const number =
-
-        Number(numberPart);
-
-      if (
-
-        Number.isFinite(number) &&
-
-        number >
-
-          highestNumber
-
-      ) {
-
-        highestNumber =
-
-          number;
-
-      }
-
-    }
-
-  );
-
-  const nextNumber =
-
-    highestNumber + 1;
+    createRandomCode();
 
   return (
 
-    prefix +
+    `DB${dateCode}-` +
 
-    String(nextNumber).padStart(
+    `${timeCode}-` +
 
-      4,
-
-      "0"
-
-    )
+    randomCode
 
   );
 
