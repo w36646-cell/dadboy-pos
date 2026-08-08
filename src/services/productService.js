@@ -20,65 +20,138 @@ function fromDatabase(row) {
 
     id: normalizeId(row.id),
 
-    name: row.name || "",
+    name:
 
-    category: row.category || "",
+      row.name || "",
 
-    price: Number(row.price || 0),
+    category:
 
-    cost: Number(row.cost || 0),
+      row.category || "",
 
-    image: row.image || "",
+    price:
 
-    stock: Number(row.stock ?? 0),
+      Number(
 
-    minStock: Number(row.min_stock ?? 5),
+        row.price || 0
 
-    trackStock: row.track_stock !== false,
+      ),
 
-    hasOption: row.has_option === true,
+    cost:
 
-    options: Array.isArray(row.options)
+      Number(
 
-      ? row.options
+        row.cost || 0
 
-      : [],
+      ),
+
+    image:
+
+      row.image || "",
+
+    stock:
+
+      Number(
+
+        row.stock ?? 0
+
+      ),
+
+    minStock:
+
+      Number(
+
+        row.min_stock ?? 5
+
+      ),
+
+    trackStock:
+
+      row.track_stock !== false,
+
+    hasOption:
+
+      row.has_option === true,
+
+    options:
+
+      Array.isArray(
+
+        row.options
+
+      )
+
+        ? row.options
+
+        : [],
 
   };
 
 }
 
-function toDatabase(product, stock) {
+function toDatabase(
+
+  product,
+
+  stock
+
+) {
 
   return {
 
-    id: String(product.id),
+    id:
 
-    name: product.name || "",
+      String(
+product.id
 
-    category: product.category || "",
+      ),
 
-    price: Number(product.price || 0),
+    name:
 
-    cost: Number(product.cost || 0),
+      product.name || "",
 
-    image: product.image || "",
+    category:
 
-    stock: Number(
+      product.category || "",
 
-      stock ??
+    price:
 
-        product.stock ??
+      Number(
 
-        0
+        product.price || 0
 
-    ),
+      ),
 
-    min_stock: Number(
+    cost:
 
-      product.minStock ?? 5
+      Number(
 
-    ),
+        product.cost || 0
+
+      ),
+
+    image:
+
+      product.image || "",
+
+    stock:
+
+      Number(
+
+        stock ??
+
+          product.stock ??
+
+          0
+
+      ),
+
+    min_stock:
+
+      Number(
+
+        product.minStock ?? 5
+
+      ),
 
     track_stock:
 
@@ -90,11 +163,17 @@ function toDatabase(product, stock) {
 
       product.hasOptions === true,
 
-    options: Array.isArray(product.options)
+    options:
 
-      ? product.options
+      Array.isArray(
 
-      : [],
+        product.options
+
+      )
+
+        ? product.options
+
+        : [],
 
   };
 
@@ -102,7 +181,13 @@ function toDatabase(product, stock) {
 
 export async function getCloudProducts() {
 
-  const { data, error } =
+  const {
+
+    data,
+
+    error,
+
+  } =
 
     await supabase
 
@@ -118,7 +203,11 @@ export async function getCloudProducts() {
 
   }
 
-  return (data || []).map(
+  return (
+
+    data || []
+
+  ).map(
 
     fromDatabase
 
@@ -144,7 +233,13 @@ export async function saveCloudProduct(
 
     );
 
-  const { data, error } =
+  const {
+
+    data,
+
+    error,
+
+  } =
 
     await supabase
 
@@ -156,7 +251,9 @@ export async function saveCloudProduct(
 
         {
 
-          onConflict: "id",
+          onConflict:
+
+            "id",
 
         }
 
@@ -172,7 +269,11 @@ export async function saveCloudProduct(
 
   }
 
-  return fromDatabase(data);
+  return fromDatabase(
+
+    data
+
+  );
 
 }
 
@@ -186,7 +287,11 @@ export async function uploadProductsToCloud(
 
   if (
 
-    !Array.isArray(products) ||
+    !Array.isArray(
+
+      products
+
+    ) ||
 
     products.length === 0
 
@@ -198,23 +303,34 @@ export async function uploadProductsToCloud(
 
   const payload =
 
-    products.map((product) =>
+    products.map(
 
-      toDatabase(
+      (product) =>
 
-        product,
+        toDatabase(
 
-        inventory[product.id] ??
+          product,
 
-          product.stock ??
+          inventory[
+product.id
 
-          0
+          ] ??
 
-      )
+            product.stock ??
+
+            0
+
+        )
 
     );
 
-  const { data, error } =
+  const {
+
+    data,
+
+    error,
+
+  } =
 
     await supabase
 
@@ -226,7 +342,9 @@ export async function uploadProductsToCloud(
 
         {
 
-          onConflict: "id",
+          onConflict:
+
+            "id",
 
         }
 
@@ -240,7 +358,11 @@ export async function uploadProductsToCloud(
 
   }
 
-  return (data || []).map(
+  return (
+
+    data || []
+
+  ).map(
 
     fromDatabase
 
@@ -272,13 +394,23 @@ export async function updateCloudStock(
 
     throw new Error(
 
-      "Invalid stock value"
+      `Invalid stock value: ${stock}`
 
     );
 
   }
 
-  const { data, error } =
+  const id =
+
+    String(productId);
+
+  const {
+
+    data,
+
+    error,
+
+  } =
 
     await supabase
 
@@ -286,7 +418,9 @@ export async function updateCloudStock(
 
       .update({
 
-        stock: safeStock,
+        stock:
+
+          safeStock,
 
       })
 
@@ -294,13 +428,17 @@ export async function updateCloudStock(
 
         "id",
 
-        String(productId)
+        id
 
       )
 
-      .select()
+      .select(
 
-      .single();
+        "id, name, category, price, cost, image, stock, min_stock, track_stock, has_option, options"
+
+      )
+
+      .maybeSingle();
 
   if (error) {
 
@@ -308,7 +446,45 @@ export async function updateCloudStock(
 
   }
 
-  return fromDatabase(data);
+  if (!data) {
+
+    throw new Error(
+
+      `ไม่พบสินค้าที่ต้องการอัปเดต Stock: ${id}`
+
+    );
+
+  }
+
+  const actualStock =
+
+    Number(
+
+      data.stock ?? 0
+
+    );
+
+  if (
+
+    actualStock !==
+
+    safeStock
+
+  ) {
+
+    throw new Error(
+
+      `Stock update verification failed: ${id}, expected ${safeStock}, got ${actualStock}`
+
+    );
+
+  }
+
+  return fromDatabase(
+
+    data
+
+  );
 
 }
 
@@ -372,13 +548,485 @@ export async function updateManyCloudStocks(
 
 }
 
+export async function updateSoldCloudStocks(
+
+  soldByProduct,
+
+  inventory
+
+) {
+
+  const productIds =
+
+    Object.keys(
+
+      soldByProduct || {}
+
+    );
+
+  if (
+
+    productIds.length === 0
+
+  ) {
+
+    return [];
+
+  }
+
+  const jobs =
+
+    productIds.map(
+
+      (productId) => {
+
+        const stock =
+
+          Number(
+
+            inventory[
+
+              productId
+
+            ] ?? 0
+
+          );
+
+        return updateCloudStock(
+
+          productId,
+
+          stock
+
+        );
+
+      }
+
+    );
+
+  return Promise.all(
+
+    jobs
+
+  );
+
+}
+
+export async function restoreCloudStocksFromItems(
+
+  items
+
+) {
+
+  if (
+
+    !Array.isArray(
+
+      items
+
+    ) ||
+
+    items.length === 0
+
+  ) {
+
+    throw new Error(
+
+      "ไม่มีรายการสินค้าในบิลสำหรับคืน Stock"
+
+    );
+
+  }
+
+  /*
+
+    รวมจำนวนสินค้าในบิลตาม Product ID
+
+    เช่น สินค้าตัวเดียวกันมี 2 option
+
+    หรือมีหลายบรรทัดในบิล
+
+    จะรวมก่อนคืน Stock
+
+  */
+
+  const quantities =
+
+    {};
+
+  items.forEach(
+
+    (item) => {
+
+      if (
+
+        item?.productId ===
+
+          undefined ||
+
+        item?.productId ===
+
+          null
+
+      ) {
+
+        return;
+
+      }
+
+      const productId =
+
+        String(
+
+          item.productId
+
+        );
+
+      const quantity =
+
+        Number(
+
+          item.quantity || 0
+
+        );
+
+      if (
+
+        !Number.isFinite(
+
+          quantity
+
+        ) ||
+
+        quantity <= 0
+
+      ) {
+
+        return;
+
+      }
+
+      quantities[
+
+        productId
+
+      ] =
+
+        Number(
+
+          quantities[
+
+            productId
+
+          ] || 0
+
+        ) +
+
+        quantity;
+
+    }
+
+  );
+
+  const productIds =
+
+    Object.keys(
+
+      quantities
+
+    );
+
+  if (
+
+    productIds.length === 0
+
+  ) {
+
+    throw new Error(
+
+      "ไม่พบจำนวนสินค้าที่สามารถคืน Stock ได้"
+
+    );
+
+  }
+
+  const restoredInventory =
+
+    {};
+
+  /*
+
+    ทำทีละ Product
+
+    1. อ่าน Stock ล่าสุดจาก Cloud
+
+    2. บวกจำนวนคืน
+
+    3. Update
+
+    4. อ่านค่าที่ Supabase คืนมา
+
+    5. ตรวจสอบว่า Stock เปลี่ยนจริง
+
+  */
+
+  for (
+
+    const productId of
+
+    productIds
+
+  ) {
+
+    const returnQty =
+
+      Number(
+
+        quantities[
+
+          productId
+
+        ]
+
+      );
+
+    console.log(
+
+      "Restore stock start:",
+
+      {
+
+        productId,
+
+        returnQty,
+
+      }
+
+    );
+
+    const {
+
+      data: currentRow,
+
+      error: readError,
+
+    } =
+
+      await supabase
+
+        .from("products")
+
+        .select(
+
+          "id, stock"
+
+        )
+
+        .eq(
+
+          "id",
+
+          productId
+
+        )
+
+        .maybeSingle();
+
+    if (readError) {
+
+      throw readError;
+
+    }
+
+    if (!currentRow) {
+
+      throw new Error(
+
+        `ไม่พบสินค้าใน Cloud: ${productId}`
+
+      );
+
+    }
+
+    const currentStock =
+
+      Number(
+
+        currentRow.stock ??
+
+          0
+
+      );
+
+    if (
+
+      !Number.isFinite(
+
+        currentStock
+
+      )
+
+    ) {
+
+      throw new Error(
+
+        `Stock ปัจจุบันไม่ถูกต้อง: ${productId}`
+
+      );
+
+    }
+
+    const newStock =
+
+      currentStock +
+
+      returnQty;
+
+    console.log(
+
+      "Restore stock calculation:",
+
+      {
+
+        productId,
+
+        currentStock,
+
+        returnQty,
+
+        newStock,
+
+      }
+
+    );
+
+    const {
+
+      data: updatedRow,
+
+      error: updateError,
+
+    } =
+
+      await supabase
+
+        .from("products")
+
+        .update({
+
+          stock:
+
+            newStock,
+
+        })
+
+        .eq(
+
+          "id",
+
+          productId
+
+        )
+
+        .select(
+
+          "id, stock"
+
+        )
+
+        .maybeSingle();
+
+    if (updateError) {
+
+      throw updateError;
+
+    }
+
+    if (!updatedRow) {
+
+      throw new Error(
+
+        `คืน Stock ไม่สำเร็จ ไม่พบสินค้า: ${productId}`
+
+      );
+
+    }
+
+    const verifiedStock =
+
+      Number(
+
+        updatedRow.stock ??
+
+          0
+
+      );
+
+    if (
+
+      verifiedStock !==
+
+      newStock
+
+    ) {
+
+      throw new Error(
+
+        `คืน Stock ไม่สำเร็จ: ${productId}, ต้องเป็น ${newStock} แต่ Cloud เป็น ${verifiedStock}`
+
+      );
+
+    }
+
+    restoredInventory[
+
+      productId
+
+    ] =
+
+      verifiedStock;
+
+    console.log(
+
+      "Restore stock success:",
+
+      {
+
+        productId,
+
+        oldStock:
+
+          currentStock,
+
+        returned:
+
+          returnQty,
+
+        newStock:
+
+          verifiedStock,
+
+      }
+
+    );
+
+  }
+
+  return restoredInventory;
+
+}
+
 export async function deleteCloudProduct(
 
   productId
 
 ) {
 
-  const { error } =
+  const {
+
+    error,
+
+  } =
 
     await supabase
 
@@ -390,7 +1038,11 @@ export async function deleteCloudProduct(
 
         "id",
 
-        String(productId)
+        String(
+
+          productId
+
+        )
 
       );
 

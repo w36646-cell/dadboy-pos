@@ -1,16 +1,42 @@
-import { useMemo, useState } from "react";
+import {
+
+  useEffect,
+
+  useMemo,
+
+  useState,
+
+} from "react";
+
+import {
+
+  getCloudSales,
+
+} from "../services/salesService";
 
 import "./ReportPage.css";
 
-const SALES_KEY = "dadboy_sales_v1";
+const SALES_KEY =
+
+  "dadboy_sales_v1";
 
 function readSales() {
 
   try {
 
-    const saved = localStorage.getItem(SALES_KEY);
+    const saved =
 
-    return saved ? JSON.parse(saved) : [];
+      localStorage.getItem(
+
+        SALES_KEY
+
+      );
+
+    return saved
+
+      ? JSON.parse(saved)
+
+      : [];
 
   } catch {
 
@@ -20,185 +46,541 @@ function readSales() {
 
 }
 
-function dateKey(date) {
+function dateKey(
 
-  return date.toLocaleDateString("en-CA");
+  date
+
+) {
+
+  return date.toLocaleDateString(
+
+    "en-CA"
+
+  );
 
 }
 
 function ReportPage() {
 
-  const sales = readSales();
+  const [
 
-  const today = new Date();
+    sales,
 
-  const firstDay = new Date();
+    setSales,
 
-  firstDay.setDate(firstDay.getDate() - 6);
+  ] = useState([]);
 
-  const [startDate, setStartDate] = useState(
+  const [
 
-    dateKey(firstDay)
+    loading,
+
+    setLoading,
+
+  ] = useState(true);
+
+  const [
+
+    cloudError,
+
+    setCloudError,
+
+  ] = useState(false);
+
+  const today =
+
+    new Date();
+
+  const firstDay =
+
+    new Date();
+
+  firstDay.setDate(
+
+    firstDay.getDate() -
+
+      6
 
   );
 
-  const [endDate, setEndDate] = useState(
+  const [
 
-    dateKey(today)
+    startDate,
+
+    setStartDate,
+
+  ] = useState(
+
+    dateKey(
+
+      firstDay
+
+    )
 
   );
 
-  const filteredSales = useMemo(() => {
+  const [
 
-    return sales
+    endDate,
 
-      .filter((sale) => {
+    setEndDate,
 
-        if (!sale.soldDate) {
+  ] = useState(
 
-          return false;
+    dateKey(
 
-        }
+      today
 
-        return (
+    )
 
-          sale.soldDate >= startDate &&
+  );
 
-          sale.soldDate <= endDate
+  async function loadSales() {
 
-        );
+    setLoading(
 
-      })
-
-      .sort((a, b) =>
-
-        String(b.soldAt || "").localeCompare(
-
-          String(a.soldAt || "")
-
-        )
-
-      );
-
-  }, [sales, startDate, endDate]);
-
-  const summary = useMemo(() => {
-
-    return filteredSales.reduce(
-
-      (result, sale) => {
-
-        result.amount += Number(
-
-          sale.totalAmount || 0
-
-        );
-
-        result.cost += Number(
-
-          sale.totalCost || 0
-
-        );
-
-        result.profit += Number(
-
-          sale.totalProfit || 0
-
-        );
-
-        result.qty += Number(
-
-          sale.totalQty || 0
-
-        );
-
-        return result;
-
-      },
-
-      {
-
-        amount: 0,
-
-        cost: 0,
-
-        profit: 0,
-
-        qty: 0,
-
-      }
+      true
 
     );
 
-  }, [filteredSales]);
+    try {
 
-  const topProducts = useMemo(() => {
+      const cloudSales =
 
-    const result = {};
+        await getCloudSales();
 
-    filteredSales.forEach((sale) => {
+      /*
 
-      sale.items?.forEach((item) => {
+        ใช้ Cloud อย่างเดียว
 
-        const key = `${item.productId}-${item.option}`;
+        เมื่อโหลดสำเร็จ
 
-        if (!result[key]) {
+      */
 
-          result[key] = {
+      setSales(
 
-            name: item.productName,
+        Array.isArray(
 
-            option: item.option,
+          cloudSales
 
-            quantity: 0,
+        )
 
-            amount: 0,
+          ? cloudSales
 
-            profit: 0,
+          : []
 
-          };
+      );
+
+      setCloudError(
+
+        false
+
+      );
+
+      console.log(
+
+        "Report: ใช้ยอดขายจาก Supabase",
+
+        cloudSales.length
+
+      );
+
+    } catch (error) {
+
+      console.error(
+
+        "Report Cloud error:",
+
+        error
+
+      );
+
+      /*
+
+        fallback เฉพาะตอน Cloud ใช้ไม่ได้
+
+      */
+
+      const localSales =
+
+        readSales();
+
+      setSales(
+
+        Array.isArray(
+
+          localSales
+
+        )
+
+          ? localSales
+
+          : []
+
+      );
+
+      setCloudError(
+
+        true
+
+      );
+
+    } finally {
+
+      setLoading(
+
+        false
+
+      );
+
+    }
+
+  }
+
+  useEffect(() => {
+
+    loadSales();
+
+    function handleFocus() {
+
+      loadSales();
+
+    }
+
+    window.addEventListener(
+
+      "focus",
+
+      handleFocus
+
+    );
+
+    return () => {
+
+      window.removeEventListener(
+
+        "focus",
+
+        handleFocus
+
+      );
+
+    };
+
+  }, []);
+
+  const filteredSales =
+
+    useMemo(() => {
+
+      return sales
+
+        .filter(
+
+          (sale) => {
+
+            if (
+
+              !sale.soldDate
+
+            ) {
+
+              return false;
+
+            }
+
+            return (
+
+              sale.soldDate >=
+
+                startDate &&
+
+              sale.soldDate <=
+
+                endDate
+
+            );
+
+          }
+
+        )
+
+        .sort(
+
+          (
+
+            a,
+
+            b
+
+          ) =>
+
+            String(
+
+              b.soldAt ||
+
+                ""
+
+            ).localeCompare(
+
+              String(
+
+                a.soldAt ||
+
+                  ""
+
+              )
+
+            )
+
+        );
+
+    }, [
+
+      sales,
+
+      startDate,
+
+      endDate,
+
+    ]);
+
+  const summary =
+
+    useMemo(() => {
+
+      return filteredSales.reduce(
+
+        (
+
+          result,
+
+          sale
+
+        ) => {
+
+          result.amount +=
+
+            Number(
+
+              sale.totalAmount ||
+
+                0
+
+            );
+
+          result.cost +=
+
+            Number(
+
+              sale.totalCost ||
+
+                0
+
+            );
+
+          result.profit +=
+
+            Number(
+
+              sale.totalProfit ||
+
+                0
+
+            );
+
+          result.qty +=
+
+            Number(
+
+              sale.totalQty ||
+
+                0
+
+            );
+
+          return result;
+
+        },
+
+        {
+
+          amount:
+
+            0,
+
+          cost:
+
+            0,
+
+          profit:
+
+            0,
+
+          qty:
+
+            0,
 
         }
 
-        result[key].quantity += Number(
+      );
 
-          item.quantity || 0
+    }, [
 
-        );
+      filteredSales,
 
-        result[key].amount += Number(
+    ]);
 
-          item.lineTotal || 0
+  const topProducts =
 
-        );
+    useMemo(() => {
 
-        result[key].profit += Number(
+      const result =
 
-          item.lineProfit || 0
+        {};
 
-        );
+      filteredSales.forEach(
 
-      });
+        (sale) => {
 
-    });
+          sale.items?.forEach(
 
-    return Object.values(result)
+            (item) => {
 
-      .sort(
+              const key =
 
-        (a, b) =>
+                `${item.productId}-${item.option}`;
 
-          b.quantity - a.quantity
+              if (
+
+                !result[
+
+                  key
+
+                ]
+
+              ) {
+
+                result[
+
+                  key
+
+                ] = {
+
+                  name:
+
+                    item.productName,
+
+                  option:
+
+                    item.option,
+
+                  quantity:
+
+                    0,
+
+                  amount:
+
+                    0,
+
+                  profit:
+
+                    0,
+
+                };
+
+              }
+
+              result[
+
+                key
+
+              ].quantity +=
+
+                Number(
+
+                  item.quantity ||
+
+                    0
+
+                );
+
+              result[
+
+                key
+
+              ].amount +=
+
+                Number(
+
+                  item.lineTotal ||
+
+                    0
+
+                );
+
+              result[
+
+                key
+
+              ].profit +=
+
+                Number(
+
+                  item.lineProfit ||
+
+                    0
+
+                );
+
+            }
+
+          );
+
+        }
+
+      );
+
+      return Object.values(
+
+        result
 
       )
 
-      .slice(0, 10);
+        .sort(
 
-  }, [filteredSales]);
+          (
+
+            a,
+
+            b
+
+          ) =>
+
+            b.quantity -
+
+            a.quantity
+
+        )
+
+        .slice(
+
+          0,
+
+          10
+
+        );
+
+    }, [
+
+      filteredSales,
+
+    ]);
 
   const averageBill =
 
-    filteredSales.length > 0
+    filteredSales.length >
+
+    0
 
       ? summary.amount /
 
@@ -208,49 +590,105 @@ function ReportPage() {
 
   function setToday() {
 
-    const value = dateKey(new Date());
+    const value =
 
-    setStartDate(value);
+      dateKey(
 
-    setEndDate(value);
+        new Date()
+
+      );
+
+    setStartDate(
+
+      value
+
+    );
+
+    setEndDate(
+
+      value
+
+    );
 
   }
 
   function setLast7Days() {
 
-    const end = new Date();
+    const end =
 
-    const start = new Date();
+      new Date();
+
+    const start =
+
+      new Date();
 
     start.setDate(
 
-      start.getDate() - 6
+      start.getDate() -
+
+        6
 
     );
 
-    setStartDate(dateKey(start));
+    setStartDate(
 
-    setEndDate(dateKey(end));
+      dateKey(
+
+        start
+
+      )
+
+    );
+
+    setEndDate(
+
+      dateKey(
+
+        end
+
+      )
+
+    );
 
   }
 
   function setThisMonth() {
 
-    const now = new Date();
+    const now =
 
-    const start = new Date(
+      new Date();
 
-      now.getFullYear(),
+    const start =
 
-      now.getMonth(),
+      new Date(
 
-      1
+        now.getFullYear(),
+
+        now.getMonth(),
+
+        1
+
+      );
+
+    setStartDate(
+
+      dateKey(
+
+        start
+
+      )
 
     );
 
-    setStartDate(dateKey(start));
+    setEndDate(
 
-    setEndDate(dateKey(now));
+      dateKey(
+
+        now
+
+      )
+
+    );
 
   }
 
@@ -258,13 +696,55 @@ function ReportPage() {
 <div className="report-page">
 <header className="report-header">
 <div>
-<h1>รายงานการขาย</h1>
+<h1>
+
+            รายงานการขาย
+</h1>
 <p>
 
             เลือกช่วงวันที่ที่ต้องการดู
 </p>
 </div>
 </header>
+
+      {cloudError && (
+<div
+
+          style={{
+
+            marginBottom:
+
+              "12px",
+
+            padding:
+
+              "10px 14px",
+
+            borderRadius:
+
+              "10px",
+
+            background:
+
+              "#fff3cd",
+
+            color:
+
+              "#664d03",
+
+            fontSize:
+
+              "13px",
+
+          }}
+>
+
+          Cloud เชื่อมต่อไม่สำเร็จ
+
+          รายงานกำลังใช้ข้อมูลสำรองจากเครื่อง
+</div>
+
+      )}
 <section className="report-filter">
 <div className="report-date-box">
 <label>
@@ -275,13 +755,23 @@ function ReportPage() {
 
             type="date"
 
-            value={startDate}
+            value={
 
-            onChange={(event) =>
+              startDate
+
+            }
+
+            onChange={(
+
+              event
+
+            ) =>
 
               setStartDate(
 
-                event.target.value
+                event.target
+
+                  .value
 
               )
 
@@ -298,13 +788,23 @@ function ReportPage() {
 
             type="date"
 
-            value={endDate}
+            value={
 
-            onChange={(event) =>
+              endDate
+
+            }
+
+            onChange={(
+
+              event
+
+            ) =>
 
               setEndDate(
 
-                event.target.value
+                event.target
+
+                  .value
 
               )
 
@@ -317,7 +817,11 @@ function ReportPage() {
 
             type="button"
 
-            onClick={setToday}
+            onClick={
+
+              setToday
+
+            }
 >
 
             วันนี้
@@ -326,7 +830,11 @@ function ReportPage() {
 
             type="button"
 
-            onClick={setLast7Days}
+            onClick={
+
+              setLast7Days
+
+            }
 >
 
             7 วัน
@@ -335,84 +843,117 @@ function ReportPage() {
 
             type="button"
 
-            onClick={setThisMonth}
+            onClick={
+
+              setThisMonth
+
+            }
 >
 
             เดือนนี้
 </button>
 </div>
 </section>
+
+      {loading ? (
+<div className="report-empty">
+
+          กำลังโหลดข้อมูลจาก Cloud...
+</div>
+
+      ) : (
+<>
 <section className="report-summary-grid">
 <article className="report-summary-card">
 <span>
 
-            ยอดขาย
+                ยอดขาย
 </span>
 <strong>
 
-            {summary.amount.toLocaleString()} บาท
+                {summary.amount.toLocaleString()}{" "}
+
+                บาท
 </strong>
 </article>
 <article className="report-summary-card">
 <span>
 
-            ต้นทุน
+                ต้นทุน
 </span>
 <strong>
 
-            {summary.cost.toLocaleString()} บาท
+                {summary.cost.toLocaleString()}{" "}
+
+                บาท
 </strong>
 </article>
 <article className="report-summary-card">
 <span>
 
-            กำไร
+                กำไร
 </span>
 <strong>
 
-            {summary.profit.toLocaleString()} บาท
+                {summary.profit.toLocaleString()}{" "}
+
+                บาท
 </strong>
 </article>
 <article className="report-summary-card">
 <span>
 
-            จำนวนบิล
+                จำนวนบิล
 </span>
 <strong>
 
-            {filteredSales.length} บิล
+                {
+
+                  filteredSales.length
+
+                }{" "}
+
+                บิล
 </strong>
 </article>
 <article className="report-summary-card">
 <span>
 
-            จำนวนสินค้า
+                จำนวนสินค้า
 </span>
 <strong>
 
-            {summary.qty} ชิ้น
+                {
+
+                  summary.qty
+
+                }{" "}
+
+                ชิ้น
 </strong>
 </article>
 <article className="report-summary-card">
 <span>
 
-            เฉลี่ยต่อบิล
+                เฉลี่ยต่อบิล
 </span>
 <strong>
 
-            {averageBill.toLocaleString(
+                {averageBill.toLocaleString(
 
-              undefined,
+                  undefined,
 
-              {
+                  {
 
-                maximumFractionDigits: 0,
+                    maximumFractionDigits:
 
-              }
+                      0,
 
-            )}{" "}
+                  }
 
-            บาท
+                )}{" "}
+
+                บาท
 </strong>
 </article>
 </section>
@@ -420,150 +961,239 @@ function ReportPage() {
 <section className="report-box">
 <h2>
 
-            สินค้าขายดี
+                สินค้าขายดี
 </h2>
 
-          {topProducts.length === 0 ? (
+              {topProducts.length ===
+
+              0 ? (
 <div className="report-empty">
 
-              ไม่มีข้อมูล
+                  ไม่มีข้อมูล
 </div>
 
-          ) : (
+              ) : (
 <div className="report-table-wrap">
 <table className="report-table">
 <thead>
 <tr>
-<th>อันดับ</th>
-<th>สินค้า</th>
-<th>จำนวน</th>
-<th>ยอดขาย</th>
-<th>กำไร</th>
+<th>
+
+                          อันดับ
+</th>
+<th>
+
+                          สินค้า
+</th>
+<th>
+
+                          จำนวน
+</th>
+<th>
+
+                          ยอดขาย
+</th>
+<th>
+
+                          กำไร
+</th>
 </tr>
 </thead>
 <tbody>
 
-                  {topProducts.map(
+                      {topProducts.map(
 
-                    (item, index) => (
+                        (
+
+                          item,
+
+                          index
+
+                        ) => (
 <tr
 
-                        key={`${item.name}-${item.option}`}
+                            key={`${item.name}-${item.option}`}
 >
 <td>
 
-                          {index + 1}
+                              {index +
+
+                                1}
 </td>
 <td>
 <strong>
 
-                            {item.name}
+                                {
+
+                                  item.name
+
+                                }
 </strong>
 <small>
 
-                            {item.option}
+                                {
+
+                                  item.option
+
+                                }
 </small>
 </td>
 <td>
 
-                          {item.quantity}
+                              {
+
+                                item.quantity
+
+                              }
 </td>
 <td>
 
-                          {item.amount.toLocaleString()}
+                              {item.amount.toLocaleString()}
 </td>
 <td>
 
-                          {item.profit.toLocaleString()}
+                              {item.profit.toLocaleString()}
 </td>
 </tr>
 
-                    )
+                        )
 
-                  )}
+                      )}
 </tbody>
 </table>
 </div>
 
-          )}
+              )}
 </section>
 <section className="report-box">
 <h2>
 
-            บิลขาย
+                บิลขาย
 </h2>
 
-          {filteredSales.length === 0 ? (
+              {filteredSales.length ===
+
+              0 ? (
 <div className="report-empty">
 
-              ไม่มีบิลในช่วงวันที่นี้
+                  ไม่มีบิลในช่วงวันที่นี้
 </div>
 
-          ) : (
+              ) : (
 <div className="report-table-wrap">
 <table className="report-table">
 <thead>
 <tr>
-<th>วันที่</th>
-<th>เวลา</th>
-<th>สินค้า</th>
-<th>ยอดขาย</th>
-<th>กำไร</th>
+<th>
+
+                          เลขบิล
+</th>
+<th>
+
+                          วันที่
+</th>
+<th>
+
+                          เวลา
+</th>
+<th>
+
+                          สินค้า
+</th>
+<th>
+
+                          ยอดขาย
+</th>
+<th>
+
+                          กำไร
+</th>
 </tr>
 </thead>
 <tbody>
 
-                  {filteredSales.map(
+                      {filteredSales.map(
 
-                    (sale) => (
+                        (
+
+                          sale
+
+                        ) => (
 <tr
 
-                        key={sale.billId}
+                            key={
+
+                              sale.billId
+
+                            }
 >
 <td>
 
-                          {sale.soldDate}
+                              {
+
+                                sale.billId
+
+                              }
 </td>
 <td>
 
-                          {sale.soldTime}
+                              {
+
+                                sale.soldDate
+
+                              }
 </td>
 <td>
 
-                          {sale.totalQty}
+                              {
+
+                                sale.soldTime
+
+                              }
 </td>
 <td>
 
-                          {Number(
+                              {
 
-                            sale.totalAmount ||
+                                sale.totalQty
 
-                              0
-
-                          ).toLocaleString()}
+                              }
 </td>
 <td>
 
-                          {Number(
+                              {Number(
 
-                            sale.totalProfit ||
+                                sale.totalAmount ||
 
-                              0
+                                  0
 
-                          ).toLocaleString()}
+                              ).toLocaleString()}
+</td>
+<td>
+
+                              {Number(
+
+                                sale.totalProfit ||
+
+                                  0
+
+                              ).toLocaleString()}
 </td>
 </tr>
 
-                    )
+                        )
 
-                  )}
+                      )}
 </tbody>
 </table>
 </div>
 
-          )}
+              )}
 </section>
 </div>
+</>
+
+      )}
 </div>
 
   );

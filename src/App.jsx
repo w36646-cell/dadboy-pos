@@ -1,10 +1,4 @@
-import {
-
-  useEffect,
-
-  useState,
-
-} from "react";
+import { useEffect, useState } from "react";
 
 import defaultProducts from "./data/products";
 
@@ -38,37 +32,31 @@ import {
 
   updateCloudStock,
 
-  updateManyCloudStocks,
+  updateSoldCloudStocks,
 
 } from "./services/productService";
+
+import { saveCloudSale } from "./services/salesService";
 
 import "./styles/App.css";
 
 import "./components/PaymentPopup.css";
 
-const STOCK_KEY =
+const STOCK_KEY = "dadboy_inventory_v2";
 
-  "dadboy_inventory_v2";
+const SALES_KEY = "dadboy_sales_v1";
 
-const SALES_KEY =
-
-  "dadboy_sales_v1";
-
-const PRODUCTS_KEY =
-
-  "dadboy_products_v1";
+const PRODUCTS_KEY = "dadboy_products_v1";
 
 const PENDING_STOCK_KEY =
 
-  "dadboy_pending_stock_sync_v1";
+  "dadboy_pending_stock_sync_v2";
 
-function readStorage(
+const PENDING_SALES_KEY =
 
-  key,
+  "dadboy_pending_sales_sync_v2";
 
-  fallback
-
-) {
+function readStorage(key, fallback) {
 
   try {
 
@@ -110,11 +98,7 @@ function loadProducts() {
 
 }
 
-function loadInventory(
-
-  productList
-
-) {
+function loadInventory(productList) {
 
   const saved =
 
@@ -188,6 +172,192 @@ function inventoryFromProducts(
 
 }
 
+function getPendingSales() {
+
+  const result =
+
+    readStorage(
+
+      PENDING_SALES_KEY,
+
+      []
+
+    );
+
+  return Array.isArray(result)
+
+    ? result
+
+    : [];
+
+}
+
+function savePendingSale(sale) {
+
+  const current =
+
+    getPendingSales();
+
+  const withoutOld =
+
+    current.filter(
+
+      (item) =>
+
+        item.billId !==
+
+        sale.billId
+
+    );
+
+  localStorage.setItem(
+
+    PENDING_SALES_KEY,
+
+    JSON.stringify([
+
+      ...withoutOld,
+
+      sale,
+
+    ])
+
+  );
+
+}
+
+function removePendingSale(
+
+  billId
+
+) {
+
+  const current =
+
+    getPendingSales();
+
+  const remaining =
+
+    current.filter(
+
+      (item) =>
+
+        item.billId !==
+
+        billId
+
+    );
+
+  localStorage.setItem(
+
+    PENDING_SALES_KEY,
+
+    JSON.stringify(
+
+      remaining
+
+    )
+
+  );
+
+}
+
+function getPendingStocks() {
+
+  const result =
+
+    readStorage(
+
+      PENDING_STOCK_KEY,
+
+      {}
+
+    );
+
+  if (
+
+    result &&
+
+    typeof result === "object" &&
+
+    !Array.isArray(result)
+
+  ) {
+
+    return result;
+
+  }
+
+  return {};
+
+}
+
+function savePendingStock(
+
+  productId,
+
+  stock
+
+) {
+
+  const current =
+
+    getPendingStocks();
+
+  localStorage.setItem(
+
+    PENDING_STOCK_KEY,
+
+    JSON.stringify({
+
+      ...current,
+
+      [String(productId)]:
+
+        Number(stock),
+
+    })
+
+  );
+
+}
+
+function removePendingStock(
+
+  productId
+
+) {
+
+  const current =
+
+    getPendingStocks();
+
+  delete current[
+
+    String(productId)
+
+  ];
+
+  localStorage.setItem(
+
+    PENDING_STOCK_KEY,
+
+    JSON.stringify(current)
+
+  );
+
+}
+
+function pendingStocksCount() {
+
+  return Object.keys(
+
+    getPendingStocks()
+
+  ).length;
+
+}
+
 function App() {
 
   const initialProducts =
@@ -222,13 +392,21 @@ function App() {
 
   );
 
-  const [cart, setCart] =
+  const [
 
-    useState([]);
+    cart,
 
-  const [page, setPage] =
+    setCart,
 
-    useState("pos");
+  ] = useState([]);
+
+  const [
+
+    page,
+
+    setPage,
+
+  ] = useState("pos");
 
   const [
 
@@ -262,55 +440,309 @@ function App() {
 
   ] = useState(false);
 
+  const [
+
+    syncVersion,
+
+    setSyncVersion,
+
+  ] = useState(0);
+
+  const [
+
+    isOnline,
+
+    setIsOnline,
+
+  ] = useState(() =>
+
+    typeof navigator === "undefined"
+
+      ? true
+
+      : navigator.onLine
+
+  );
+
+  function notifySyncStateChanged() {
+
+    setSyncVersion(
+
+      (current) =>
+
+        current + 1
+
+    );
+
+  }
+
+  async function retryPendingStocks() {
+
+    const pending =
+
+      getPendingStocks();
+
+    const entries =
+
+      Object.entries(
+
+        pending
+
+      );
+
+    if (
+
+      entries.length === 0
+
+    ) {
+
+      return true;
+
+    }
+
+    let allSuccess =
+
+      true;
+
+    for (
+
+      const [
+
+        productId,
+
+        stock,
+
+      ] of entries
+
+    ) {
+
+      try {
+
+        await updateCloudStock(
+
+          productId,
+
+          stock
+
+        );
+
+        removePendingStock(
+
+          productId
+
+        );
+
+      } catch (error) {
+
+        allSuccess =
+
+          false;
+
+        console.error(
+
+          "Pending stock sync error:",
+
+          productId,
+
+          error
+
+        );
+
+      }
+
+    }
+
+    notifySyncStateChanged();
+
+    return allSuccess;
+
+  }
+
+  async function retryPendingSales() {
+
+    const pendingSales =
+
+      getPendingSales();
+
+    if (
+
+      pendingSales.length === 0
+
+    ) {
+
+      return true;
+
+    }
+
+    let allSuccess =
+
+      true;
+
+    for (
+
+      const sale of
+
+      pendingSales
+
+    ) {
+
+      try {
+
+        await saveCloudSale(
+
+          sale
+
+        );
+
+        removePendingSale(
+
+          sale.billId
+
+        );
+
+      } catch (error) {
+
+        allSuccess =
+
+          false;
+
+        console.error(
+
+          "Pending sale sync error:",
+
+          sale.billId,
+
+          error
+
+        );
+
+      }
+
+    }
+
+    notifySyncStateChanged();
+
+    return allSuccess;
+
+  }
+
+  async function retryAllPending() {
+
+    if (
+
+      typeof navigator !==
+
+        "undefined" &&
+
+      navigator.onLine === false
+
+    ) {
+
+      setCloudReady(false);
+
+      return false;
+
+    }
+
+    const [
+
+      stockOk,
+
+      salesOk,
+
+    ] =
+
+      await Promise.all([
+
+        retryPendingStocks(),
+
+        retryPendingSales(),
+
+      ]);
+
+    const clean =
+
+      pendingStocksCount() ===
+
+        0 &&
+
+      getPendingSales()
+
+        .length === 0;
+
+    setCloudReady(
+
+      stockOk &&
+
+        salesOk &&
+
+        clean
+
+    );
+
+    return clean;
+
+  }
+
   useEffect(() => {
 
-    let cancelled = false;
+    let cancelled =
+
+      false;
+
+    let syncing =
+
+      false;
+
+    async function runSync() {
+
+      if (syncing) {
+
+        return;
+
+      }
+
+      if (
+
+        typeof navigator !==
+
+          "undefined" &&
+
+        navigator.onLine ===
+
+          false
+
+      ) {
+
+        setCloudReady(false);
+
+        return;
+
+      }
+
+      syncing =
+
+        true;
+
+      try {
+
+        await retryAllPending();
+
+      } finally {
+
+        syncing =
+
+          false;
+
+      }
+
+    }
 
     async function startCloud() {
 
       try {
 
-        /*
-
-          ถ้าครั้งก่อน Cloud sync ไม่สำเร็จ
-
-          ให้ลองส่ง Stock ในเครื่องขึ้น Cloud ก่อน
-
-        */
-
-        const hasPendingStock =
-
-          localStorage.getItem(
-
-            PENDING_STOCK_KEY
-
-          ) === "1";
-
-        if (hasPendingStock) {
-
-          const localInventory =
-
-            readStorage(
-
-              STOCK_KEY,
-
-              {}
-
-            );
-
-          await updateManyCloudStocks(
-
-            localInventory
-
-          );
-
-          localStorage.removeItem(
-
-            PENDING_STOCK_KEY
-
-          );
-
-        }
+        await runSync();
 
         const cloudProducts =
 
@@ -322,12 +754,6 @@ function App() {
 
         }
 
-        /*
-
-          Cloud มีสินค้าอยู่แล้ว
-
-        */
-
         if (
 
           Array.isArray(
@@ -336,7 +762,9 @@ function App() {
 
           ) &&
 
-          cloudProducts.length > 0
+          cloudProducts.length >
+
+            0
 
         ) {
 
@@ -347,6 +775,36 @@ function App() {
               cloudProducts
 
             );
+
+          const pendingStocks =
+
+            getPendingStocks();
+
+          Object.entries(
+
+            pendingStocks
+
+          ).forEach(
+
+            ([
+
+              productId,
+
+              stock,
+
+            ]) => {
+
+              cloudInventory[
+
+                productId
+
+              ] =
+
+                Number(stock);
+
+            }
+
+          );
 
           setProducts(
 
@@ -384,27 +842,23 @@ function App() {
 
           );
 
-          setCloudReady(true);
+          setCloudReady(
 
-          console.log(
+            pendingStocksCount() ===
 
-            "Supabase: Products + Stock โหลดสำเร็จ",
+              0 &&
 
-            cloudProducts.length
+            getPendingSales()
+
+              .length ===
+
+              0
 
           );
 
           return;
 
         }
-
-        /*
-
-          Cloud ยังว่าง
-
-          ส่งข้อมูลในเครื่องขึ้นครั้งแรก
-
-        */
 
         const localInventory =
 
@@ -478,14 +932,6 @@ function App() {
 
         setCloudReady(true);
 
-        console.log(
-
-          "Supabase: อัปโหลด Products + Stock ครั้งแรกสำเร็จ",
-
-          uploaded.length
-
-        );
-
       } catch (error) {
 
         console.error(
@@ -496,25 +942,149 @@ function App() {
 
         );
 
-        /*
-
-          ถ้า Cloud มีปัญหา
-
-          โปรแกรมยังใช้ข้อมูลในเครื่องได้
-
-        */
-
         setCloudReady(false);
 
       }
 
     }
 
+    function handleOnline() {
+
+      setIsOnline(true);
+
+      runSync();
+
+    }
+
+    function handleOffline() {
+
+      setIsOnline(false);
+
+      setCloudReady(false);
+
+    }
+
+    function handleFocus() {
+
+      const online =
+
+        typeof navigator ===
+
+        "undefined"
+
+          ? true
+
+          : navigator.onLine;
+
+      setIsOnline(online);
+
+      if (online) {
+
+        runSync();
+
+      }
+
+    }
+
+    setIsOnline(
+
+      typeof navigator ===
+
+        "undefined"
+
+        ? true
+
+        : navigator.onLine
+
+    );
+
     startCloud();
+
+    window.addEventListener(
+
+      "online",
+
+      handleOnline
+
+    );
+
+    window.addEventListener(
+
+      "offline",
+
+      handleOffline
+
+    );
+
+    window.addEventListener(
+
+      "focus",
+
+      handleFocus
+
+    );
+
+    const syncTimer =
+
+      setInterval(
+
+        () => {
+
+          if (
+
+            typeof navigator ===
+
+              "undefined" ||
+
+            navigator.onLine
+
+          ) {
+
+            runSync();
+
+          }
+
+        },
+
+        15000
+
+      );
 
     return () => {
 
-      cancelled = true;
+      cancelled =
+
+        true;
+
+      clearInterval(
+
+        syncTimer
+
+      );
+
+      window.removeEventListener(
+
+        "online",
+
+        handleOnline
+
+      );
+
+      window.removeEventListener(
+
+        "offline",
+
+        handleOffline
+
+      );
+
+      window.removeEventListener(
+
+        "focus",
+
+        handleFocus
+
+      );
 
     };
 
@@ -619,14 +1189,6 @@ cloudProduct.id
 
       setCloudReady(true);
 
-      console.log(
-
-        "Supabase: บันทึกสินค้าสำเร็จ",
-
-        cloudProduct.name
-
-      );
-
     } catch (error) {
 
       console.error(
@@ -699,129 +1261,7 @@ cloudProduct.id
 
   }
 
-  async function syncOneStock(
-
-    productId,
-
-    stock
-
-  ) {
-
-    try {
-
-      await updateCloudStock(
-
-        productId,
-
-        stock
-
-      );
-
-      setCloudReady(true);
-
-      console.log(
-
-        "Supabase: Stock updated",
-
-        productId,
-
-        stock
-
-      );
-
-      return true;
-
-    } catch (error) {
-
-      console.error(
-
-        "Supabase stock error:",
-
-        error
-
-      );
-
-      localStorage.setItem(
-
-        PENDING_STOCK_KEY,
-
-        "1"
-
-      );
-
-      setCloudReady(false);
-
-      return false;
-
-    }
-
-  }
-
-  async function syncAllStocks(
-
-    newInventory
-
-  ) {
-
-    try {
-
-      await updateManyCloudStocks(
-
-        newInventory
-
-      );
-
-      localStorage.removeItem(
-
-        PENDING_STOCK_KEY
-
-      );
-
-      setCloudReady(true);
-
-      console.log(
-
-        "Supabase: Stock ทั้งหมด sync สำเร็จ"
-
-      );
-
-      return true;
-
-    } catch (error) {
-
-      console.error(
-
-        "Supabase many stocks error:",
-
-        error
-
-      );
-
-      /*
-
-        บอกระบบว่ามี Stock รอ sync
-
-        รอบเปิดโปรแกรมครั้งถัดไปจะลองใหม่
-
-      */
-
-      localStorage.setItem(
-
-        PENDING_STOCK_KEY,
-
-        "1"
-
-      );
-
-      setCloudReady(false);
-
-      return false;
-
-    }
-
-  }
-
-  async function addStock(
+  function addStock(
 
     productId,
 
@@ -855,7 +1295,9 @@ cloudProduct.id
 
         productId
 
-      ) + safeQty;
+      ) +
+
+      safeQty;
 
     const newInventory = {
 
@@ -867,39 +1309,73 @@ cloudProduct.id
 
     };
 
-    /*
-
-      บันทึกเครื่องก่อน
-
-      เพื่อให้หน้าจอเปลี่ยนทันที
-
-    */
-
     saveInventoryLocal(
 
       newInventory
 
     );
 
-    const synced =
+    savePendingStock(
 
-      await syncOneStock(
+      productId,
 
-        productId,
+      newStock
 
-        newStock
+    );
+
+    notifySyncStateChanged();
+
+    updateCloudStock(
+
+      productId,
+
+      newStock
+
+    )
+
+      .then(() => {
+
+        removePendingStock(
+
+          productId
+
+        );
+
+        notifySyncStateChanged();
+
+        setCloudReady(
+
+          getPendingSales()
+
+            .length ===
+
+            0 &&
+
+          pendingStocksCount() ===
+
+            0
+
+        );
+
+      })
+
+      .catch(
+
+        (error) => {
+
+          console.error(
+
+            "Supabase stock background error:",
+
+            error
+
+          );
+
+          setCloudReady(false);
+
+        }
 
       );
-
-    if (!synced) {
-
-      window.alert(
-
-        "รับสินค้าเข้าแล้วในเครื่อง\nแต่ Cloud ยัง Sync ไม่สำเร็จ ระบบจะลองใหม่ภายหลัง"
-
-      );
-
-    }
 
   }
 
@@ -919,11 +1395,7 @@ cloudProduct.id
 
         1,
 
-        Number(
-
-          quantity
-
-        ) || 1
+        Number(quantity) || 1
 
       );
 
@@ -1062,11 +1534,7 @@ product.id,
 
         1,
 
-        Number(
-
-          quantity
-
-        ) || 1
+        Number(quantity) || 1
 
       );
 
@@ -1292,25 +1760,17 @@ product.id,
 
     }
 
-    setPaymentOpen(
-
-      true
-
-    );
+    setPaymentOpen(true);
 
   }
 
   function closePayment() {
 
-    setPaymentOpen(
-
-      false
-
-    );
+    setPaymentOpen(false);
 
   }
 
-  async function completeSale() {
+  function completeSale() {
 
     if (
 
@@ -1318,21 +1778,29 @@ product.id,
 
     ) {
 
-      setPaymentOpen(
-
-        false
-
-      );
+      setPaymentOpen(false);
 
       return;
 
     }
 
+    const checkoutCart =
+
+      [...cart];
+
+    const checkoutTotalQty =
+
+      totalQty;
+
+    const checkoutTotal =
+
+      total;
+
     const soldByProduct =
 
       {};
 
-    cart.forEach(
+    checkoutCart.forEach(
 
       (item) => {
 
@@ -1392,11 +1860,7 @@ item.id
 
           ) -
 
-          Number(
-
-            quantity
-
-          );
+          Number(quantity);
 
       }
 
@@ -1404,7 +1868,7 @@ item.id
 
     const saleItems =
 
-      cart.map(
+      checkoutCart.map(
 
         (item) => {
 
@@ -1489,9 +1953,7 @@ item.id,
 
           Number(
 
-            item.lineCost ||
-
-              0
+            item.lineCost || 0
 
           ),
 
@@ -1529,17 +1991,19 @@ item.id,
 
         ),
 
-      totalQty,
+      totalQty:
+
+        checkoutTotalQty,
 
       totalAmount:
 
-        total,
+        checkoutTotal,
 
       totalCost,
 
       totalProfit:
 
-        total -
+        checkoutTotal -
 
         totalCost,
 
@@ -1559,14 +2023,6 @@ item.id,
 
       );
 
-    /*
-
-      บิลตอนนี้ยังเก็บ LocalStorage
-
-      Sales Cloud เราจะทำเป็นขั้นถัดไป
-
-    */
-
     localStorage.setItem(
 
       SALES_KEY,
@@ -1581,57 +2037,187 @@ item.id,
 
     );
 
-    /*
-
-      ลด Stock ในเครื่องทันที
-
-    */
-
     saveInventoryLocal(
 
       newInventory
 
     );
 
-    /*
+    savePendingSale(
 
-      ส่ง Stock ใหม่ขึ้น Supabase
-
-    */
-
-    const cloudSynced =
-
-      await syncAllStocks(
-
-        newInventory
-
-      );
-
-    setCart([]);
-
-    setPaymentOpen(
-
-      false
+      sale
 
     );
 
-    if (cloudSynced) {
+    Object.keys(
 
-      window.alert(
+      soldByProduct
 
-        `ขายสำเร็จ\nเลขบิล ${sale.billId}\nยอดรวม ${total.toLocaleString()} บาท\nStock บันทึก Cloud แล้ว`
+    ).forEach(
 
-      );
+      (productId) => {
 
-    } else {
+        savePendingStock(
 
-      window.alert(
+          productId,
 
-        `ขายสำเร็จ\nเลขบิล ${sale.billId}\nยอดรวม ${total.toLocaleString()} บาท\n\nStock บันทึกในเครื่องแล้ว แต่ Cloud ยัง Sync ไม่สำเร็จ`
+          newInventory[
 
-      );
+            productId
 
-    }
+          ]
+
+        );
+
+      }
+
+    );
+
+    notifySyncStateChanged();
+
+    setCart([]);
+
+    setPaymentOpen(false);
+
+    window.alert(
+
+      `ขายสำเร็จ\nเลขบิล ${sale.billId}\nยอดรวม ${checkoutTotal.toLocaleString()} บาท`
+
+    );
+
+    const stockJob =
+
+      updateSoldCloudStocks(
+
+        soldByProduct,
+
+        newInventory
+
+      )
+
+        .then(() => {
+
+          Object.keys(
+
+            soldByProduct
+
+          ).forEach(
+
+            (productId) => {
+
+              removePendingStock(
+
+                productId
+
+              );
+
+            }
+
+          );
+
+          notifySyncStateChanged();
+
+          return true;
+
+        })
+
+        .catch(
+
+          (error) => {
+
+            console.error(
+
+              "Supabase stock sync error:",
+
+              error
+
+            );
+
+            setCloudReady(false);
+
+            return false;
+
+          }
+
+        );
+
+    const saleJob =
+
+      saveCloudSale(sale)
+
+        .then(() => {
+
+          removePendingSale(
+
+            sale.billId
+
+          );
+
+          notifySyncStateChanged();
+
+          return true;
+
+        })
+
+        .catch(
+
+          (error) => {
+
+            console.error(
+
+              "Supabase sale sync error:",
+
+              error
+
+            );
+
+            setCloudReady(false);
+
+            return false;
+
+          }
+
+        );
+
+    Promise.all([
+
+      stockJob,
+
+      saleJob,
+
+    ]).then(
+
+      ([
+
+        stockOk,
+
+        saleOk,
+
+      ]) => {
+
+        const clean =
+
+          pendingStocksCount() ===
+
+            0 &&
+
+          getPendingSales()
+
+            .length === 0;
+
+        setCloudReady(
+
+          stockOk &&
+
+            saleOk &&
+
+            clean
+
+        );
+
+      }
+
+    );
 
   }
 
@@ -1641,11 +2227,7 @@ item.id,
 
     setLoginOpen(false);
 
-    setPage(
-
-      "dashboard"
-
-    );
+    setPage("dashboard");
 
   }
 
@@ -1657,30 +2239,28 @@ item.id,
 
   }
 
+  const pendingSaleCount =
+
+    getPendingSales().length;
+
+  const pendingStockCount =
+
+    pendingStocksCount();
+
+  void syncVersion;
+
   function renderPOS() {
 
     return (
 <POSPage
 
-        products={
+        products={products}
 
-          products
-
-        }
-
-        inventory={
-
-          inventory
-
-        }
+        inventory={inventory}
 
         cart={cart}
 
-        onAddToCart={
-
-          addToCart
-
-        }
+        onAddToCart={addToCart}
 
         onChangeCartQty={
 
@@ -1712,6 +2292,26 @@ item.id,
 
         }
 
+        isOnline={isOnline}
+
+        cloudReady={
+
+          cloudReady
+
+        }
+
+        pendingSaleCount={
+
+          pendingSaleCount
+
+        }
+
+        pendingStockCount={
+
+          pendingStockCount
+
+        }
+
       />
 
     );
@@ -1722,9 +2322,7 @@ item.id,
 
     if (
 
-      page ===
-
-      "dashboard"
+      page === "dashboard"
 
     ) {
 
@@ -1733,11 +2331,7 @@ item.id,
 
           onOpenStock={() =>
 
-            setPage(
-
-              "stock"
-
-            )
+            setPage("stock")
 
           }
 
@@ -1749,9 +2343,7 @@ item.id,
 
     if (
 
-      page ===
-
-      "reports"
+      page === "reports"
 
     ) {
 
@@ -1764,14 +2356,20 @@ item.id,
 
     if (
 
-      page ===
-
-      "bills"
+      page === "bills"
 
     ) {
 
       return (
-<BillsPage />
+<BillsPage
+
+          onInventoryUpdated={
+
+            saveInventoryLocal
+
+          }
+
+        />
 
       );
 
@@ -1779,26 +2377,16 @@ item.id,
 
     if (
 
-      page ===
-
-      "products"
+      page === "products"
 
     ) {
 
       return (
 <ProductManager
 
-          products={
+          products={products}
 
-            products
-
-          }
-
-          inventory={
-
-            inventory
-
-          }
+          inventory={inventory}
 
           onSaveProduct={
 
@@ -1808,11 +2396,7 @@ item.id,
 
           onClose={() =>
 
-            setPage(
-
-              "pos"
-
-            )
+            setPage("pos")
 
           }
 
@@ -1824,40 +2408,22 @@ item.id,
 
     if (
 
-      page ===
-
-      "stock"
+      page === "stock"
 
     ) {
 
       return (
 <StockManager
 
-          products={
+          products={products}
 
-            products
+          inventory={inventory}
 
-          }
-
-          inventory={
-
-            inventory
-
-          }
-
-          onAddStock={
-
-            addStock
-
-          }
+          onAddStock={addStock}
 
           onClose={() =>
 
-            setPage(
-
-              "pos"
-
-            )
+            setPage("pos")
 
           }
 
@@ -1869,9 +2435,7 @@ item.id,
 
     if (
 
-      page ===
-
-      "settings"
+      page === "settings"
 
     ) {
 
@@ -1883,14 +2447,49 @@ item.id,
 </h1>
 <p>
 
+            Internet:{" "}
+
+            {isOnline
+
+              ? "ออนไลน์"
+
+              : "ออฟไลน์"}
+</p>
+<p>
+
             Cloud:{" "}
 
             {cloudReady
 
-              ? "เชื่อมต่อแล้ว"
+              ? "Sync เรียบร้อย"
 
-              : "กำลังใช้ข้อมูลสำรองในเครื่อง"}
+              : "มีข้อมูลรอ Sync"}
 </p>
+<p>
+
+            บิลรอ Sync:{" "}
+
+            {pendingSaleCount} บิล
+</p>
+<p>
+
+            Stock รอ Sync:{" "}
+
+            {pendingStockCount} รายการ
+</p>
+<button
+
+            type="button"
+
+            onClick={() => {
+
+              retryAllPending();
+
+            }}
+>
+
+            Sync ตอนนี้
+</button>
 </div>
 
       );
@@ -1912,23 +2511,11 @@ item.id,
     return (
 <StockManager
 
-        products={
+        products={products}
 
-          products
+        inventory={inventory}
 
-        }
-
-        inventory={
-
-          inventory
-
-        }
-
-        onAddStock={
-
-          addStock
-
-        }
+        onAddStock={addStock}
 
         onClose={() =>
 
@@ -1949,11 +2536,7 @@ item.id,
 <div className="owner-app-shell">
 <OwnerSidebar
 
-            currentPage={
-
-              page
-
-            }
+            currentPage={page}
 
             onChangePage={
 
@@ -1990,11 +2573,7 @@ item.id,
 
                 onClick={() =>
 
-                  setPage(
-
-                    "stock"
-
-                  )
+                  setPage("stock")
 
                 }
 >
@@ -2009,11 +2588,7 @@ item.id,
 
                 onClick={() =>
 
-                  setLoginOpen(
-
-                    true
-
-                  )
+                  setLoginOpen(true)
 
                 }
 >
@@ -2029,11 +2604,7 @@ item.id,
       )}
 <OwnerLogin
 
-        open={
-
-          loginOpen
-
-        }
+        open={loginOpen}
 
         onSuccess={
 
@@ -2043,22 +2614,14 @@ item.id,
 
         onClose={() =>
 
-          setLoginOpen(
-
-            false
-
-          )
+          setLoginOpen(false)
 
         }
 
       />
 <PaymentPopup
 
-        open={
-
-          paymentOpen
-
-        }
+        open={paymentOpen}
 
         total={total}
 

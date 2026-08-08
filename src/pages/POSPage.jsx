@@ -1,4 +1,10 @@
-import { useMemo, useState } from "react";
+import {
+
+  useMemo,
+
+  useState,
+
+} from "react";
 
 function POSPage({
 
@@ -20,11 +26,23 @@ function POSPage({
 
   onOpenPayment,
 
+  isOnline,
+
+  cloudReady,
+
+  pendingSaleCount,
+
+  pendingStockCount,
+
 }) {
 
-  const [searchText, setSearchText] =
+  const [
 
-    useState("");
+    searchText,
+
+    setSearchText,
+
+  ] = useState("");
 
   const [
 
@@ -42,9 +60,13 @@ function POSPage({
 
   ] = useState(null);
 
-  const [popupQty, setPopupQty] =
+  const [
 
-    useState(1);
+    popupQty,
+
+    setPopupQty,
+
+  ] = useState(1);
 
   const filteredProducts =
 
@@ -72,7 +94,11 @@ function POSPage({
 
             .toLowerCase()
 
-            .includes(keyword)
+            .includes(
+
+              keyword
+
+            )
 
       );
 
@@ -212,7 +238,9 @@ function POSPage({
 
         {
 
-          name: "ปกติ",
+          name:
+
+            "ปกติ",
 
           price:
 
@@ -253,7 +281,11 @@ option.id ===
 
     );
 
-    setPopupQty(1);
+    setPopupQty(
+
+      1
+
+    );
 
   }
 
@@ -271,7 +303,11 @@ option.id ===
 
     );
 
-    setPopupQty(1);
+    setPopupQty(
+
+      1
+
+    );
 
   }
 
@@ -307,7 +343,9 @@ option.id ===
 
     if (
 
-      cart.length === 0
+      cart.length ===
+
+      0
 
     ) {
 
@@ -316,6 +354,166 @@ option.id ===
     }
 
     onOpenPayment();
+
+  }
+
+  const hasPending =
+
+    Number(
+
+      pendingSaleCount ||
+
+        0
+
+    ) > 0 ||
+
+    Number(
+
+      pendingStockCount ||
+
+        0
+
+    ) > 0;
+
+  let syncText =
+
+    "";
+
+  let statusBackground =
+
+    "#ecfdf3";
+
+  let statusBorder =
+
+    "#abefc6";
+
+  let statusColor =
+
+    "#067647";
+
+  let dotColor =
+
+    "#12b76a";
+
+  if (!isOnline) {
+
+    syncText =
+
+      "ออฟไลน์ · บันทึกข้อมูลไว้ในเครื่อง";
+
+    statusBackground =
+
+      "#fff7ed";
+
+    statusBorder =
+
+      "#fed7aa";
+
+    statusColor =
+
+      "#9a3412";
+
+    dotColor =
+
+      "#f97316";
+
+  } else if (
+
+    hasPending
+
+  ) {
+
+    const parts =
+
+      [];
+
+    if (
+
+      pendingSaleCount >
+
+      0
+
+    ) {
+
+      parts.push(
+
+        `${pendingSaleCount} บิล`
+
+      );
+
+    }
+
+    if (
+
+      pendingStockCount >
+
+      0
+
+    ) {
+
+      parts.push(
+
+        `${pendingStockCount} Stock`
+
+      );
+
+    }
+
+    syncText =
+
+      `ออนไลน์ · รอ Sync ${parts.join(
+
+        " / "
+
+      )}`;
+
+    statusBackground =
+
+      "#fffaeb";
+
+    statusBorder =
+
+      "#fedf89";
+
+    statusColor =
+
+      "#93370d";
+
+    dotColor =
+
+      "#f79009";
+
+  } else if (
+
+    cloudReady
+
+  ) {
+
+    syncText =
+
+      "ออนไลน์ · Sync เรียบร้อย";
+
+  } else {
+
+    syncText =
+
+      "ออนไลน์ · กำลังเชื่อมต่อ Cloud";
+
+    statusBackground =
+
+      "#eff8ff";
+
+    statusBorder =
+
+      "#b2ddff";
+
+    statusColor =
+
+      "#175cd3";
+
+    dotColor =
+
+      "#2e90fa";
 
   }
 
@@ -341,6 +539,90 @@ option.id ===
               รายการ
 </p>
 </div>
+<div
+
+            style={{
+
+              display:
+
+                "flex",
+
+              alignItems:
+
+                "center",
+
+              gap:
+
+                "8px",
+
+              padding:
+
+                "8px 12px",
+
+              borderRadius:
+
+                "999px",
+
+              background:
+
+                statusBackground,
+
+              border:
+
+                `1px solid ${statusBorder}`,
+
+              color:
+
+                statusColor,
+
+              fontSize:
+
+                "13px",
+
+              fontWeight:
+
+                "700",
+
+              whiteSpace:
+
+                "nowrap",
+
+            }}
+>
+<span
+
+              style={{
+
+                width:
+
+                  "9px",
+
+                height:
+
+                  "9px",
+
+                borderRadius:
+
+                  "999px",
+
+                background:
+
+                  dotColor,
+
+                display:
+
+                  "inline-block",
+
+                flexShrink:
+
+                  0,
+
+              }}
+
+            />
+
+            {syncText}
+</div>
 </header>
 <input
 
@@ -356,7 +638,11 @@ option.id ===
 
           }
 
-          onChange={(event) =>
+          onChange={(
+
+            event
+
+          ) =>
 
             setSearchText(
 
@@ -383,13 +669,21 @@ option.id ===
 
             {filteredProducts.map(
 
-              (product) => {
+              (
+
+                product
+
+              ) => {
 
                 const normalPrice =
 
                   product.options?.find(
 
-                    (option) =>
+                    (
+
+                      option
+
+                    ) =>
 option.id ===
 
                       "normal"
@@ -784,7 +1078,11 @@ product.id
 
                 {selectedProduct.options.map(
 
-                  (option) => (
+                  (
+
+                    option
+
+                  ) => (
 <label
 
                       className={
@@ -825,9 +1123,7 @@ option.id
 
                           }
 
-                        />
-
-                        {" "}
+                        />{" "}
 
                         {
 
@@ -915,9 +1211,7 @@ option.id
 
                         Number(
 
-                          event
-
-                            .target
+                          event.target
 
                             .value
 
@@ -1021,4 +1315,3 @@ option.id
 }
 
 export default POSPage;
- 

@@ -8,21 +8,43 @@ import {
 
 } from "react";
 
+import {
+
+  getCloudSales,
+
+} from "../services/salesService";
+
 import "./DashboardPage.css";
 
-const SALES_KEY = "dadboy_sales_v1";
+const SALES_KEY =
 
-const STOCK_KEY = "dadboy_inventory_v2";
+  "dadboy_sales_v1";
 
-const PRODUCTS_KEY = "dadboy_products_v1";
+const STOCK_KEY =
 
-function readStorage(key, fallback) {
+  "dadboy_inventory_v2";
+
+const PRODUCTS_KEY =
+
+  "dadboy_products_v1";
+
+function readStorage(
+
+  key,
+
+  fallback
+
+) {
 
   try {
 
     const saved =
 
-      localStorage.getItem(key);
+      localStorage.getItem(
+
+        key
+
+      );
 
     return saved
 
@@ -38,7 +60,11 @@ function readStorage(key, fallback) {
 
 }
 
-function formatDateKey(date) {
+function formatDateKey(
+
+  date
+
+) {
 
   return date.toLocaleDateString(
 
@@ -48,17 +74,29 @@ function formatDateKey(date) {
 
 }
 
-function summarize(saleList) {
+function summarize(
+
+  saleList
+
+) {
 
   return saleList.reduce(
 
-    (result, sale) => {
+    (
+
+      result,
+
+      sale
+
+    ) => {
 
       result.totalAmount +=
 
         Number(
 
-          sale.totalAmount || 0
+          sale.totalAmount ||
+
+            0
 
         );
 
@@ -66,7 +104,9 @@ function summarize(saleList) {
 
         Number(
 
-          sale.totalCost || 0
+          sale.totalCost ||
+
+            0
 
         );
 
@@ -74,7 +114,9 @@ function summarize(saleList) {
 
         Number(
 
-          sale.totalProfit || 0
+          sale.totalProfit ||
+
+            0
 
         );
 
@@ -82,7 +124,9 @@ function summarize(saleList) {
 
         Number(
 
-          sale.totalQty || 0
+          sale.totalQty ||
+
+            0
 
         );
 
@@ -112,19 +156,13 @@ function DashboardPage({
 
 }) {
 
-  const [sales, setSales] =
+  const [
 
-    useState(() =>
+    sales,
 
-      readStorage(
+    setSales,
 
-        SALES_KEY,
-
-        []
-
-      )
-
-    );
+  ] = useState([]);
 
   const [
 
@@ -162,19 +200,23 @@ function DashboardPage({
 
   );
 
-  function reloadDashboardData() {
+  const [
 
-    setSales(
+    cloudError,
 
-      readStorage(
+    setCloudError,
 
-        SALES_KEY,
+  ] = useState(false);
 
-        []
+  const [
 
-      )
+    loading,
 
-    );
+    setLoading,
+
+  ] = useState(true);
+
+  function reloadLocalStockData() {
 
     setInventory(
 
@@ -202,21 +244,145 @@ function DashboardPage({
 
   }
 
+  async function reloadSales() {
+
+    try {
+
+      const cloudSales =
+
+        await getCloudSales();
+
+      /*
+
+        ถ้า Cloud โหลดสำเร็จ
+
+        ใช้ Cloud อย่างเดียว 100%
+
+        ไม่รวมกับ LocalStorage
+
+      */
+
+      setSales(
+
+        Array.isArray(
+
+          cloudSales
+
+        )
+
+          ? cloudSales
+
+          : []
+
+      );
+
+      setCloudError(
+
+        false
+
+      );
+
+      console.log(
+
+        "Dashboard: ใช้ยอดขายจาก Supabase",
+
+        cloudSales.length
+
+      );
+
+    } catch (error) {
+
+      console.error(
+
+        "Dashboard Cloud sales error:",
+
+        error
+
+      );
+
+      /*
+
+        fallback เฉพาะตอน Cloud ใช้งานไม่ได้
+
+      */
+
+      const localSales =
+
+        readStorage(
+
+          SALES_KEY,
+
+          []
+
+        );
+
+      setSales(
+
+        Array.isArray(
+
+          localSales
+
+        )
+
+          ? localSales
+
+          : []
+
+      );
+
+      setCloudError(
+
+        true
+
+      );
+
+    } finally {
+
+      setLoading(
+
+        false
+
+      );
+
+    }
+
+  }
+
   useEffect(() => {
+
+    reloadLocalStockData();
+
+    reloadSales();
 
     const timer =
 
       setInterval(() => {
 
-        reloadDashboardData();
+        reloadLocalStockData();
 
-      }, 2000);
+        reloadSales();
+
+      }, 5000);
+
+    function handleFocus() {
+
+      reloadLocalStockData();
+
+      reloadSales();
+
+    }
+
+    function handleStorage() {
+
+      reloadLocalStockData();
+
+    }
 
     window.addEventListener(
 
       "focus",
 
-      reloadDashboardData
+      handleFocus
 
     );
 
@@ -224,19 +390,23 @@ function DashboardPage({
 
       "storage",
 
-      reloadDashboardData
+      handleStorage
 
     );
 
     return () => {
 
-      clearInterval(timer);
+      clearInterval(
+
+        timer
+
+      );
 
       window.removeEventListener(
 
         "focus",
 
-        reloadDashboardData
+        handleFocus
 
       );
 
@@ -244,7 +414,7 @@ function DashboardPage({
 
         "storage",
 
-        reloadDashboardData
+        handleStorage
 
       );
 
@@ -252,11 +422,17 @@ function DashboardPage({
 
   }, []);
 
-  const now = new Date();
+  const now =
+
+    new Date();
 
   const today =
 
-    formatDateKey(now);
+    formatDateKey(
+
+      now
+
+    );
 
   const todaySales =
 
@@ -272,7 +448,13 @@ function DashboardPage({
 
       );
 
-    }, [sales, today]);
+    }, [
+
+      sales,
+
+      today,
+
+    ]);
 
   const summary =
 
@@ -284,11 +466,17 @@ function DashboardPage({
 
       );
 
-    }, [todaySales]);
+    }, [
+
+      todaySales,
+
+    ]);
 
   const averageBill =
 
-    todaySales.length > 0
+    todaySales.length >
+
+    0
 
       ? summary.totalAmount /
 
@@ -298,7 +486,9 @@ function DashboardPage({
 
   const margin =
 
-    summary.totalAmount > 0
+    summary.totalAmount >
+
+    0
 
       ? (
 
@@ -314,7 +504,9 @@ function DashboardPage({
 
     useMemo(() => {
 
-      const result = {};
+      const result =
+
+        {};
 
       todaySales.forEach(
 
@@ -328,23 +520,33 @@ function DashboardPage({
 
                 `${item.productId}-${item.option}`;
 
-              if (!result[key]) {
+              if (
 
-                result[key] = {
+                !result[key]
 
-                  name:
+              ) {
 
-                    item.productName,
+                result[key] =
 
-                  option:
+                  {
 
-                    item.option,
+                    name:
 
-                  quantity: 0,
+                      item.productName,
 
-                  amount: 0,
+                    option:
 
-                };
+                      item.option,
+
+                    quantity:
+
+                      0,
+
+                    amount:
+
+                      0,
+
+                  };
 
               }
 
@@ -392,7 +594,13 @@ function DashboardPage({
 
         .sort(
 
-          (a, b) =>
+          (
+
+            a,
+
+            b
+
+          ) =>
 
             b.quantity -
 
@@ -400,9 +608,19 @@ function DashboardPage({
 
         )
 
-        .slice(0, 5);
+        .slice(
 
-    }, [todaySales]);
+          0,
+
+          5
+
+        );
+
+    }, [
+
+      todaySales,
+
+    ]);
 
   const lowStockProducts =
 
@@ -410,56 +628,68 @@ function DashboardPage({
 
       return products
 
-        .map((product) => {
+        .map(
 
-          const stock =
+          (
 
-            Number(
+            product
 
-              inventory[
+          ) => {
+
+            const stock =
+
+              Number(
+
+                inventory[
 product.id
 
-              ] ??
+                ] ??
 
-                product.stock ??
+                  product.stock ??
 
-                50
+                  50
 
-            );
+              );
 
-          const minStock =
+            const minStock =
 
-            Number(
+              Number(
 
-              product.minStock ??
+                product.minStock ??
 
-                5
+                  5
 
-            );
+              );
 
-          const trackStock =
+            const trackStock =
 
-            product.trackStock !==
+              product.trackStock !==
 
-            false;
+              false;
 
-          return {
+            return {
 
-            ...product,
+              ...product,
 
-            stock,
+              stock,
 
-            minStock,
+              minStock,
 
-            trackStock,
+              trackStock,
 
-          };
+            };
 
-        })
+          }
+
+        )
 
         .filter(
 
-          (product) =>
+          (
+
+            product
+
+          ) =>
 
             product.trackStock &&
 
@@ -469,23 +699,39 @@ product.id
 
         )
 
-        .sort((a, b) => {
+        .sort(
 
-          const aGap =
+          (
 
-            a.stock -
+            a,
 
-            a.minStock;
+            b
 
-          const bGap =
+          ) => {
 
-            b.stock -
+            const aGap =
 
-            b.minStock;
+              a.stock -
 
-          return aGap - bGap;
+              a.minStock;
 
-        });
+            const bGap =
+
+              b.stock -
+
+              b.minStock;
+
+            return (
+
+              aGap -
+
+              bGap
+
+            );
+
+          }
+
+        );
 
     }, [
 
@@ -528,7 +774,9 @@ product.id
 
             Number(
 
-              product.cost || 0
+              product.cost ||
+
+                0
 
             );
 
@@ -572,17 +820,29 @@ product.id
 
           {
 
-            length: 16,
+            length:
+
+              16,
 
           },
 
-          (_, index) => ({
+          (
+
+            _,
+
+            index
+
+          ) => ({
 
             hour:
 
-              index + 7,
+              index +
 
-            amount: 0,
+              7,
+
+            amount:
+
+              0,
 
           })
 
@@ -592,21 +852,97 @@ product.id
 
         (sale) => {
 
-          const saleDate =
+          let hour =
 
-            new Date(
+            null;
 
-              sale.soldAt
+          /*
 
-            );
+            ใช้ soldTime ก่อน
+
+            เพราะเป็นเวลาไทยจาก POS
+
+          */
 
           if (
 
-            Number.isNaN(
+            sale.soldTime
 
-              saleDate.getTime()
+          ) {
 
-            )
+            const text =
+
+              String(
+
+                sale.soldTime
+
+              );
+
+            const match =
+
+              text.match(
+
+                /(\d{1,2})[:.]/
+
+              );
+
+            if (
+
+              match
+
+            ) {
+
+              hour =
+
+                Number(
+
+                  match[1]
+
+                );
+
+            }
+
+          }
+
+          if (
+
+            hour ===
+
+            null
+
+          ) {
+
+            const saleDate =
+
+              new Date(
+
+                sale.soldAt
+
+              );
+
+            if (
+
+              !Number.isNaN(
+
+                saleDate.getTime()
+
+              )
+
+            ) {
+
+              hour =
+
+                saleDate.getHours();
+
+            }
+
+          }
+
+          if (
+
+            hour ===
+
+            null
 
           ) {
 
@@ -614,15 +950,15 @@ product.id
 
           }
 
-          const hour =
-
-            saleDate.getHours();
-
           const target =
 
             hours.find(
 
-              (item) =>
+              (
+
+                item
+
+              ) =>
 
                 item.hour ===
 
@@ -630,7 +966,11 @@ product.id
 
             );
 
-          if (target) {
+          if (
+
+            target
+
+          ) {
 
             target.amount +=
 
@@ -650,7 +990,11 @@ product.id
 
       return hours;
 
-    }, [todaySales]);
+    }, [
+
+      todaySales,
+
+    ]);
 
   const maxHourlyAmount =
 
@@ -672,11 +1016,15 @@ product.id
 
     useMemo(() => {
 
-      const result = [];
+      const result =
+
+        [];
 
       for (
 
-        let index = 6;
+        let index =
+
+          6;
 
         index >= 0;
 
@@ -720,7 +1068,11 @@ product.id
 
           sales.filter(
 
-            (sale) =>
+            (
+
+              sale
+
+            ) =>
 
               sale.soldDate ===
 
@@ -770,7 +1122,11 @@ product.id
 
       return result;
 
-    }, [sales]);
+    }, [
+
+      sales,
+
+    ]);
 
   const max7DayAmount =
 
@@ -836,9 +1192,56 @@ product.id
 <div className="db-live">
 <span />
 
-          LIVE
+          {loading
+
+            ? "LOADING"
+
+            : cloudError
+
+              ? "LOCAL"
+
+              : "CLOUD"}
 </div>
 </div>
+
+      {cloudError && (
+<div
+
+          style={{
+
+            marginBottom:
+
+              "12px",
+
+            padding:
+
+              "10px 14px",
+
+            borderRadius:
+
+              "10px",
+
+            background:
+
+              "#fff3cd",
+
+            color:
+
+              "#664d03",
+
+            fontSize:
+
+              "13px",
+
+          }}
+>
+
+          Cloud เชื่อมต่อไม่สำเร็จ
+
+          Dashboard กำลังใช้ข้อมูลสำรองจากเครื่อง
+</div>
+
+      )}
 
       {lowStockProducts.length >
 
@@ -876,11 +1279,21 @@ product.id
 
               {lowStockProducts
 
-                .slice(0, 3)
+                .slice(
+
+                  0,
+
+                  3
+
+                )
 
                 .map(
 
-                  (product) =>
+                  (
+
+                    product
+
+                  ) =>
 
                     `${product.name} ${product.stock}/${product.minStock}`
 
@@ -1168,7 +1581,11 @@ product.id
 
             lowStockProducts.map(
 
-              (product) => (
+              (
+
+                product
+
+              ) => (
 <button
 
                   type="button"
@@ -1318,7 +1735,11 @@ product.id
 
             {last7Days.map(
 
-              (day) => (
+              (
+
+                day
+
+              ) => (
 <div
 
                   className="db-day"
@@ -1392,7 +1813,11 @@ product.id
 
             {last7Days.map(
 
-              (day) => (
+              (
+
+                day
+
+              ) => (
 <div
 
                   className="db-day"
