@@ -12,72 +12,114 @@ function ProductManager({
 
 }) {
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] =
 
-  const [editingProduct, setEditingProduct] =
+    useState("");
 
-    useState(null);
+  const [
 
-  const [form, setForm] = useState({
+    editingProduct,
 
-    name: "",
+    setEditingProduct,
 
-    category: "",
+  ] = useState(null);
 
-    price: 0,
+  const [form, setForm] =
 
-    cost: 0,
+    useState({
 
-    image: "",
+      name: "",
 
-    minStock: 5,
+      category: "",
 
-    trackStock: true,
+      price: 0,
 
-    hasOption: false,
+      cost: 0,
 
-    normalPrice: 0,
+      image: "",
 
-    cupPrice: 25,
+      minStock: 5,
 
-    ownCupPrice: 20,
+      trackStock: true,
 
-  });
+      hasOption: false,
 
-  const list = useMemo(() => {
+      normalPrice: 0,
 
-    const keyword = search
+      cupPrice: 25,
 
-      .trim()
+      ownCupPrice: 20,
 
-      .toLowerCase();
+      /*
 
-    if (!keyword) {
+        ==========================
 
-      return products;
+        ขายยกแพ็ก
 
-    }
+        ==========================
 
-    return products.filter((product) =>
+      */
 
-      product.name
+      packEnabled: false,
 
-        .toLowerCase()
+      packQty: 1,
 
-        .includes(keyword)
+      packPrice: 0,
 
-    );
+    });
 
-  }, [products, search]);
+  const list =
 
-  function openEdit(product) {
+    useMemo(() => {
+
+      const keyword =
+
+        search
+
+          .trim()
+
+          .toLowerCase();
+
+      if (!keyword) {
+
+        return products;
+
+      }
+
+      return products.filter(
+
+        (product) =>
+
+          product.name
+
+            .toLowerCase()
+
+            .includes(keyword)
+
+      );
+
+    }, [
+
+      products,
+
+      search,
+
+    ]);
+
+  function openEdit(
+
+    product
+
+  ) {
 
     const normalOption =
 
       product.options?.find(
 
         (option) =>
-option.id === "normal"
+option.id ===
+
+          "normal"
 
       );
 
@@ -86,7 +128,9 @@ option.id === "normal"
       product.options?.find(
 
         (option) =>
-option.id === "cup"
+option.id ===
+
+          "cup"
 
       );
 
@@ -95,17 +139,27 @@ option.id === "cup"
       product.options?.find(
 
         (option) =>
-option.id === "ownCup"
+option.id ===
+
+          "ownCup"
 
       );
 
     const hasOption =
 
-      product.hasOption === true ||
+      product.hasOption ===
 
-      product.hasOptions === true;
+        true ||
 
-    setEditingProduct(product);
+      product.hasOptions ===
+
+        true;
+
+    setEditingProduct(
+
+      product
+
+    );
 
     setForm({
 
@@ -115,7 +169,9 @@ option.id === "ownCup"
 
       category:
 
-        product.category || "",
+        product.category ||
+
+        "",
 
       price:
 
@@ -141,13 +197,17 @@ option.id === "ownCup"
 
         Number(
 
-          product.minStock ?? 5
+          product.minStock ??
+
+            5
 
         ),
 
       trackStock:
 
-        product.trackStock !== false,
+        product.trackStock !==
+
+        false,
 
       hasOption,
 
@@ -167,7 +227,9 @@ option.id === "ownCup"
 
         Number(
 
-          cupOption?.price ?? 25
+          cupOption?.price ??
+
+            25
 
         ),
 
@@ -175,7 +237,57 @@ option.id === "ownCup"
 
         Number(
 
-          ownCupOption?.price ?? 20
+          ownCupOption?.price ??
+
+            20
+
+        ),
+
+      /*
+
+        ==========================
+
+        ค่าแพ็กเดิม
+
+        ==========================
+
+      */
+
+      packEnabled:
+
+        product.packEnabled ===
+
+        true,
+
+      packQty:
+
+        Math.max(
+
+          1,
+
+          Number(
+
+            product.packQty ??
+
+              1
+
+          ) || 1
+
+        ),
+
+      packPrice:
+
+        Math.max(
+
+          0,
+
+          Number(
+
+            product.packPrice ??
+
+              0
+
+          ) || 0
 
         ),
 
@@ -183,23 +295,39 @@ option.id === "ownCup"
 
   }
 
-  function updateField(field, value) {
+  function updateField(
 
-    setForm((current) => ({
+    field,
 
-      ...current,
+    value
 
-      [field]: value,
+  ) {
 
-    }));
+    setForm(
+
+      (current) => ({
+
+        ...current,
+
+        [field]: value,
+
+      })
+
+    );
 
   }
 
-  function handleImageFile(event) {
+  function handleImageFile(
+
+    event
+
+  ) {
 
     const file =
 
-      event.target.files?.[0];
+      event.target
+
+        .files?.[0];
 
     if (!file) {
 
@@ -237,9 +365,13 @@ option.id === "ownCup"
 
         const size = 512;
 
-        canvas.width = size;
+        canvas.width =
 
-        canvas.height = size;
+          size;
+
+        canvas.height =
+
+          size;
 
         const context =
 
@@ -333,7 +465,9 @@ option.id === "ownCup"
 
       };
 
-      image.src = source;
+      image.src =
+
+        source;
 
     };
 
@@ -353,7 +487,11 @@ option.id === "ownCup"
 
     }
 
-    if (!form.name.trim()) {
+    if (
+
+      !form.name.trim()
+
+    ) {
 
       window.alert(
 
@@ -367,13 +505,19 @@ option.id === "ownCup"
 
     const normalPrice =
 
-      Number(
+      Math.max(
 
-        form.hasOption
+        0,
 
-          ? form.normalPrice
+        Number(
 
-          : form.price
+          form.hasOption
+
+            ? form.normalPrice
+
+            : form.price
+
+        ) || 0
 
       );
 
@@ -404,6 +548,92 @@ option.id === "ownCup"
         ) || 0
 
       );
+
+    const packEnabled =
+
+      Boolean(
+
+        form.packEnabled
+
+      );
+
+    const packQty =
+
+      Math.max(
+
+        1,
+
+        Math.floor(
+
+          Number(
+
+            form.packQty
+
+          ) || 1
+
+        )
+
+      );
+
+    const packPrice =
+
+      Math.max(
+
+        0,
+
+        Number(
+
+          form.packPrice
+
+        ) || 0
+
+      );
+
+    /*
+
+      ถ้าเปิดขายแพ็ก
+
+      ต้องมีอย่างน้อย 2 ชิ้น
+
+      และต้องมีราคาแพ็กมากกว่า 0
+
+    */
+
+    if (
+
+      packEnabled &&
+
+      packQty < 2
+
+    ) {
+
+      window.alert(
+
+        "จำนวนชิ้นต่อแพ็กต้องตั้งแต่ 2 ชิ้นขึ้นไป"
+
+      );
+
+      return;
+
+    }
+
+    if (
+
+      packEnabled &&
+
+      packPrice <= 0
+
+    ) {
+
+      window.alert(
+
+        "กรุณาใส่ราคาขายต่อแพ็ก"
+
+      );
+
+      return;
+
+    }
 
     const updatedProduct = {
 
@@ -479,7 +709,7 @@ option.id === "ownCup"
 
                     form.cupPrice
 
-                  ),
+                  ) || 0,
 
               },
 
@@ -499,7 +729,7 @@ option.id === "ownCup"
 
                     form.ownCupPrice
 
-                  ),
+                  ) || 0,
 
               },
 
@@ -507,9 +737,39 @@ option.id === "ownCup"
 
           : [],
 
+      /*
+
+        ==========================
+
+        ขายยกแพ็ก
+
+        ==========================
+
+      */
+
+      packEnabled,
+
+      packQty:
+
+        packEnabled
+
+          ? packQty
+
+          : 1,
+
+      packPrice:
+
+        packEnabled
+
+          ? packPrice
+
+          : 0,
+
     };
 
-    delete updatedProduct.hasOptions;
+    delete updatedProduct
+
+      .hasOptions;
 
     onSaveProduct(
 
@@ -543,7 +803,7 @@ option.id === "ownCup"
 
             แก้ชื่อ ราคา ต้นทุน รูป
 
-            และการติดตามสต๊อก
+            สต๊อก และราคาขายยกแพ็ก
 </p>
 </div>
 <button
@@ -552,7 +812,11 @@ option.id === "ownCup"
 
           type="button"
 
-          onClick={onClose}
+          onClick={
+
+            onClose
+
+          }
 >
 
           กลับหน้าขาย
@@ -566,13 +830,23 @@ option.id === "ownCup"
 
         placeholder="ค้นหาสินค้า..."
 
-        value={search}
+        value={
 
-        onChange={(event) =>
+          search
+
+        }
+
+        onChange={(
+
+          event
+
+        ) =>
 
           setSearch(
 
-            event.target.value
+            event.target
+
+              .value
 
           )
 
@@ -584,7 +858,10 @@ option.id === "ownCup"
 <table className="product-table">
 <thead>
 <tr>
-<th>รูป</th>
+<th>
+
+                  รูป
+</th>
 <th>
 
                   ชื่อสินค้า
@@ -592,6 +869,10 @@ option.id === "ownCup"
 <th>
 
                   ราคาขาย
+</th>
+<th>
+
+                  ราคาแพ็ก
 </th>
 <th>
 
@@ -677,6 +958,44 @@ option.id ===
 
                       minStock;
 
+                  const packEnabled =
+
+                    item.packEnabled ===
+
+                    true;
+
+                  const packQty =
+
+                    Math.max(
+
+                      1,
+
+                      Number(
+
+                        item.packQty ??
+
+                          1
+
+                      ) || 1
+
+                    );
+
+                  const packPrice =
+
+                    Math.max(
+
+                      0,
+
+                      Number(
+
+                        item.packPrice ??
+
+                          0
+
+                      ) || 0
+
+                    );
+
                   return (
 <tr
 
@@ -716,7 +1035,11 @@ item.id
 </td>
 <td>
 
-                        {item.name}
+                        {
+
+                          item.name
+
+                        }
 </td>
 <td>
 
@@ -727,6 +1050,37 @@ item.id
                         }{" "}
 
                         บาท
+</td>
+<td>
+
+                        {packEnabled ? (
+<>
+
+                            {
+
+                              packPrice
+
+                            }{" "}
+
+                            บาท
+<br />
+<small>
+
+                              {
+
+                                packQty
+
+                              }{" "}
+
+                              ชิ้น/แพ็ก
+</small>
+</>
+
+                        ) : (
+
+                          "-"
+
+                        )}
 </td>
 <td>
 
@@ -749,7 +1103,11 @@ item.id
 </td>
 <td>
 
-                        {minStock}
+                        {
+
+                          minStock
+
+                        }
 </td>
 <td>
 
@@ -818,7 +1176,11 @@ item.id
 
                 }
 
-                onChange={(event) =>
+                onChange={(
+
+                  event
+
+                ) =>
 
                   updateField(
 
@@ -847,7 +1209,11 @@ item.id
 
                 }
 
-                onChange={(event) =>
+                onChange={(
+
+                  event
+
+                ) =>
 
                   updateField(
 
@@ -882,7 +1248,11 @@ item.id
 
                 }
 
-                onChange={(event) =>
+                onChange={(
+
+                  event
+
+                ) =>
 
                   updateField(
 
@@ -902,7 +1272,7 @@ item.id
 <>
 <label className="manager-label">
 
-                    ราคาขาย
+                    ราคาขายต่อชิ้น
 </label>
 <input
 
@@ -953,7 +1323,11 @@ item.id
 
                   }
 
-                  onChange={(event) =>
+                  onChange={(
+
+                    event
+
+                  ) =>
 
                     updateField(
 
@@ -1091,6 +1465,192 @@ item.id
 <hr />
 <h3>
 
+                ขายยกแพ็ก
+</h3>
+<label className="manager-checkbox">
+<input
+
+                  type="checkbox"
+
+                  checked={
+
+                    form.packEnabled
+
+                  }
+
+                  onChange={(
+
+                    event
+
+                  ) =>
+
+                    updateField(
+
+                      "packEnabled",
+
+                      event.target
+
+                        .checked
+
+                    )
+
+                  }
+
+                />
+
+                สินค้านี้ขายยกแพ็กได้
+</label>
+
+              {form.packEnabled && (
+<>
+<label className="manager-label">
+
+                    จำนวนชิ้นต่อ 1 แพ็ก
+</label>
+<input
+
+                    className="manager-input"
+
+                    type="number"
+
+                    min="2"
+
+                    step="1"
+
+                    value={
+
+                      form.packQty
+
+                    }
+
+                    onChange={(
+
+                      event
+
+                    ) =>
+
+                      updateField(
+
+                        "packQty",
+
+                        event.target
+
+                          .value
+
+                      )
+
+                    }
+
+                  />
+<label className="manager-label">
+
+                    ราคาขายต่อ 1 แพ็ก
+</label>
+<input
+
+                    className="manager-input"
+
+                    type="number"
+
+                    min="0"
+
+                    step="0.01"
+
+                    value={
+
+                      form.packPrice
+
+                    }
+
+                    onChange={(
+
+                      event
+
+                    ) =>
+
+                      updateField(
+
+                        "packPrice",
+
+                        event.target
+
+                          .value
+
+                      )
+
+                    }
+
+                  />
+<small>
+
+                    ตัวอย่าง: 6 ชิ้น/แพ็ก ราคา 95 บาท
+
+                    ระบบ Stock จะยังนับเป็นจำนวนชิ้น
+</small>
+<div
+
+                    style={{
+
+                      marginTop:
+
+                        "10px",
+
+                      padding:
+
+                        "10px 12px",
+
+                      borderRadius:
+
+                        "8px",
+
+                      background:
+
+                        "#f8fafc",
+
+                      fontSize:
+
+                        "13px",
+
+                    }}
+>
+
+                    1 แพ็ก ={" "}
+<strong>
+
+                      {Math.max(
+
+                        1,
+
+                        Number(
+
+                          form.packQty
+
+                        ) || 1
+
+                      )}{" "}
+
+                      ชิ้น
+</strong>
+<br />
+
+                    ราคาแพ็ก ={" "}
+<strong>
+
+                      {Number(
+
+                        form.packPrice
+
+                      ) || 0}{" "}
+
+                      บาท
+</strong>
+</div>
+</>
+
+              )}
+<hr />
+<h3>
+
                 การติดตามสต๊อก
 </h3>
 <label className="manager-checkbox">
@@ -1104,7 +1664,11 @@ item.id
 
                   }
 
-                  onChange={(event) =>
+                  onChange={(
+
+                    event
+
+                  ) =>
 
                     updateField(
 
@@ -1188,7 +1752,11 @@ item.id
 
                 placeholder="/images/ชื่อรูป.png"
 
-                onChange={(event) =>
+                onChange={(
+
+                  event
+
+                ) =>
 
                   updateField(
 

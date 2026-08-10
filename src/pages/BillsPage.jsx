@@ -234,6 +234,14 @@ function mergeSales(
 
     new Map();
 
+  /*
+
+    ใส่บิล Local ก่อน
+
+    เผื่อมีบิลที่ยังรอ Sync
+
+  */
+
   (localSales || []).forEach(
 
     (sale) => {
@@ -255,6 +263,14 @@ function mergeSales(
     }
 
   );
+
+  /*
+
+    ถ้าบิลเดียวกันอยู่บน Cloud
+
+    ให้ข้อมูล Cloud เป็นหลัก
+
+  */
 
   (cloudSales || []).forEach(
 
@@ -558,6 +574,14 @@ function BillsPage({
 
         );
 
+      /*
+
+        Offline:
+
+        แสดงบิลในเครื่องอย่างเดียว
+
+      */
+
       if (
 
         typeof navigator !==
@@ -663,6 +687,14 @@ function BillsPage({
     function handleOnline() {
 
       setIsOnline(true);
+
+      /*
+
+        เมื่อเน็ตกลับ
+
+        โหลดบิลจาก Cloud ใหม่
+
+      */
 
       loadBills();
 
@@ -846,16 +878,23 @@ function BillsPage({
 
     }
 
-    if (
-sale.id &&
+    /*
 
-      !isOnline
+      ==================================
 
-    ) {
+      กติกาใหม่:
+
+      Offline ห้ามยกเลิกบิลทุกกรณี
+
+      ==================================
+
+    */
+
+    if (!isOnline) {
 
       window.alert(
 
-        "บิลนี้บันทึกอยู่บน Cloud แล้ว\nกรุณาเชื่อมต่ออินเทอร์เน็ตก่อนยกเลิกบิล"
+        "ไม่สามารถยกเลิกบิลขณะ Offline ได้\nกรุณาเชื่อมต่ออินเทอร์เน็ตก่อนยกเลิกบิล"
 
       );
 
@@ -885,13 +924,21 @@ sale.id &&
 
         ==================================
 
-        บิลที่อยู่บน Cloud
+        CASE 1
+
+        บิลอยู่บน Cloud แล้ว
 
         ==================================
 
       */
 
       if (sale.id) {
+
+        /*
+
+          คืน Stock บน Supabase
+
+        */
 
         const restoredStocks =
 
@@ -900,6 +947,12 @@ sale.id &&
             sale.items || []
 
           );
+
+        /*
+
+          เอา Stock ใหม่มาเขียน Local
+
+        */
 
         const localInventory =
 
@@ -919,12 +972,6 @@ sale.id &&
 
         };
 
-        /*
-
-          เขียน LocalStorage
-
-        */
-
         writeStorage(
 
           STOCK_KEY,
@@ -935,11 +982,9 @@ sale.id &&
 
         /*
 
-          สำคัญ:
+          อัปเดต React State
 
-          อัปเดต React inventory
-
-          ที่ App.jsx ด้วย
+          เพื่อให้หน้า POS เปลี่ยนทันที
 
         */
 
@@ -951,9 +996,9 @@ sale.id &&
 
         /*
 
-          Stock ชุดนี้ขึ้น Cloud แล้ว
+          Stock เหล่านี้ Sync Cloud แล้ว
 
-          ไม่ต้องค้าง Pending
+          เอาออกจาก Pending
 
         */
 
@@ -979,6 +1024,8 @@ sale.id &&
 
           ลบ sale_items + sales
 
+          จาก Supabase
+
         */
 
         await deleteCloudSale(
@@ -986,11 +1033,23 @@ sale.id
 
         );
 
+        /*
+
+          ป้องกันบิลนี้ค้างใน Pending Sale
+
+        */
+
         removePendingSale(
 
           sale.billId
 
         );
+
+        /*
+
+          ลบบิลออกจาก Local
+
+        */
 
         const updatedSales =
 
@@ -1024,7 +1083,13 @@ sale.id
 
         ==================================
 
+        CASE 2
+
         บิล Local ที่ยังไม่ขึ้น Cloud
+
+        ถึงแม้เป็น Local
+
+        ก็เข้ามาตรงนี้ได้เฉพาะตอน Online
 
         ==================================
 
@@ -1040,7 +1105,7 @@ sale.id
 
       /*
 
-        อัปเดตหน้า POS ทันที
+        ให้หน้า POS เห็น Stock ใหม่ทันที
 
       */
 
@@ -1052,7 +1117,7 @@ sale.id
 
       /*
 
-        บิลนี้ถูกยกเลิกแล้ว
+        บิลถูกยกเลิกแล้ว
 
         ห้าม Sync ขึ้น Cloud
 
@@ -1066,9 +1131,9 @@ sale.id
 
       /*
 
-        Stock ที่คืนต้องรอ Sync
+        Stock ที่คืนแล้วต้อง Sync
 
-        ไป Cloud ภายหลัง
+        ขึ้น Cloud
 
       */
 
@@ -1110,6 +1175,12 @@ sale.id
 
       );
 
+      /*
+
+        ลบบิล Local
+
+      */
+
       const updatedSales =
 
         removeLocalBill(
@@ -1128,23 +1199,11 @@ sale.id
 
       setSelectedBill(null);
 
-      if (isOnline) {
+      window.alert(
 
-        window.alert(
+        "ยกเลิกบิลและคืนสต๊อกเรียบร้อย\nStock จะ Sync ขึ้น Cloud อัตโนมัติ"
 
-          "ยกเลิกบิลและคืนสต๊อกใน POS เรียบร้อย\nStock จะ Sync ขึ้น Cloud อัตโนมัติ"
-
-        );
-
-      } else {
-
-        window.alert(
-
-          "ยกเลิกบิลและคืนสต๊อกใน POS เรียบร้อย\nเมื่ออินเทอร์เน็ตกลับมา Stock จะ Sync ขึ้น Cloud"
-
-        );
-
-      }
+      );
 
     } catch (error) {
 
@@ -1238,7 +1297,7 @@ sale.id
 </div>
 </header>
 
-      {cloudError && (
+      {!isOnline && (
 <div
 
           style={{
@@ -1249,7 +1308,7 @@ sale.id
 
             padding:
 
-              "10px 14px",
+              "11px 14px",
 
             borderRadius:
 
@@ -1257,27 +1316,76 @@ sale.id
 
             background:
 
-              "#fff3cd",
+              "#fff7ed",
 
             color:
 
-              "#664d03",
+              "#9a3412",
+
+            border:
+
+              "1px solid #fed7aa",
 
             fontSize:
 
               "13px",
 
+            fontWeight:
+
+              600,
+
           }}
 >
 
-          {isOnline
+          ขณะ Offline สามารถดูบิลได้
 
-            ? "Cloud เชื่อมต่อไม่สำเร็จ ตอนนี้กำลังแสดงบิลสำรองจากเครื่อง"
+          แต่ไม่สามารถยกเลิกบิลได้
 
-            : "กำลังใช้งานแบบ Offline แสดงบิลที่เก็บอยู่ในเครื่อง"}
+          กรุณาเชื่อมต่ออินเทอร์เน็ตก่อน
 </div>
 
       )}
+
+      {cloudError &&
+
+        isOnline && (
+<div
+
+            style={{
+
+              marginBottom:
+
+                "12px",
+
+              padding:
+
+                "10px 14px",
+
+              borderRadius:
+
+                "10px",
+
+              background:
+
+                "#fff3cd",
+
+              color:
+
+                "#664d03",
+
+              fontSize:
+
+                "13px",
+
+            }}
+>
+
+            Cloud เชื่อมต่อไม่สำเร็จ
+
+            ตอนนี้กำลังแสดงบิลสำรองจากเครื่อง
+</div>
+
+        )}
 <div className="bills-toolbar">
 <input
 
@@ -1470,7 +1578,9 @@ sale.id
 
                   disabled={
 
-                    cancelling
+                    cancelling ||
+
+                    !isOnline
 
                   }
 
@@ -1483,54 +1593,66 @@ sale.id
                     )
 
                   }
+
+                  title={
+
+                    !isOnline
+
+                      ? "ต้องออนไลน์ก่อนจึงจะยกเลิกบิลได้"
+
+                      : ""
+
+                  }
 >
 
                   {cancelling
 
                     ? "กำลังยกเลิก..."
 
-                    : "ยกเลิกบิล"}
+                    : !isOnline
+
+                      ? "ยกเลิกไม่ได้ขณะ Offline"
+
+                      : "ยกเลิกบิล"}
 </button>
 </div>
 
-              {selectedBill.id &&
-
-                !isOnline && (
+              {!isOnline && (
 <div
 
-                    style={{
+                  style={{
 
-                      marginBottom:
+                    marginBottom:
 
-                        "12px",
+                      "12px",
 
-                      padding:
+                    padding:
 
-                        "8px 10px",
+                      "8px 10px",
 
-                      borderRadius:
+                    borderRadius:
 
-                        "8px",
+                      "8px",
 
-                      background:
+                    background:
 
-                        "#fff7ed",
+                      "#fff7ed",
 
-                      color:
+                    color:
 
-                        "#9a3412",
+                      "#9a3412",
 
-                      fontSize:
+                    fontSize:
 
-                        "12px",
+                      "12px",
 
-                    }}
+                  }}
 >
 
-                    บิลนี้อยู่บน Cloud แล้ว ต้องออนไลน์ก่อนจึงจะยกเลิกได้
+                  ต้องเชื่อมต่ออินเทอร์เน็ตก่อนจึงจะยกเลิกบิลนี้ได้
 </div>
 
-                )}
+              )}
 <div className="bill-detail-summary">
 <div>
 <span>
@@ -1682,3 +1804,4 @@ sale.id
 }
 
 export default BillsPage;
+ 

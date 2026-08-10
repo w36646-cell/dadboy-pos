@@ -36,17 +36,27 @@ import {
 
 } from "./services/productService";
 
-import { saveCloudSale } from "./services/salesService";
+import {
+
+  saveCloudSale,
+
+} from "./services/salesService";
 
 import "./styles/App.css";
 
 import "./components/PaymentPopup.css";
 
-const STOCK_KEY = "dadboy_inventory_v2";
+const STOCK_KEY =
 
-const SALES_KEY = "dadboy_sales_v1";
+  "dadboy_inventory_v2";
 
-const PRODUCTS_KEY = "dadboy_products_v1";
+const SALES_KEY =
+
+  "dadboy_sales_v1";
+
+const PRODUCTS_KEY =
+
+  "dadboy_products_v1";
 
 const PENDING_STOCK_KEY =
 
@@ -56,13 +66,23 @@ const PENDING_SALES_KEY =
 
   "dadboy_pending_sales_sync_v2";
 
-function readStorage(key, fallback) {
+function readStorage(
+
+  key,
+
+  fallback
+
+) {
 
   try {
 
     const saved =
 
-      localStorage.getItem(key);
+      localStorage.getItem(
+
+        key
+
+      );
 
     return saved
 
@@ -98,7 +118,11 @@ function loadProducts() {
 
 }
 
-function loadInventory(productList) {
+function loadInventory(
+
+  productList
+
+) {
 
   const saved =
 
@@ -114,7 +138,9 @@ function loadInventory(productList) {
 
     saved &&
 
-    typeof saved === "object"
+    typeof saved ===
+
+      "object"
 
   ) {
 
@@ -128,11 +154,16 @@ function loadInventory(productList) {
 
     (product) => {
 
-      result[product.id] =
+      result[
+product.id
+
+      ] =
 
         Number(
 
-          product.stock ?? 50
+          product.stock ??
+
+            50
 
         );
 
@@ -156,11 +187,16 @@ function inventoryFromProducts(
 
     (product) => {
 
-      result[product.id] =
+      result[
+product.id
+
+      ] =
 
         Number(
 
-          product.stock ?? 0
+          product.stock ??
+
+            0
 
         );
 
@@ -192,7 +228,11 @@ function getPendingSales() {
 
 }
 
-function savePendingSale(sale) {
+function savePendingSale(
+
+  sale
+
+) {
 
   const current =
 
@@ -278,7 +318,9 @@ function getPendingStocks() {
 
     result &&
 
-    typeof result === "object" &&
+    typeof result ===
+
+      "object" &&
 
     !Array.isArray(result)
 
@@ -342,7 +384,11 @@ function removePendingStock(
 
     PENDING_STOCK_KEY,
 
-    JSON.stringify(current)
+    JSON.stringify(
+
+      current
+
+    )
 
   );
 
@@ -456,7 +502,9 @@ function App() {
 
   ] = useState(() =>
 
-    typeof navigator === "undefined"
+    typeof navigator ===
+
+    "undefined"
 
       ? true
 
@@ -566,7 +614,9 @@ function App() {
 
     if (
 
-      pendingSales.length === 0
+      pendingSales.length ===
+
+      0
 
     ) {
 
@@ -634,7 +684,9 @@ function App() {
 
         "undefined" &&
 
-      navigator.onLine === false
+      navigator.onLine ===
+
+        false
 
     ) {
 
@@ -714,15 +766,17 @@ function App() {
 
       ) {
 
-        setCloudReady(false);
+        setCloudReady(
+
+          false
+
+        );
 
         return;
 
       }
 
-      syncing =
-
-        true;
+      syncing = true;
 
       try {
 
@@ -730,9 +784,7 @@ function App() {
 
       } finally {
 
-        syncing =
-
-          false;
+        syncing = false;
 
       }
 
@@ -850,9 +902,7 @@ function App() {
 
             getPendingSales()
 
-              .length ===
-
-              0
+              .length === 0
 
           );
 
@@ -930,7 +980,11 @@ function App() {
 
         );
 
-        setCloudReady(true);
+        setCloudReady(
+
+          true
+
+        );
 
       } catch (error) {
 
@@ -942,7 +996,11 @@ function App() {
 
         );
 
-        setCloudReady(false);
+        setCloudReady(
+
+          false
+
+        );
 
       }
 
@@ -976,7 +1034,11 @@ function App() {
 
           : navigator.onLine;
 
-      setIsOnline(online);
+      setIsOnline(
+
+        online
+
+      );
 
       if (online) {
 
@@ -1052,9 +1114,7 @@ function App() {
 
     return () => {
 
-      cancelled =
-
-        true;
+      cancelled = true;
 
       clearInterval(
 
@@ -1347,9 +1407,7 @@ cloudProduct.id
 
           getPendingSales()
 
-            .length ===
-
-            0 &&
+            .length === 0 &&
 
           pendingStocksCount() ===
 
@@ -1379,6 +1437,150 @@ cloudProduct.id
 
   }
 
+  /*
+
+    หาข้อมูลสินค้าจริง
+
+    จาก Product ID
+
+  */
+
+  function findProduct(
+
+    productId
+
+  ) {
+
+    return products.find(
+
+      (product) =>
+
+        String(
+product.id
+
+        ) ===
+
+        String(
+
+          productId
+
+        )
+
+    );
+
+  }
+
+  /*
+
+    ==========================
+
+    จำนวน Stock ต่อหน่วยขาย
+
+    ==========================
+
+    ตัวนี้เป็นจุดสำคัญ
+
+    ถ้าเป็นแพ็ก
+
+    เราอ่าน packQty จาก Product จริง
+
+    ไม่เชื่อค่าใน Cart อย่างเดียว
+
+  */
+
+  function getStockPerUnit(
+
+    item
+
+  ) {
+
+    const product =
+
+      findProduct(
+item.id
+
+      );
+
+    const optionName =
+
+      String(
+
+        item.option || ""
+
+      );
+
+    const looksLikePack =
+
+      item.saleType ===
+
+        "pack" ||
+
+      optionName.startsWith(
+
+        "แพ็ก"
+
+      );
+
+    if (looksLikePack) {
+
+      const productPackQty =
+
+        Number(
+
+          product?.packQty ||
+
+            0
+
+        );
+
+      if (
+
+        Number.isFinite(
+
+          productPackQty
+
+        ) &&
+
+        productPackQty >= 2
+
+      ) {
+
+        return productPackQty;
+
+      }
+
+      const cartPackQty =
+
+        Number(
+
+          item.stockPerUnit ||
+
+            0
+
+        );
+
+      if (
+
+        Number.isFinite(
+
+          cartPackQty
+
+        ) &&
+
+        cartPackQty >= 2
+
+      ) {
+
+        return cartPackQty;
+
+      }
+
+    }
+
+    return 1;
+
+  }
+
   function addToCart(
 
     product,
@@ -1395,7 +1597,11 @@ cloudProduct.id
 
         1,
 
-        Number(quantity) || 1
+        Number(
+
+          quantity
+
+        ) || 1
 
       );
 
@@ -1417,6 +1623,60 @@ cloudProduct.id
 
       "ปกติ";
 
+    const isPack =
+
+      option?.saleType ===
+
+        "pack" ||
+
+      String(
+
+        optionName
+
+      ).startsWith(
+
+        "แพ็ก"
+
+      );
+
+    const saleType =
+
+      isPack
+
+        ? "pack"
+
+        : "unit";
+
+    /*
+
+      ถ้าเป็นแพ็ก
+
+      ใช้ packQty จาก Product ก่อน
+
+    */
+
+    const stockPerUnit =
+
+      isPack
+
+        ? Math.max(
+
+            2,
+
+            Number(
+
+              product.packQty ??
+
+                option?.stockPerUnit ??
+
+                2
+
+            ) || 2
+
+          )
+
+        : 1;
+
     const cost =
 
       Number(
@@ -1434,12 +1694,24 @@ cloudProduct.id
           currentCart.find(
 
             (item) =>
-item.id ===
-product.id &&
+
+              String(
+item.id
+
+              ) ===
+
+                String(
+product.id
+
+                ) &&
 
               item.option ===
 
-                optionName
+                optionName &&
+
+              item.saleType ===
+
+                saleType
 
           );
 
@@ -1448,12 +1720,24 @@ product.id &&
           return currentCart.map(
 
             (item) =>
-item.id ===
-product.id &&
+
+              String(
+item.id
+
+              ) ===
+
+                String(
+product.id
+
+                ) &&
 
               item.option ===
 
-                optionName
+                optionName &&
+
+              item.saleType ===
+
+                saleType
 
                 ? {
 
@@ -1466,6 +1750,10 @@ product.id &&
                     price,
 
                     cost,
+
+                    saleType,
+
+                    stockPerUnit,
 
                     qty:
 
@@ -1510,6 +1798,10 @@ product.id,
 
               safeQty,
 
+            saleType,
+
+            stockPerUnit,
+
           },
 
         ];
@@ -1534,7 +1826,11 @@ product.id,
 
         1,
 
-        Number(quantity) || 1
+        Number(
+
+          quantity
+
+        ) || 1
 
       );
 
@@ -1760,13 +2056,21 @@ product.id,
 
     }
 
-    setPaymentOpen(true);
+    setPaymentOpen(
+
+      true
+
+    );
 
   }
 
   function closePayment() {
 
-    setPaymentOpen(false);
+    setPaymentOpen(
+
+      false
+
+    );
 
   }
 
@@ -1778,7 +2082,11 @@ product.id,
 
     ) {
 
-      setPaymentOpen(false);
+      setPaymentOpen(
+
+        false
+
+      );
 
       return;
 
@@ -1788,13 +2096,77 @@ product.id,
 
       [...cart];
 
-    const checkoutTotalQty =
-
-      totalQty;
-
     const checkoutTotal =
 
       total;
+
+    /*
+
+      ==========================
+
+      จำนวนชิ้นจริงที่ออกจาก Stock
+
+      ==========================
+
+    */
+
+    const checkoutStockQty =
+
+      checkoutCart.reduce(
+
+        (
+
+          sum,
+
+          item
+
+        ) => {
+
+          const quantity =
+
+            Number(
+
+              item.qty ||
+
+                0
+
+            );
+
+          const stockPerUnit =
+
+            getStockPerUnit(
+
+              item
+
+            );
+
+          return (
+
+            sum +
+
+            quantity *
+
+              stockPerUnit
+
+          );
+
+        },
+
+        0
+
+      );
+
+    /*
+
+      ==========================
+
+      รวม Stock ที่ต้องตัด
+
+      แยกตามสินค้า
+
+      ==========================
+
+    */
 
     const soldByProduct =
 
@@ -1804,15 +2176,7 @@ product.id,
 
       (item) => {
 
-        soldByProduct[
-item.id
-
-        ] =
-
-          (soldByProduct[
-item.id
-
-          ] || 0) +
+        const quantity =
 
           Number(
 
@@ -1820,9 +2184,101 @@ item.id
 
           );
 
+        const stockPerUnit =
+
+          getStockPerUnit(
+
+            item
+
+          );
+
+        const stockQuantity =
+
+          quantity *
+
+          stockPerUnit;
+
+        soldByProduct[
+item.id
+
+        ] =
+
+          Number(
+
+            soldByProduct[
+item.id
+
+            ] || 0
+
+          ) +
+
+          stockQuantity;
+
       }
 
     );
+
+    console.log(
+
+      "Checkout stock calculation:",
+
+      checkoutCart.map(
+
+        (item) => ({
+
+          product:
+
+            item.name,
+
+          option:
+
+            item.option,
+
+          qty:
+
+            item.qty,
+
+          saleType:
+
+            item.saleType,
+
+          stockPerUnit:
+
+            getStockPerUnit(
+
+              item
+
+            ),
+
+          stockQuantity:
+
+            Number(
+
+              item.qty || 0
+
+            ) *
+
+            getStockPerUnit(
+
+              item
+
+            ),
+
+        })
+
+      )
+
+    );
+
+    /*
+
+      ==========================
+
+      ตัด Stock Local
+
+      ==========================
+
+    */
 
     const newInventory = {
 
@@ -1840,7 +2296,7 @@ item.id
 
         productId,
 
-        quantity,
+        stockQuantity,
 
       ]) => {
 
@@ -1860,11 +2316,25 @@ item.id
 
           ) -
 
-          Number(quantity);
+          Number(
+
+            stockQuantity
+
+          );
 
       }
 
     );
+
+    /*
+
+      ==========================
+
+      สร้างรายการในบิล
+
+      ==========================
+
+    */
 
     const saleItems =
 
@@ -1880,6 +2350,20 @@ item.id
 
             );
 
+          const stockPerUnit =
+
+            getStockPerUnit(
+
+              item
+
+            );
+
+          const stockQuantity =
+
+            quantity *
+
+            stockPerUnit;
+
           const unitPrice =
 
             Number(
@@ -1888,13 +2372,19 @@ item.id
 
             );
 
-          const unitCost =
+          const costPerPiece =
 
             Number(
 
               item.cost || 0
 
             );
+
+          const unitCost =
+
+            costPerPiece *
+
+            stockPerUnit;
 
           const lineTotal =
 
@@ -1904,9 +2394,17 @@ item.id
 
           const lineCost =
 
-            unitCost *
+            costPerPiece *
 
-            quantity;
+            stockQuantity;
+
+          const saleType =
+
+            stockPerUnit > 1
+
+              ? "pack"
+
+              : "unit";
 
           return {
 
@@ -1920,6 +2418,12 @@ item.id,
             option:
 
               item.option,
+
+            saleType,
+
+            stockPerUnit,
+
+            stockQuantity,
 
             unitPrice,
 
@@ -1953,7 +2457,9 @@ item.id,
 
           Number(
 
-            item.lineCost || 0
+            item.lineCost ||
+
+              0
 
           ),
 
@@ -1991,9 +2497,17 @@ item.id,
 
         ),
 
+      /*
+
+        จำนวนชิ้นจริง
+
+        ที่ออกจาก Stock
+
+      */
+
       totalQty:
 
-        checkoutTotalQty,
+        checkoutStockQty,
 
       totalAmount:
 
@@ -2077,7 +2591,11 @@ item.id,
 
     setCart([]);
 
-    setPaymentOpen(false);
+    setPaymentOpen(
+
+      false
+
+    );
 
     window.alert(
 
@@ -2133,7 +2651,11 @@ item.id,
 
             );
 
-            setCloudReady(false);
+            setCloudReady(
+
+              false
+
+            );
 
             return false;
 
@@ -2143,7 +2665,11 @@ item.id,
 
     const saleJob =
 
-      saveCloudSale(sale)
+      saveCloudSale(
+
+        sale
+
+      )
 
         .then(() => {
 
@@ -2171,7 +2697,11 @@ item.id,
 
             );
 
-            setCloudReady(false);
+            setCloudReady(
+
+              false
+
+            );
 
             return false;
 
@@ -2223,25 +2753,47 @@ item.id,
 
   function enterOwnerMode() {
 
-    setOwnerMode(true);
+    setOwnerMode(
 
-    setLoginOpen(false);
+      true
 
-    setPage("dashboard");
+    );
+
+    setLoginOpen(
+
+      false
+
+    );
+
+    setPage(
+
+      "dashboard"
+
+    );
 
   }
 
   function exitOwnerMode() {
 
-    setOwnerMode(false);
+    setOwnerMode(
 
-    setPage("pos");
+      false
+
+    );
+
+    setPage(
+
+      "pos"
+
+    );
 
   }
 
   const pendingSaleCount =
 
-    getPendingSales().length;
+    getPendingSales()
+
+      .length;
 
   const pendingStockCount =
 
@@ -2254,13 +2806,29 @@ item.id,
     return (
 <POSPage
 
-        products={products}
+        products={
 
-        inventory={inventory}
+          products
 
-        cart={cart}
+        }
 
-        onAddToCart={addToCart}
+        inventory={
+
+          inventory
+
+        }
+
+        cart={
+
+          cart
+
+        }
+
+        onAddToCart={
+
+          addToCart
+
+        }
 
         onChangeCartQty={
 
@@ -2292,7 +2860,11 @@ item.id,
 
         }
 
-        isOnline={isOnline}
+        isOnline={
+
+          isOnline
+
+        }
 
         cloudReady={
 
@@ -2322,7 +2894,9 @@ item.id,
 
     if (
 
-      page === "dashboard"
+      page ===
+
+      "dashboard"
 
     ) {
 
@@ -2331,7 +2905,11 @@ item.id,
 
           onOpenStock={() =>
 
-            setPage("stock")
+            setPage(
+
+              "stock"
+
+            )
 
           }
 
@@ -2343,7 +2921,9 @@ item.id,
 
     if (
 
-      page === "reports"
+      page ===
+
+      "reports"
 
     ) {
 
@@ -2356,7 +2936,9 @@ item.id,
 
     if (
 
-      page === "bills"
+      page ===
+
+      "bills"
 
     ) {
 
@@ -2377,16 +2959,26 @@ item.id,
 
     if (
 
-      page === "products"
+      page ===
+
+      "products"
 
     ) {
 
       return (
 <ProductManager
 
-          products={products}
+          products={
 
-          inventory={inventory}
+            products
+
+          }
+
+          inventory={
+
+            inventory
+
+          }
 
           onSaveProduct={
 
@@ -2396,7 +2988,11 @@ item.id,
 
           onClose={() =>
 
-            setPage("pos")
+            setPage(
+
+              "pos"
+
+            )
 
           }
 
@@ -2408,22 +3004,40 @@ item.id,
 
     if (
 
-      page === "stock"
+      page ===
+
+      "stock"
 
     ) {
 
       return (
 <StockManager
 
-          products={products}
+          products={
 
-          inventory={inventory}
+            products
 
-          onAddStock={addStock}
+          }
+
+          inventory={
+
+            inventory
+
+          }
+
+          onAddStock={
+
+            addStock
+
+          }
 
           onClose={() =>
 
-            setPage("pos")
+            setPage(
+
+              "pos"
+
+            )
 
           }
 
@@ -2435,7 +3049,9 @@ item.id,
 
     if (
 
-      page === "settings"
+      page ===
+
+      "settings"
 
     ) {
 
@@ -2469,13 +3085,17 @@ item.id,
 
             บิลรอ Sync:{" "}
 
-            {pendingSaleCount} บิล
+            {pendingSaleCount}{" "}
+
+            บิล
 </p>
 <p>
 
             Stock รอ Sync:{" "}
 
-            {pendingStockCount} รายการ
+            {pendingStockCount}{" "}
+
+            รายการ
 </p>
 <button
 
@@ -2504,22 +3124,40 @@ item.id,
 
     !ownerMode &&
 
-    page === "stock"
+    page ===
+
+      "stock"
 
   ) {
 
     return (
 <StockManager
 
-        products={products}
+        products={
 
-        inventory={inventory}
+          products
 
-        onAddStock={addStock}
+        }
+
+        inventory={
+
+          inventory
+
+        }
+
+        onAddStock={
+
+          addStock
+
+        }
 
         onClose={() =>
 
-          setPage("pos")
+          setPage(
+
+            "pos"
+
+          )
 
         }
 
@@ -2536,7 +3174,11 @@ item.id,
 <div className="owner-app-shell">
 <OwnerSidebar
 
-            currentPage={page}
+            currentPage={
+
+              page
+
+            }
 
             onChangePage={
 
@@ -2573,7 +3215,11 @@ item.id,
 
                 onClick={() =>
 
-                  setPage("stock")
+                  setPage(
+
+                    "stock"
+
+                  )
 
                 }
 >
@@ -2588,7 +3234,11 @@ item.id,
 
                 onClick={() =>
 
-                  setLoginOpen(true)
+                  setLoginOpen(
+
+                    true
+
+                  )
 
                 }
 >
@@ -2604,7 +3254,11 @@ item.id,
       )}
 <OwnerLogin
 
-        open={loginOpen}
+        open={
+
+          loginOpen
+
+        }
 
         onSuccess={
 
@@ -2614,16 +3268,28 @@ item.id,
 
         onClose={() =>
 
-          setLoginOpen(false)
+          setLoginOpen(
+
+            false
+
+          )
 
         }
 
       />
 <PaymentPopup
 
-        open={paymentOpen}
+        open={
 
-        total={total}
+          paymentOpen
+
+        }
+
+        total={
+
+          total
+
+        }
 
         onConfirm={
 

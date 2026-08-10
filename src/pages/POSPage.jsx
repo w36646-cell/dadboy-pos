@@ -2,6 +2,8 @@ import {
 
   useMemo,
 
+  useRef,
+
   useState,
 
 } from "react";
@@ -67,6 +69,34 @@ function POSPage({
     setPopupQty,
 
   ] = useState(1);
+
+  const [
+
+    packProduct,
+
+    setPackProduct,
+
+  ] = useState(null);
+
+  const [
+
+    packPopupQty,
+
+    setPackPopupQty,
+
+  ] = useState(1);
+
+  const holdTimerRef =
+
+    useRef(null);
+
+  const longPressTriggeredRef =
+
+    useRef(false);
+
+  const LONG_PRESS_MS =
+
+    550;
 
   const filteredProducts =
 
@@ -208,6 +238,34 @@ function POSPage({
 
   }
 
+  function hasPack(
+
+    product
+
+  ) {
+
+    return (
+
+      product.packEnabled ===
+
+        true &&
+
+      Number(
+
+        product.packQty || 0
+
+      ) >= 2 &&
+
+      Number(
+
+        product.packPrice || 0
+
+      ) > 0
+
+    );
+
+  }
+
   function openProduct(
 
     product
@@ -224,6 +282,14 @@ function POSPage({
 
         true;
 
+    /*
+
+      สินค้าปกติ:
+
+      แตะครั้งเดียว = เพิ่ม 1 ชิ้น
+
+    */
+
     if (
 
       !hasOption ||
@@ -238,13 +304,25 @@ function POSPage({
 
         {
 
+          id:
+
+            "normal",
+
           name:
 
-            "ปกติ",
+            "ชิ้น",
 
           price:
 
             product.price,
+
+          saleType:
+
+            "unit",
+
+          stockPerUnit:
+
+            1,
 
         },
 
@@ -255,6 +333,14 @@ function POSPage({
       return;
 
     }
+
+    /*
+
+      สินค้าที่มีตัวเลือกแก้ว:
+
+      แตะ = เปิด Popup เดิม
+
+    */
 
     const normalOption =
 
@@ -275,17 +361,47 @@ option.id ===
 
     );
 
-    setSelectedOption(
+    setSelectedOption({
 
-      normalOption
+      ...normalOption,
+
+      saleType:
+
+        "unit",
+
+      stockPerUnit:
+
+        1,
+
+    });
+
+    setPopupQty(1);
+
+  }
+
+  function openPackPopup(
+
+    product
+
+  ) {
+
+    if (
+
+      !hasPack(product)
+
+    ) {
+
+      return;
+
+    }
+
+    setPackProduct(
+
+      product
 
     );
 
-    setPopupQty(
-
-      1
-
-    );
+    setPackPopupQty(1);
 
   }
 
@@ -303,11 +419,19 @@ option.id ===
 
     );
 
-    setPopupQty(
+    setPopupQty(1);
 
-      1
+  }
+
+  function closePackPopup() {
+
+    setPackProduct(
+
+      null
 
     );
+
+    setPackPopupQty(1);
 
   }
 
@@ -339,13 +463,201 @@ option.id ===
 
   }
 
+  function confirmPackPopup() {
+
+    if (!packProduct) {
+
+      return;
+
+    }
+
+    const packQty =
+
+      Math.max(
+
+        2,
+
+        Number(
+
+          packProduct.packQty
+
+        ) || 2
+
+      );
+
+    const packPrice =
+
+      Math.max(
+
+        0,
+
+        Number(
+
+          packProduct.packPrice
+
+        ) || 0
+
+      );
+
+    onAddToCart(
+
+      packProduct,
+
+      {
+
+        id:
+
+          "pack",
+
+        name:
+
+          `แพ็ก ${packQty} ชิ้น`,
+
+        price:
+
+          packPrice,
+
+        saleType:
+
+          "pack",
+
+        stockPerUnit:
+
+          packQty,
+
+        packQty,
+
+      },
+
+      packPopupQty
+
+    );
+
+    closePackPopup();
+
+  }
+
+  function startLongPress(
+
+    product
+
+  ) {
+
+    longPressTriggeredRef.current =
+
+      false;
+
+    if (
+
+      holdTimerRef.current
+
+    ) {
+
+      clearTimeout(
+
+        holdTimerRef.current
+
+      );
+
+    }
+
+    if (
+
+      !hasPack(product)
+
+    ) {
+
+      return;
+
+    }
+
+    holdTimerRef.current =
+
+      setTimeout(
+
+        () => {
+
+          longPressTriggeredRef.current =
+
+            true;
+
+          openPackPopup(
+
+            product
+
+          );
+
+        },
+
+        LONG_PRESS_MS
+
+      );
+
+  }
+
+  function cancelLongPress() {
+
+    if (
+
+      holdTimerRef.current
+
+    ) {
+
+      clearTimeout(
+
+        holdTimerRef.current
+
+      );
+
+      holdTimerRef.current =
+
+        null;
+
+    }
+
+  }
+
+  function handleProductClick(
+
+    product
+
+  ) {
+
+    /*
+
+      ถ้าเพิ่งเกิด Long Press
+
+      ห้าม click ซ้ำแล้วเพิ่มสินค้าเป็นชิ้น
+
+    */
+
+    if (
+
+      longPressTriggeredRef.current
+
+    ) {
+
+      longPressTriggeredRef.current =
+
+        false;
+
+      return;
+
+    }
+
+    openProduct(
+
+      product
+
+    );
+
+  }
+
   function handlePayment() {
 
     if (
 
-      cart.length ===
-
-      0
+      cart.length === 0
 
     ) {
 
@@ -361,17 +673,13 @@ option.id ===
 
     Number(
 
-      pendingSaleCount ||
-
-        0
+      pendingSaleCount || 0
 
     ) > 0 ||
 
     Number(
 
-      pendingStockCount ||
-
-        0
+      pendingStockCount || 0
 
     ) > 0;
 
@@ -429,9 +737,7 @@ option.id ===
 
     if (
 
-      pendingSaleCount >
-
-      0
+      pendingSaleCount > 0
 
     ) {
 
@@ -445,9 +751,7 @@ option.id ===
 
     if (
 
-      pendingStockCount >
-
-      0
+      pendingStockCount > 0
 
     ) {
 
@@ -516,6 +820,30 @@ option.id ===
       "#2e90fa";
 
   }
+
+  const packStockUse =
+
+    packProduct
+
+      ? Math.max(
+
+          2,
+
+          Number(
+
+            packProduct.packQty
+
+          ) || 2
+
+        ) *
+
+        Number(
+
+          packPopupQty || 0
+
+        )
+
+      : 0;
 
   return (
 <div className="app pos-page">
@@ -713,6 +1041,14 @@ product.id
 
                   );
 
+                const packEnabled =
+
+                  hasPack(
+
+                    product
+
+                  );
+
                 return (
 <button
 
@@ -727,11 +1063,65 @@ product.id
 
                     onClick={() =>
 
-                      openProduct(
+                      handleProductClick(
 
                         product
 
                       )
+
+                    }
+
+                    onMouseDown={() =>
+
+                      startLongPress(
+
+                        product
+
+                      )
+
+                    }
+
+                    onMouseUp={
+
+                      cancelLongPress
+
+                    }
+
+                    onMouseLeave={
+
+                      cancelLongPress
+
+                    }
+
+                    onTouchStart={() =>
+
+                      startLongPress(
+
+                        product
+
+                      )
+
+                    }
+
+                    onTouchEnd={
+
+                      cancelLongPress
+
+                    }
+
+                    onTouchCancel={
+
+                      cancelLongPress
+
+                    }
+
+                    onContextMenu={(
+
+                      event
+
+                    ) =>
+
+                      event.preventDefault()
 
                     }
 >
@@ -796,6 +1186,47 @@ product.id
 
                       บาท
 </div>
+
+                    {packEnabled && (
+<div
+
+                        style={{
+
+                          marginTop:
+
+                            "4px",
+
+                          fontSize:
+
+                            "11px",
+
+                          color:
+
+                            "#667085",
+
+                        }}
+>
+
+                        กดค้าง: แพ็ก{" "}
+
+                        {
+
+                          product.packQty
+
+                        }{" "}
+
+                        ชิ้น{" "}
+
+                        {Number(
+
+                          product.packPrice
+
+                        ).toLocaleString()}{" "}
+
+                        บาท
+</div>
+
+                    )}
 <div
 
                       className={
@@ -837,9 +1268,7 @@ product.id
 </div>
 <div className="cart-list">
 
-          {cart.length ===
-
-          0 ? (
+          {cart.length === 0 ? (
 <p className="empty-cart">
 
               ยังไม่มีสินค้า
@@ -1022,9 +1451,7 @@ product.id
 
           disabled={
 
-            cart.length ===
-
-            0
+            cart.length === 0
 
           }
 
@@ -1115,11 +1542,19 @@ option.id
 
                           onChange={() =>
 
-                            setSelectedOption(
+                            setSelectedOption({
 
-                              option
+                              ...option,
 
-                            )
+                              saleType:
+
+                                "unit",
+
+                              stockPerUnit:
+
+                                1,
+
+                            })
 
                           }
 
@@ -1170,9 +1605,7 @@ option.id
 
                             quantity
 
-                          ) -
-
-                            1
+                          ) - 1
 
                         )
 
@@ -1308,6 +1741,295 @@ option.id
 </div>
 
         )}
+
+      {packProduct && (
+<div
+
+          className="popup-overlay"
+
+          onClick={
+
+            closePackPopup
+
+          }
+>
+<div
+
+            className="popup"
+
+            onClick={(
+
+              event
+
+            ) =>
+
+              event.stopPropagation()
+
+            }
+>
+<h2>
+
+              {
+
+                packProduct.name
+
+              }
+</h2>
+<div
+
+              style={{
+
+                marginBottom:
+
+                  "14px",
+
+                padding:
+
+                  "10px 12px",
+
+                borderRadius:
+
+                  "9px",
+
+                background:
+
+                  "#eff8ff",
+
+                color:
+
+                  "#175cd3",
+
+                textAlign:
+
+                  "center",
+
+                fontWeight:
+
+                  700,
+
+              }}
+>
+
+              แพ็ก{" "}
+
+              {
+
+                packProduct.packQty
+
+              }{" "}
+
+              ชิ้น ·{" "}
+
+              {Number(
+
+                packProduct.packPrice
+
+              ).toLocaleString()}{" "}
+
+              บาท
+</div>
+<div className="popup-quantity">
+<button
+
+                type="button"
+
+                onClick={() =>
+
+                  setPackPopupQty(
+
+                    (
+
+                      quantity
+
+                    ) =>
+
+                      Math.max(
+
+                        1,
+
+                        Number(
+
+                          quantity
+
+                        ) - 1
+
+                      )
+
+                  )
+
+                }
+>
+
+                −
+</button>
+<input
+
+                className="quantity-input"
+
+                type="number"
+
+                min="1"
+
+                value={
+
+                  packPopupQty
+
+                }
+
+                onChange={(
+
+                  event
+
+                ) =>
+
+                  setPackPopupQty(
+
+                    Math.max(
+
+                      1,
+
+                      Number(
+
+                        event.target
+
+                          .value
+
+                      ) || 1
+
+                    )
+
+                  )
+
+                }
+
+              />
+<button
+
+                type="button"
+
+                onClick={() =>
+
+                  setPackPopupQty(
+
+                    (
+
+                      quantity
+
+                    ) =>
+
+                      Number(
+
+                        quantity
+
+                      ) + 1
+
+                  )
+
+                }
+>
+
+                +
+</button>
+</div>
+<div
+
+              style={{
+
+                marginTop:
+
+                  "10px",
+
+                marginBottom:
+
+                  "10px",
+
+                textAlign:
+
+                  "center",
+
+                color:
+
+                  "#475467",
+
+                fontSize:
+
+                  "13px",
+
+              }}
+>
+
+              {packPopupQty} แพ็ก ={" "}
+<strong>
+
+                {
+
+                  packStockUse
+
+                }{" "}
+
+                ชิ้น
+</strong>
+</div>
+<div className="popup-total">
+
+              รวม{" "}
+
+              {(
+
+                Number(
+
+                  packProduct.packPrice ||
+
+                    0
+
+                ) *
+
+                Number(
+
+                  packPopupQty ||
+
+                    0
+
+                )
+
+              ).toLocaleString()}{" "}
+
+              บาท
+</div>
+<button
+
+              className="pay-button"
+
+              type="button"
+
+              onClick={
+
+                confirmPackPopup
+
+              }
+>
+
+              เพิ่มแพ็กลงตะกร้า
+</button>
+<button
+
+              className="cancel-button"
+
+              type="button"
+
+              onClick={
+
+                closePackPopup
+
+              }
+>
+
+              ยกเลิก
+</button>
+</div>
+</div>
+
+      )}
 </div>
 
   );
@@ -1315,3 +2037,4 @@ option.id
 }
 
 export default POSPage;
+ 

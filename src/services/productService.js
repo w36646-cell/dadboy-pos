@@ -18,7 +18,9 @@ function fromDatabase(row) {
 
   return {
 
-    id: normalizeId(row.id),
+    id:
+
+      normalizeId(row.id),
 
     name:
 
@@ -83,6 +85,48 @@ function fromDatabase(row) {
         ? row.options
 
         : [],
+
+    /*
+
+      ==========================
+
+      ขายยกแพ็ก
+
+      ==========================
+
+    */
+
+    packEnabled:
+
+      row.pack_enabled === true,
+
+    packQty:
+
+      Math.max(
+
+        1,
+
+        Number(
+
+          row.pack_qty ?? 1
+
+        ) || 1
+
+      ),
+
+    packPrice:
+
+      Math.max(
+
+        0,
+
+        Number(
+
+          row.pack_price ?? 0
+
+        ) || 0
+
+      ),
 
   };
 
@@ -155,13 +199,19 @@ product.id
 
     track_stock:
 
-      product.trackStock !== false,
+      product.trackStock !==
+
+      false,
 
     has_option:
 
-      product.hasOption === true ||
+      product.hasOption ===
 
-      product.hasOptions === true,
+        true ||
+
+      product.hasOptions ===
+
+        true,
 
     options:
 
@@ -174,6 +224,50 @@ product.id
         ? product.options
 
         : [],
+
+    /*
+
+      ==========================
+
+      ขายยกแพ็ก
+
+      ==========================
+
+    */
+
+    pack_enabled:
+
+      product.packEnabled ===
+
+      true,
+
+    pack_qty:
+
+      Math.max(
+
+        1,
+
+        Number(
+
+          product.packQty ?? 1
+
+        ) || 1
+
+      ),
+
+    pack_price:
+
+      Math.max(
+
+        0,
+
+        Number(
+
+          product.packPrice ?? 0
+
+        ) || 0
+
+      ),
 
   };
 
@@ -434,7 +528,37 @@ export async function updateCloudStock(
 
       .select(
 
-        "id, name, category, price, cost, image, stock, min_stock, track_stock, has_option, options"
+        `
+
+        id,
+
+        name,
+
+        category,
+
+        price,
+
+        cost,
+
+        image,
+
+        stock,
+
+        min_stock,
+
+        track_stock,
+
+        has_option,
+
+        options,
+
+        pack_enabled,
+
+        pack_qty,
+
+        pack_price
+
+        `
 
       )
 
@@ -640,19 +764,37 @@ export async function restoreCloudStocksFromItems(
 
   /*
 
-    รวมจำนวนสินค้าในบิลตาม Product ID
+    ==========================
 
-    เช่น สินค้าตัวเดียวกันมี 2 option
+    รวมจำนวน Stock ที่ต้องคืน
 
-    หรือมีหลายบรรทัดในบิล
+    ==========================
 
-    จะรวมก่อนคืน Stock
+    สินค้าปกติ:
+
+    quantity = 2
+
+    stockQuantity ไม่มี
+
+    => คืน 2 ชิ้น
+
+    สินค้าแพ็ก:
+
+    quantity = 2 แพ็ก
+
+    stockQuantity = 12 ชิ้น
+
+    => คืน 12 ชิ้น
+
+    จึงใช้ stockQuantity ก่อน
+
+    แล้ว fallback ไป quantity
+
+    เพื่อรองรับบิลเก่าด้วย
 
   */
 
-  const quantities =
-
-    {};
+  const quantities = {};
 
   items.forEach(
 
@@ -686,7 +828,11 @@ export async function restoreCloudStocksFromItems(
 
         Number(
 
-          item.quantity || 0
+          item.stockQuantity ??
+
+            item.quantity ??
+
+            0
 
         );
 
@@ -806,9 +952,13 @@ export async function restoreCloudStocksFromItems(
 
     const {
 
-      data: currentRow,
+      data:
 
-      error: readError,
+        currentRow,
+
+      error:
+
+        readError,
 
     } =
 
@@ -902,9 +1052,13 @@ export async function restoreCloudStocksFromItems(
 
     const {
 
-      data: updatedRow,
+      data:
 
-      error: updateError,
+        updatedRow,
+
+      error:
+
+        updateError,
 
     } =
 
