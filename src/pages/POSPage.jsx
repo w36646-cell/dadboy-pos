@@ -1,5 +1,7 @@
 import {
 
+  useEffect,
+
   useMemo,
 
   useRef,
@@ -7,6 +9,12 @@ import {
   useState,
 
 } from "react";
+
+import {
+
+  createPortal,
+
+} from "react-dom";
 
 import ProductCard from "../components/pos/ProductCard";
 
@@ -17,6 +25,8 @@ import PackPopup from "../components/pos/PackPopup";
 import ProductOptionPopup from "../components/pos/ProductOptionPopup";
 
 import SyncStatus from "../components/pos/SyncStatus";
+
+import "../styles/POSModern.css";
 
 function POSPage({
 
@@ -58,6 +68,22 @@ function POSPage({
 
   const [
 
+    searchOpen,
+
+    setSearchOpen,
+
+  ] = useState(false);
+
+  const [
+
+    searchPortalTarget,
+
+    setSearchPortalTarget,
+
+  ] = useState(null);
+
+  const [
+
     selectedProduct,
 
     setSelectedProduct,
@@ -96,6 +122,10 @@ function POSPage({
 
   ] = useState(1);
 
+  const searchInputRef =
+
+    useRef(null);
+
   const holdTimerRef =
 
     useRef(null);
@@ -107,6 +137,78 @@ function POSPage({
   const LONG_PRESS_MS =
 
     550;
+
+  /*
+
+    เอา Search ไปต่อท้าย
+
+    ปุ่มโหมดเจ้าของร้าน
+
+    โดยไม่ต้องแก้ App.jsx
+
+  */
+
+  useEffect(() => {
+
+    function findTarget() {
+
+      const target =
+
+        document.querySelector(
+
+          ".employee-pos-topbar > div"
+
+        );
+
+      setSearchPortalTarget(
+
+        target
+
+      );
+
+    }
+
+    findTarget();
+
+    const timer =
+
+      setTimeout(
+
+        findTarget,
+
+        100
+
+      );
+
+    return () =>
+
+      clearTimeout(
+
+        timer
+
+      );
+
+  }, []);
+
+  useEffect(() => {
+
+    if (
+
+      searchOpen &&
+
+      searchInputRef.current
+
+    ) {
+
+      searchInputRef.current.focus();
+
+    }
+
+  }, [
+
+    searchOpen,
+
+  ]);
 
   const filteredProducts =
 
@@ -272,7 +374,9 @@ function POSPage({
 
       Number(
 
-        product.packPrice || 0
+        product.packPrice ||
+
+          0
 
       ) > 0
 
@@ -310,13 +414,9 @@ function POSPage({
 
         {
 
-          id:
+          id: "normal",
 
-            "normal",
-
-          name:
-
-            "ชิ้น",
+          name: "ชิ้น",
 
           price:
 
@@ -363,13 +463,9 @@ option.id ===
 
       ...normalOption,
 
-      saleType:
+      saleType: "unit",
 
-        "unit",
-
-      stockPerUnit:
-
-        1,
+      stockPerUnit: 1,
 
     });
 
@@ -503,9 +599,7 @@ option.id ===
 
       {
 
-        id:
-
-          "pack",
+        id: "pack",
 
         name:
 
@@ -663,6 +757,18 @@ option.id ===
 
   }
 
+  function closeSearch() {
+
+    setSearchOpen(
+
+      false
+
+    );
+
+    setSearchText("");
+
+  }
+
   const packStockUse =
 
     packProduct
@@ -687,59 +793,50 @@ option.id ===
 
       : 0;
 
-  return (
-<div className="app pos-page">
-<main className="product-panel">
-<header className="pos-page-header">
-<div>
-<h1>
+  const searchControl = (
+<div
 
-              ขายสินค้า
-</h1>
-<p>
+      className={
 
-              สินค้า{" "}
+        searchOpen
 
-              {
+          ? "pos-search-control open"
 
-                filteredProducts.length
+          : "pos-search-control"
 
-              }{" "}
+      }
+>
+<button
 
-              รายการ
-</p>
-</div>
-<SyncStatus
+        type="button"
 
-            isOnline={
+        className="pos-search-toggle"
 
-              isOnline
+        aria-label="ค้นหาสินค้า"
 
-            }
+        onClick={() =>
 
-            cloudReady={
+          setSearchOpen(
 
-              cloudReady
+            (current) =>
 
-            }
+              !current
 
-            pendingSaleCount={
+          )
 
-              pendingSaleCount
+        }
+>
 
-            }
-
-            pendingStockCount={
-
-              pendingStockCount
-
-            }
-
-          />
-</header>
+        🔍
+</button>
+<div className="pos-search-slide">
 <input
 
-          className="search-input"
+          ref={
+
+            searchInputRef
+
+          }
 
           type="search"
 
@@ -768,6 +865,110 @@ option.id ===
           }
 
         />
+<button
+
+          type="button"
+
+          className="pos-search-close"
+
+          onClick={
+
+            closeSearch
+
+          }
+>
+
+          ×
+</button>
+</div>
+</div>
+
+  );
+
+  return (
+<div className="app pos-page pos-modern">
+
+      {searchPortalTarget &&
+
+        createPortal(
+
+          searchControl,
+
+          searchPortalTarget
+
+        )}
+<main className="product-panel">
+<header className="pos-modern-header">
+<div className="pos-title-row">
+<h1>
+
+              ขายสินค้า
+</h1>
+<span className="pos-product-count">
+
+              {
+
+                filteredProducts.length
+
+              }{" "}
+
+              สินค้า
+</span>
+</div>
+<div className="pos-sync-corner">
+<SyncStatus
+
+              isOnline={
+
+                isOnline
+
+              }
+
+              cloudReady={
+
+                cloudReady
+
+              }
+
+              pendingSaleCount={
+
+                pendingSaleCount
+
+              }
+
+              pendingStockCount={
+
+                pendingStockCount
+
+              }
+
+            />
+</div>
+</header>
+
+        {!searchPortalTarget && (
+<div className="pos-search-fallback">
+
+            {searchControl}
+</div>
+
+        )}
+
+        {searchText && (
+<div className="pos-search-result">
+
+            พบ{" "}
+
+            {
+
+              filteredProducts.length
+
+            }{" "}
+
+            รายการ
+</div>
+
+        )}
 
         {filteredProducts.length ===
 
@@ -778,11 +979,17 @@ option.id ===
 </div>
 
         ) : (
-<div className="product-grid">
+<div className="product-grid pos-modern-grid">
 
             {filteredProducts.map(
 
-              (product) => {
+              (
+
+                product,
+
+                index
+
+              ) => {
 
                 const normalPrice =
 
@@ -831,6 +1038,12 @@ product.id
 
                     key={
 product.id
+
+                    }
+
+                    index={
+
+                      index
 
                     }
 

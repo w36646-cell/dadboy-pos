@@ -26,45 +26,21 @@ function SyncStatus({
 
   let syncText =
 
-    "";
+    "Sync";
 
-  let statusBackground =
+  let statusClass =
 
-    "#ecfdf3";
-
-  let statusBorder =
-
-    "#abefc6";
-
-  let statusColor =
-
-    "#067647";
-
-  let dotColor =
-
-    "#12b76a";
+    "ready";
 
   if (!isOnline) {
 
     syncText =
 
-      "ออฟไลน์ · บันทึกข้อมูลไว้ในเครื่อง";
+      "ออฟไลน์";
 
-    statusBackground =
+    statusClass =
 
-      "#fff7ed";
-
-    statusBorder =
-
-      "#fed7aa";
-
-    statusColor =
-
-      "#9a3412";
-
-    dotColor =
-
-      "#f97316";
+      "offline";
 
   } else if (
 
@@ -72,67 +48,13 @@ function SyncStatus({
 
   ) {
 
-    const parts = [];
-
-    if (
-
-      Number(
-
-        pendingSaleCount
-
-      ) > 0
-
-    ) {
-
-      parts.push(
-
-        `${pendingSaleCount} บิล`
-
-      );
-
-    }
-
-    if (
-
-      Number(
-
-        pendingStockCount
-
-      ) > 0
-
-    ) {
-
-      parts.push(
-
-        `${pendingStockCount} Stock`
-
-      );
-
-    }
-
     syncText =
 
-      `ออนไลน์ · รอ Sync ${parts.join(
+      "รอ Sync";
 
-        " / "
+    statusClass =
 
-      )}`;
-
-    statusBackground =
-
-      "#fffaeb";
-
-    statusBorder =
-
-      "#fedf89";
-
-    statusColor =
-
-      "#93370d";
-
-    dotColor =
-
-      "#f79009";
+      "pending";
 
   } else if (
 
@@ -144,114 +66,32 @@ function SyncStatus({
 
       "ออนไลน์ · Sync เรียบร้อย";
 
+    statusClass =
+
+      "ready";
+
   } else {
 
     syncText =
 
-      "ออนไลน์ · กำลังเชื่อมต่อ Cloud";
+      "กำลัง Sync";
 
-    statusBackground =
+    statusClass =
 
-      "#eff8ff";
-
-    statusBorder =
-
-      "#b2ddff";
-
-    statusColor =
-
-      "#175cd3";
-
-    dotColor =
-
-      "#2e90fa";
+      "connecting";
 
   }
 
   return (
 <div
 
-      style={{
-
-        display:
-
-          "flex",
-
-        alignItems:
-
-          "center",
-
-        gap:
-
-          "8px",
-
-        padding:
-
-          "8px 12px",
-
-        borderRadius:
-
-          "999px",
-
-        background:
-
-          statusBackground,
-
-        border:
-
-          `1px solid ${statusBorder}`,
-
-        color:
-
-          statusColor,
-
-        fontSize:
-
-          "13px",
-
-        fontWeight:
-
-          "700",
-
-        whiteSpace:
-
-          "nowrap",
-
-      }}
+      className={`pos-sync-pill ${statusClass}`}
 >
-<span
+<span className="pos-sync-dot" />
+<span>
 
-        style={{
-
-          width:
-
-            "9px",
-
-          height:
-
-            "9px",
-
-          borderRadius:
-
-            "999px",
-
-          background:
-
-            dotColor,
-
-          display:
-
-            "inline-block",
-
-          flexShrink:
-
-            0,
-
-        }}
-
-      />
-
-      {syncText}
+        {syncText}
+</span>
 </div>
 
   );
