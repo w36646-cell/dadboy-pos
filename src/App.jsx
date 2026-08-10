@@ -1,8 +1,16 @@
-import { useEffect, useState } from "react";
+import {
+
+  useEffect,
+
+  useState,
+
+} from "react";
 
 import defaultProducts from "./data/products";
 
 import StockManager from "./components/StockManager";
+
+import StockAdjustment from "./components/StockAdjustment";
 
 import ProductManager from "./components/ProductManager";
 
@@ -42,6 +50,12 @@ import {
 
 } from "./services/salesService";
 
+import {
+
+  saveStockAdjustment,
+
+} from "./services/stockAdjustmentService";
+
 import "./styles/App.css";
 
 import "./components/PaymentPopup.css";
@@ -65,6 +79,10 @@ const PENDING_STOCK_KEY =
 const PENDING_SALES_KEY =
 
   "dadboy_pending_sales_sync_v2";
+
+const PENDING_ADJUSTMENTS_KEY =
+
+  "dadboy_pending_stock_adjustments_v1";
 
 function readStorage(
 
@@ -208,6 +226,12 @@ product.id
 
 }
 
+/* =========================
+
+   Pending Sales
+
+========================= */
+
 function getPendingSales() {
 
   const result =
@@ -220,7 +244,11 @@ function getPendingSales() {
 
     );
 
-  return Array.isArray(result)
+  return Array.isArray(
+
+    result
+
+  )
 
     ? result
 
@@ -272,21 +300,19 @@ function removePendingSale(
 
 ) {
 
-  const current =
-
-    getPendingSales();
-
   const remaining =
 
-    current.filter(
+    getPendingSales()
 
-      (item) =>
+      .filter(
 
-        item.billId !==
+        (item) =>
 
-        billId
+          item.billId !==
 
-    );
+          billId
+
+      );
 
   localStorage.setItem(
 
@@ -301,6 +327,12 @@ function removePendingSale(
   );
 
 }
+
+/* =========================
+
+   Pending Stock
+
+========================= */
 
 function getPendingStocks() {
 
@@ -401,6 +433,160 @@ function pendingStocksCount() {
     getPendingStocks()
 
   ).length;
+
+}
+
+/* =========================
+
+   Pending Stock Adjustments
+
+========================= */
+
+function getPendingAdjustments() {
+
+  const result =
+
+    readStorage(
+
+      PENDING_ADJUSTMENTS_KEY,
+
+      []
+
+    );
+
+  return Array.isArray(
+
+    result
+
+  )
+
+    ? result
+
+    : [];
+
+}
+
+function adjustmentKey(
+
+  adjustment
+
+) {
+
+  return [
+
+    String(
+
+      adjustment.productId
+
+    ),
+
+    String(
+
+      adjustment.adjustedAt
+
+    ),
+
+  ].join("|");
+
+}
+
+function savePendingAdjustment(
+
+  adjustment
+
+) {
+
+  const current =
+
+    getPendingAdjustments();
+
+  const key =
+
+    adjustmentKey(
+
+      adjustment
+
+    );
+
+  const withoutOld =
+
+    current.filter(
+
+      (item) =>
+
+        adjustmentKey(
+
+          item
+
+        ) !== key
+
+    );
+
+  localStorage.setItem(
+
+    PENDING_ADJUSTMENTS_KEY,
+
+    JSON.stringify([
+
+      ...withoutOld,
+
+      adjustment,
+
+    ])
+
+  );
+
+}
+
+function removePendingAdjustment(
+
+  adjustment
+
+) {
+
+  const key =
+
+    adjustmentKey(
+
+      adjustment
+
+    );
+
+  const remaining =
+
+    getPendingAdjustments()
+
+      .filter(
+
+        (item) =>
+
+          adjustmentKey(
+
+            item
+
+          ) !== key
+
+      );
+
+  localStorage.setItem(
+
+    PENDING_ADJUSTMENTS_KEY,
+
+    JSON.stringify(
+
+      remaining
+
+    )
+
+  );
+
+}
+
+function pendingAdjustmentsCount() {
+
+  return getPendingAdjustments()
+
+    .length;
 
 }
 
@@ -524,17 +710,39 @@ function App() {
 
   }
 
+  function isSyncClean() {
+
+    return (
+
+      pendingStocksCount() ===
+
+        0 &&
+
+      getPendingSales()
+
+        .length === 0 &&
+
+      pendingAdjustmentsCount() ===
+
+        0
+
+    );
+
+  }
+
+  /* =========================
+
+     Pending Sync
+
+  ========================= */
+
   async function retryPendingStocks() {
-
-    const pending =
-
-      getPendingStocks();
 
     const entries =
 
       Object.entries(
 
-        pending
+        getPendingStocks()
 
       );
 
@@ -676,6 +884,74 @@ function App() {
 
   }
 
+  async function retryPendingAdjustments() {
+
+    const pending =
+
+      getPendingAdjustments();
+
+    if (
+
+      pending.length === 0
+
+    ) {
+
+      return true;
+
+    }
+
+    let allSuccess =
+
+      true;
+
+    for (
+
+      const adjustment of
+
+      pending
+
+    ) {
+
+      try {
+
+        await saveStockAdjustment(
+
+          adjustment
+
+        );
+
+        removePendingAdjustment(
+
+          adjustment
+
+        );
+
+      } catch (error) {
+
+        allSuccess =
+
+          false;
+
+        console.error(
+
+          "Pending adjustment sync error:",
+
+          adjustment,
+
+          error
+
+        );
+
+      }
+
+    }
+
+    notifySyncStateChanged();
+
+    return allSuccess;
+
+  }
+
   async function retryAllPending() {
 
     if (
@@ -690,7 +966,11 @@ function App() {
 
     ) {
 
-      setCloudReady(false);
+      setCloudReady(
+
+        false
+
+      );
 
       return false;
 
@@ -702,6 +982,8 @@ function App() {
 
       salesOk,
 
+      adjustmentOk,
+
     ] =
 
       await Promise.all([
@@ -710,23 +992,21 @@ function App() {
 
         retryPendingSales(),
 
+        retryPendingAdjustments(),
+
       ]);
 
     const clean =
 
-      pendingStocksCount() ===
-
-        0 &&
-
-      getPendingSales()
-
-        .length === 0;
+      isSyncClean();
 
     setCloudReady(
 
       stockOk &&
 
         salesOk &&
+
+        adjustmentOk &&
 
         clean
 
@@ -735,6 +1015,12 @@ function App() {
     return clean;
 
   }
+
+  /* =========================
+
+     Startup / Online Sync
+
+  ========================= */
 
   useEffect(() => {
 
@@ -896,13 +1182,7 @@ function App() {
 
           setCloudReady(
 
-            pendingStocksCount() ===
-
-              0 &&
-
-            getPendingSales()
-
-              .length === 0
+            isSyncClean()
 
           );
 
@@ -1008,7 +1288,11 @@ function App() {
 
     function handleOnline() {
 
-      setIsOnline(true);
+      setIsOnline(
+
+        true
+
+      );
 
       runSync();
 
@@ -1016,9 +1300,17 @@ function App() {
 
     function handleOffline() {
 
-      setIsOnline(false);
+      setIsOnline(
 
-      setCloudReady(false);
+        false
+
+      );
+
+      setCloudReady(
+
+        false
+
+      );
 
     }
 
@@ -1150,6 +1442,12 @@ function App() {
 
   }, []);
 
+  /* =========================
+
+     Products
+
+  ========================= */
+
   function saveProducts(
 
     newProducts
@@ -1247,7 +1545,11 @@ cloudProduct.id
 
       );
 
-      setCloudReady(true);
+      setCloudReady(
+
+        isSyncClean()
+
+      );
 
     } catch (error) {
 
@@ -1265,7 +1567,11 @@ cloudProduct.id
 
       );
 
-      setCloudReady(false);
+      setCloudReady(
+
+        false
+
+      );
 
       window.alert(
 
@@ -1276,6 +1582,12 @@ cloudProduct.id
     }
 
   }
+
+  /* =========================
+
+     Inventory
+
+  ========================= */
 
   function saveInventoryLocal(
 
@@ -1405,13 +1717,7 @@ cloudProduct.id
 
         setCloudReady(
 
-          getPendingSales()
-
-            .length === 0 &&
-
-          pendingStocksCount() ===
-
-            0
+          isSyncClean()
 
         );
 
@@ -1429,7 +1735,11 @@ cloudProduct.id
 
           );
 
-          setCloudReady(false);
+          setCloudReady(
+
+            false
+
+          );
 
         }
 
@@ -1439,11 +1749,327 @@ cloudProduct.id
 
   /*
 
-    หาข้อมูลสินค้าจริง
+    ปรับ Stock จากการตรวจนับ
 
-    จาก Product ID
+    local เปลี่ยนก่อน
+
+    แล้ว Cloud ทำงานเบื้องหลัง
+
+    Offline:
+
+    - stock pending
+
+    - adjustment pending
+
+    Online:
+
+    - update products.stock
+
+    - insert stock_adjustments
 
   */
+
+  function adjustStock(
+
+    adjustment
+
+  ) {
+
+    const productId =
+
+      adjustment?.productId;
+
+    const actualStock =
+
+      Number(
+
+        adjustment?.actualStock
+
+      );
+
+    if (
+
+      productId ===
+
+        undefined ||
+
+      productId ===
+
+        null ||
+
+      !Number.isFinite(
+
+        actualStock
+
+      ) ||
+
+      actualStock < 0
+
+    ) {
+
+      window.alert(
+
+        "ข้อมูลปรับสต๊อกไม่ถูกต้อง"
+
+      );
+
+      return;
+
+    }
+
+    const normalizedAdjustment = {
+
+      ...adjustment,
+
+      productId,
+
+      previousStock:
+
+        Number(
+
+          adjustment.previousStock
+
+        ),
+
+      actualStock,
+
+      difference:
+
+        actualStock -
+
+        Number(
+
+          adjustment.previousStock
+
+        ),
+
+      adjustedAt:
+
+        adjustment.adjustedAt ||
+
+        new Date()
+
+          .toISOString(),
+
+    };
+
+    const newInventory = {
+
+      ...inventory,
+
+      [productId]:
+
+        actualStock,
+
+    };
+
+    /*
+
+      Save local ก่อน
+
+    */
+
+    saveInventoryLocal(
+
+      newInventory
+
+    );
+
+    savePendingStock(
+
+      productId,
+
+      actualStock
+
+    );
+
+    savePendingAdjustment(
+
+      normalizedAdjustment
+
+    );
+
+    notifySyncStateChanged();
+
+    /*
+
+      ถ้า Offline
+
+      จบแค่นี้ก่อน
+
+      รอระบบ Sync
+
+    */
+
+    if (
+
+      typeof navigator !==
+
+        "undefined" &&
+
+      navigator.onLine ===
+
+        false
+
+    ) {
+
+      setCloudReady(
+
+        false
+
+      );
+
+      window.alert(
+
+        "ปรับสต๊อกเรียบร้อย\nข้อมูลจะ Sync เมื่อกลับมาออนไลน์"
+
+      );
+
+      return;
+
+    }
+
+    const stockJob =
+
+      updateCloudStock(
+
+        productId,
+
+        actualStock
+
+      )
+
+        .then(() => {
+
+          removePendingStock(
+
+            productId
+
+          );
+
+          return true;
+
+        })
+
+        .catch(
+
+          (error) => {
+
+            console.error(
+
+              "Stock adjustment stock sync error:",
+
+              error
+
+            );
+
+            return false;
+
+          }
+
+        );
+
+    const adjustmentJob =
+
+      saveStockAdjustment(
+
+        normalizedAdjustment
+
+      )
+
+        .then(() => {
+
+          removePendingAdjustment(
+
+            normalizedAdjustment
+
+          );
+
+          return true;
+
+        })
+
+        .catch(
+
+          (error) => {
+
+            console.error(
+
+              "Stock adjustment history sync error:",
+
+              error
+
+            );
+
+            return false;
+
+          }
+
+        );
+
+    Promise.all([
+
+      stockJob,
+
+      adjustmentJob,
+
+    ]).then(
+
+      ([
+
+        stockOk,
+
+        adjustmentOk,
+
+      ]) => {
+
+        notifySyncStateChanged();
+
+        setCloudReady(
+
+          stockOk &&
+
+            adjustmentOk &&
+
+            isSyncClean()
+
+        );
+
+        if (
+
+          stockOk &&
+
+          adjustmentOk
+
+        ) {
+
+          window.alert(
+
+            "ปรับสต๊อกและบันทึกประวัติเรียบร้อย"
+
+          );
+
+        } else {
+
+          window.alert(
+
+            "ปรับสต๊อกในเครื่องแล้ว\nมีข้อมูลบางส่วนรอ Sync"
+
+          );
+
+        }
+
+      }
+
+    );
+
+  }
+
+  /* =========================
+
+     Cart Helpers
+
+  ========================= */
 
   function findProduct(
 
@@ -1469,24 +2095,6 @@ product.id
     );
 
   }
-
-  /*
-
-    ==========================
-
-    จำนวน Stock ต่อหน่วยขาย
-
-    ==========================
-
-    ตัวนี้เป็นจุดสำคัญ
-
-    ถ้าเป็นแพ็ก
-
-    เราอ่าน packQty จาก Product จริง
-
-    ไม่เชื่อค่าใน Cart อย่างเดียว
-
-  */
 
   function getStockPerUnit(
 
@@ -1521,7 +2129,11 @@ item.id
 
       );
 
-    if (looksLikePack) {
+    if (
+
+      looksLikePack
+
+    ) {
 
       const productPackQty =
 
@@ -1647,14 +2259,6 @@ item.id
 
         : "unit";
 
-    /*
-
-      ถ้าเป็นแพ็ก
-
-      ใช้ packQty จาก Product ก่อน
-
-    */
-
     const stockPerUnit =
 
       isPack
@@ -1726,18 +2330,18 @@ item.id
 
               ) ===
 
-                String(
+                  String(
 product.id
 
-                ) &&
+                  ) &&
 
-              item.option ===
+                item.option ===
 
-                optionName &&
+                  optionName &&
 
-              item.saleType ===
+                item.saleType ===
 
-                saleType
+                  saleType
 
                 ? {
 
@@ -2044,6 +2648,14 @@ product.id,
 
     );
 
+  void totalQty;
+
+  /* =========================
+
+     Payment
+
+  ========================= */
+
   function openPayment() {
 
     if (
@@ -2100,16 +2712,6 @@ product.id,
 
       total;
 
-    /*
-
-      ==========================
-
-      จำนวนชิ้นจริงที่ออกจาก Stock
-
-      ==========================
-
-    */
-
     const checkoutStockQty =
 
       checkoutCart.reduce(
@@ -2126,9 +2728,7 @@ product.id,
 
             Number(
 
-              item.qty ||
-
-                0
+              item.qty || 0
 
             );
 
@@ -2155,18 +2755,6 @@ product.id,
         0
 
       );
-
-    /*
-
-      ==========================
-
-      รวม Stock ที่ต้องตัด
-
-      แยกตามสินค้า
-
-      ==========================
-
-    */
 
     const soldByProduct =
 
@@ -2270,16 +2858,6 @@ item.id
 
     );
 
-    /*
-
-      ==========================
-
-      ตัด Stock Local
-
-      ==========================
-
-    */
-
     const newInventory = {
 
       ...inventory,
@@ -2325,16 +2903,6 @@ item.id
       }
 
     );
-
-    /*
-
-      ==========================
-
-      สร้างรายการในบิล
-
-      ==========================
-
-    */
 
     const saleItems =
 
@@ -2496,14 +3064,6 @@ item.id,
           "th-TH"
 
         ),
-
-      /*
-
-        จำนวนชิ้นจริง
-
-        ที่ออกจาก Stock
-
-      */
 
       totalQty:
 
@@ -2725,23 +3285,13 @@ item.id,
 
       ]) => {
 
-        const clean =
-
-          pendingStocksCount() ===
-
-            0 &&
-
-          getPendingSales()
-
-            .length === 0;
-
         setCloudReady(
 
           stockOk &&
 
             saleOk &&
 
-            clean
+            isSyncClean()
 
         );
 
@@ -2750,6 +3300,12 @@ item.id,
     );
 
   }
+
+  /* =========================
+
+     Owner Mode
+
+  ========================= */
 
   function enterOwnerMode() {
 
@@ -2799,7 +3355,17 @@ item.id,
 
     pendingStocksCount();
 
+  const pendingAdjustmentCount =
+
+    pendingAdjustmentsCount();
+
   void syncVersion;
+
+  /* =========================
+
+     Render POS
+
+  ========================= */
 
   function renderPOS() {
 
@@ -2889,6 +3455,12 @@ item.id,
     );
 
   }
+
+  /* =========================
+
+     Render Owner Pages
+
+  ========================= */
 
   function renderOwnerPage() {
 
@@ -3051,6 +3623,51 @@ item.id,
 
       page ===
 
+      "stock-adjustment"
+
+    ) {
+
+      return (
+<StockAdjustment
+
+          products={
+
+            products
+
+          }
+
+          inventory={
+
+            inventory
+
+          }
+
+          onAdjustStock={
+
+            adjustStock
+
+          }
+
+          onClose={() =>
+
+            setPage(
+
+              "pos"
+
+            )
+
+          }
+
+        />
+
+      );
+
+    }
+
+    if (
+
+      page ===
+
       "settings"
 
     ) {
@@ -3085,7 +3702,11 @@ item.id,
 
             บิลรอ Sync:{" "}
 
-            {pendingSaleCount}{" "}
+            {
+
+              pendingSaleCount
+
+            }{" "}
 
             บิล
 </p>
@@ -3093,7 +3714,23 @@ item.id,
 
             Stock รอ Sync:{" "}
 
-            {pendingStockCount}{" "}
+            {
+
+              pendingStockCount
+
+            }{" "}
+
+            รายการ
+</p>
+<p>
+
+            ปรับ Stock รอ Sync:{" "}
+
+            {
+
+              pendingAdjustmentCount
+
+            }{" "}
 
             รายการ
 </p>
@@ -3119,6 +3756,12 @@ item.id,
     return renderPOS();
 
   }
+
+  /* =========================
+
+     Employee Stock Page
+
+  ========================= */
 
   if (
 
@@ -3167,6 +3810,12 @@ item.id,
 
   }
 
+  /* =========================
+
+     Main
+
+  ========================= */
+
   return (
 <>
 
@@ -3195,7 +3844,11 @@ item.id,
           />
 <main className="owner-app-content">
 
-            {renderOwnerPage()}
+            {
+
+              renderOwnerPage()
+
+            }
 </main>
 </div>
 

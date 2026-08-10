@@ -1,4 +1,8 @@
-import { useState } from "react";
+import {
+
+  useState,
+
+} from "react";
 
 import "./OwnerSidebar.css";
 
@@ -12,7 +16,13 @@ function OwnerSidebar({
 
 }) {
 
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [
+
+    mobileOpen,
+
+    setMobileOpen,
+
+  ] = useState(false);
 
   const menuItems = [
 
@@ -42,7 +52,7 @@ function OwnerSidebar({
 
       icon: "📦",
 
-      label: "สินค้า",
+      label: "จัดการสินค้า",
 
     },
 
@@ -53,6 +63,16 @@ function OwnerSidebar({
       icon: "📥",
 
       label: "รับสินค้าเข้า",
+
+    },
+
+    {
+
+      id: "stock-adjustment",
+
+      icon: "🧮",
+
+      label: "ปรับสต๊อก",
 
     },
 
@@ -76,23 +96,37 @@ function OwnerSidebar({
 
     },
 
-    {
-
-      id: "settings",
-
-      icon: "⚙️",
-
-      label: "ตั้งค่า",
-
-    },
-
   ];
 
-  function selectPage(page) {
+  function selectPage(
 
-    onChangePage(page);
+    page
 
-    setMobileOpen(false);
+  ) {
+
+    onChangePage(
+
+      page
+
+    );
+
+    setMobileOpen(
+
+      false
+
+    );
+
+  }
+
+  function logout() {
+
+    setMobileOpen(
+
+      false
+
+    );
+
+    onLogout();
 
   }
 
@@ -106,11 +140,17 @@ function OwnerSidebar({
 
         onClick={() =>
 
-          setMobileOpen((current) => !current)
+          setMobileOpen(
+
+            (current) =>
+
+              !current
+
+          )
 
         }
 
-        aria-label="เปิดเมนู"
+        aria-label="เปิดเมนูเจ้าของร้าน"
 >
 
         ☰
@@ -121,7 +161,15 @@ function OwnerSidebar({
 
           className="owner-sidebar-backdrop"
 
-          onClick={() => setMobileOpen(false)}
+          onClick={() =>
+
+            setMobileOpen(
+
+              false
+
+            )
+
+          }
 
         />
 
@@ -140,8 +188,14 @@ function OwnerSidebar({
 >
 <div className="owner-sidebar-header">
 <div>
-<strong>Dadboy POS</strong>
-<span>โหมดเจ้าของร้าน</span>
+<strong>
+
+              Dadboy POS
+</strong>
+<span>
+
+              โหมดเจ้าของร้าน
+</span>
 </div>
 <button
 
@@ -149,7 +203,17 @@ function OwnerSidebar({
 
             className="owner-sidebar-close"
 
-            onClick={() => setMobileOpen(false)}
+            onClick={() =>
+
+              setMobileOpen(
+
+                false
+
+              )
+
+            }
+
+            aria-label="ปิดเมนู"
 >
 
             ×
@@ -157,33 +221,59 @@ function OwnerSidebar({
 </div>
 <nav className="owner-sidebar-menu">
 
-          {menuItems.map((item) => (
+          {menuItems.map(
+
+            (item) => (
 <button
 
-              type="button"
+                type="button"
 
-              key={item.id}
+                key={
+item.id
 
-              className={
+                }
 
-                currentPage === item.id
+                className={
 
-                  ? "owner-sidebar-item active"
+                  currentPage ===
+item.id
 
-                  : "owner-sidebar-item"
+                    ? "owner-sidebar-item active"
 
-              }
+                    : "owner-sidebar-item"
 
-              onClick={() => selectPage(item.id)}
+                }
+
+                onClick={() =>
+
+                  selectPage(
+item.id
+
+                  )
+
+                }
 >
 <span className="owner-sidebar-icon">
 
-                {item.icon}
+                  {
+
+                    item.icon
+
+                  }
 </span>
-<span>{item.label}</span>
+<span>
+
+                  {
+
+                    item.label
+
+                  }
+</span>
 </button>
 
-          ))}
+            )
+
+          )}
 </nav>
 <div className="owner-sidebar-bottom">
 <button
@@ -192,10 +282,20 @@ function OwnerSidebar({
 
             className="owner-sidebar-logout"
 
-            onClick={onLogout}
+            onClick={
+
+              logout
+
+            }
 >
-<span>🚪</span>
-<span>ออกจากโหมดเจ้าของ</span>
+<span>
+
+              🚪
+</span>
+<span>
+
+              ออกจากโหมดเจ้าของ
+</span>
 </button>
 </div>
 </aside>
@@ -206,3 +306,4 @@ function OwnerSidebar({
 }
 
 export default OwnerSidebar;
+ 
