@@ -2,11 +2,39 @@ import { supabase } from "../lib/supabase";
 
 function fromSaleItemRow(row) {
 
+  const quantity = Number(
+
+    row.qty || 0
+
+  );
+
+  const stockPerUnit = Math.max(
+
+    1,
+
+    Number(
+
+      row.stock_per_unit ?? 1
+
+    ) || 1
+
+  );
+
+  const stockQuantity = Number(
+
+    row.stock_quantity ??
+
+      quantity * stockPerUnit
+
+  );
+
   return {
 
     id: row.id,
 
-    productId: row.product_id,
+    productId:
+
+      row.product_id,
 
     productName:
 
@@ -16,9 +44,21 @@ function fromSaleItemRow(row) {
 
       row.option_name || "",
 
-    quantity:
+    saleType:
 
-      Number(row.qty || 0),
+      row.sale_type ||
+
+      (stockPerUnit > 1
+
+        ? "pack"
+
+        : "unit"),
+
+    stockPerUnit,
+
+    stockQuantity,
+
+    quantity,
 
     unitPrice:
 
@@ -213,89 +253,137 @@ function createItemPayload(
 
   ).map(
 
-    (item) => ({
+    (item) => {
 
-      sale_id:
-
-        saleId,
-
-      product_id:
-
-        String(
-
-          item.productId
-
-        ),
-
-      product_name:
-
-        item.productName ||
-
-        "",
-
-      option_name:
-
-        item.option || "",
-
-      qty:
+      const quantity =
 
         Number(
 
           item.quantity || 0
 
-        ),
+        );
 
-      unit_price:
+      const stockPerUnit =
 
-        Number(
+        Math.max(
 
-          item.unitPrice ||
+          1,
 
-            0
+          Number(
 
-        ),
+            item.stockPerUnit ??
 
-      unit_cost:
+              1
 
-        Number(
+          ) || 1
 
-          item.unitCost ||
+        );
 
-            0
-
-        ),
-
-      subtotal:
+      const stockQuantity =
 
         Number(
 
-          item.lineTotal ||
+          item.stockQuantity ??
 
-            0
+            quantity *
 
-        ),
+              stockPerUnit
 
-      cost_total:
+        );
 
-        Number(
+      const saleType =
 
-          item.lineCost ||
+        item.saleType ||
 
-            0
+        (stockPerUnit > 1
 
-        ),
+          ? "pack"
 
-      profit:
+          : "unit");
 
-        Number(
+      return {
 
-          item.lineProfit ||
+        sale_id:
 
-            0
+          saleId,
 
-        ),
+        product_id:
 
-    })
+          String(
+
+            item.productId
+
+          ),
+
+        product_name:
+
+          item.productName ||
+
+          "",
+
+        option_name:
+
+          item.option || "",
+
+        sale_type:
+
+          saleType,
+
+        stock_per_unit:
+
+          stockPerUnit,
+
+        stock_quantity:
+
+          stockQuantity,
+
+        qty:
+
+          quantity,
+
+        unit_price:
+
+          Number(
+
+            item.unitPrice || 0
+
+          ),
+
+        unit_cost:
+
+          Number(
+
+            item.unitCost || 0
+
+          ),
+
+        subtotal:
+
+          Number(
+
+            item.lineTotal || 0
+
+          ),
+
+        cost_total:
+
+          Number(
+
+            item.lineCost || 0
+
+          ),
+
+        profit:
+
+          Number(
+
+            item.lineProfit || 0
+
+          ),
+
+      };
+
+    }
 
   );
 
@@ -325,13 +413,7 @@ export async function saveCloudSale(
 
     ==========================
 
-    1. หัวบิล
-
-    bill_id เป็น UNIQUE แล้ว
-
-    ดังนั้นส่งบิลเดิมซ้ำ
-
-    จะอัปเดตแถวเดิม
+    1. บันทึกหัวบิล
 
     ==========================
 
@@ -385,23 +467,29 @@ export async function saveCloudSale(
 
     ==========================
 
-    2. รายการสินค้า
+    2. บันทึกรายการสินค้า
 
-    ไม่ใช้ delete + insert แล้ว
+    ==========================
 
-    ใช้ UNIQUE:
+    สำคัญ:
 
-    sale_id,
+    เก็บข้อมูลการตัด Stock
 
-    product_id,
+    ของสินค้าแพ็กไว้ด้วย
 
-    option_name
+    ตัวอย่าง:
 
-    ถ้า Sync ซ้ำ
+    quantity = 2 แพ็ก
 
-    จะ UPDATE แถวเดิม
+    stockPerUnit = 12
 
-    ไม่สร้างแถวใหม่
+    stockQuantity = 24
+
+    เวลายกเลิกบิล
+
+    ระบบจึงคืน Stock 24 ชิ้น
+
+    ไม่ใช่คืนเพียง 2
 
     ==========================
 
@@ -418,17 +506,13 @@ saleRow.id,
 
   if (
 
-    itemPayload.length >
-
-    0
+    itemPayload.length > 0
 
   ) {
 
     const {
 
-      error:
-
-        itemError,
+      error: itemError,
 
     } =
 
@@ -503,6 +587,12 @@ export async function getCloudSales() {
           product_name,
 
           option_name,
+
+          sale_type,
+
+          stock_per_unit,
+
+          stock_quantity,
 
           qty,
 
@@ -584,6 +674,12 @@ export async function getCloudSaleByBillId(
 
           option_name,
 
+          sale_type,
+
+          stock_per_unit,
+
+          stock_quantity,
+
           qty,
 
           unit_price,
@@ -648,9 +744,7 @@ export async function deleteCloudSale(
 
   const {
 
-    error:
-
-      itemError,
+    error: itemError,
 
   } =
 
@@ -680,9 +774,7 @@ export async function deleteCloudSale(
 
   const {
 
-    error:
-
-      saleError,
+    error: saleError,
 
   } =
 
