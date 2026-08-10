@@ -8,6 +8,16 @@ import {
 
 } from "react";
 
+import ProductCard from "../components/pos/ProductCard";
+
+import CartPanel from "../components/pos/CartPanel";
+
+import PackPopup from "../components/pos/PackPopup";
+
+import ProductOptionPopup from "../components/pos/ProductOptionPopup";
+
+import SyncStatus from "../components/pos/SyncStatus";
+
 function POSPage({
 
   products,
@@ -120,7 +130,11 @@ function POSPage({
 
         (product) =>
 
-          product.name
+          String(
+
+            product.name || ""
+
+          )
 
             .toLowerCase()
 
@@ -282,14 +296,6 @@ function POSPage({
 
         true;
 
-    /*
-
-      สินค้าปกติ:
-
-      แตะครั้งเดียว = เพิ่ม 1 ชิ้น
-
-    */
-
     if (
 
       !hasOption ||
@@ -333,14 +339,6 @@ function POSPage({
       return;
 
     }
-
-    /*
-
-      สินค้าที่มีตัวเลือกแก้ว:
-
-      แตะ = เปิด Popup เดิม
-
-    */
 
     const normalOption =
 
@@ -587,6 +585,10 @@ option.id ===
 
           );
 
+          holdTimerRef.current =
+
+            null;
+
         },
 
         LONG_PRESS_MS
@@ -623,14 +625,6 @@ option.id ===
 
   ) {
 
-    /*
-
-      ถ้าเพิ่งเกิด Long Press
-
-      ห้าม click ซ้ำแล้วเพิ่มสินค้าเป็นชิ้น
-
-    */
-
     if (
 
       longPressTriggeredRef.current
@@ -666,158 +660,6 @@ option.id ===
     }
 
     onOpenPayment();
-
-  }
-
-  const hasPending =
-
-    Number(
-
-      pendingSaleCount || 0
-
-    ) > 0 ||
-
-    Number(
-
-      pendingStockCount || 0
-
-    ) > 0;
-
-  let syncText =
-
-    "";
-
-  let statusBackground =
-
-    "#ecfdf3";
-
-  let statusBorder =
-
-    "#abefc6";
-
-  let statusColor =
-
-    "#067647";
-
-  let dotColor =
-
-    "#12b76a";
-
-  if (!isOnline) {
-
-    syncText =
-
-      "ออฟไลน์ · บันทึกข้อมูลไว้ในเครื่อง";
-
-    statusBackground =
-
-      "#fff7ed";
-
-    statusBorder =
-
-      "#fed7aa";
-
-    statusColor =
-
-      "#9a3412";
-
-    dotColor =
-
-      "#f97316";
-
-  } else if (
-
-    hasPending
-
-  ) {
-
-    const parts =
-
-      [];
-
-    if (
-
-      pendingSaleCount > 0
-
-    ) {
-
-      parts.push(
-
-        `${pendingSaleCount} บิล`
-
-      );
-
-    }
-
-    if (
-
-      pendingStockCount > 0
-
-    ) {
-
-      parts.push(
-
-        `${pendingStockCount} Stock`
-
-      );
-
-    }
-
-    syncText =
-
-      `ออนไลน์ · รอ Sync ${parts.join(
-
-        " / "
-
-      )}`;
-
-    statusBackground =
-
-      "#fffaeb";
-
-    statusBorder =
-
-      "#fedf89";
-
-    statusColor =
-
-      "#93370d";
-
-    dotColor =
-
-      "#f79009";
-
-  } else if (
-
-    cloudReady
-
-  ) {
-
-    syncText =
-
-      "ออนไลน์ · Sync เรียบร้อย";
-
-  } else {
-
-    syncText =
-
-      "ออนไลน์ · กำลังเชื่อมต่อ Cloud";
-
-    statusBackground =
-
-      "#eff8ff";
-
-    statusBorder =
-
-      "#b2ddff";
-
-    statusColor =
-
-      "#175cd3";
-
-    dotColor =
-
-      "#2e90fa";
 
   }
 
@@ -867,90 +709,33 @@ option.id ===
               รายการ
 </p>
 </div>
-<div
+<SyncStatus
 
-            style={{
+            isOnline={
 
-              display:
+              isOnline
 
-                "flex",
+            }
 
-              alignItems:
+            cloudReady={
 
-                "center",
+              cloudReady
 
-              gap:
+            }
 
-                "8px",
+            pendingSaleCount={
 
-              padding:
+              pendingSaleCount
 
-                "8px 12px",
+            }
 
-              borderRadius:
+            pendingStockCount={
 
-                "999px",
+              pendingStockCount
 
-              background:
+            }
 
-                statusBackground,
-
-              border:
-
-                `1px solid ${statusBorder}`,
-
-              color:
-
-                statusColor,
-
-              fontSize:
-
-                "13px",
-
-              fontWeight:
-
-                "700",
-
-              whiteSpace:
-
-                "nowrap",
-
-            }}
->
-<span
-
-              style={{
-
-                width:
-
-                  "9px",
-
-                height:
-
-                  "9px",
-
-                borderRadius:
-
-                  "999px",
-
-                background:
-
-                  dotColor,
-
-                display:
-
-                  "inline-block",
-
-                flexShrink:
-
-                  0,
-
-              }}
-
-            />
-
-            {syncText}
-</div>
+          />
 </header>
 <input
 
@@ -997,21 +782,13 @@ option.id ===
 
             {filteredProducts.map(
 
-              (
-
-                product
-
-              ) => {
+              (product) => {
 
                 const normalPrice =
 
                   product.options?.find(
 
-                    (
-
-                      option
-
-                    ) =>
+                    (option) =>
 option.id ===
 
                       "normal"
@@ -1050,14 +827,40 @@ product.id
                   );
 
                 return (
-<button
-
-                    type="button"
-
-                    className="product-card product-card-touch"
+<ProductCard
 
                     key={
 product.id
+
+                    }
+
+                    product={
+
+                      product
+
+                    }
+
+                    stock={
+
+                      stock
+
+                    }
+
+                    lowStock={
+
+                      lowStock
+
+                    }
+
+                    packEnabled={
+
+                      packEnabled
+
+                    }
+
+                    normalPrice={
+
+                      normalPrice
 
                     }
 
@@ -1071,7 +874,7 @@ product.id
 
                     }
 
-                    onMouseDown={() =>
+                    onLongPressStart={() =>
 
                       startLongPress(
 
@@ -1081,170 +884,13 @@ product.id
 
                     }
 
-                    onMouseUp={
+                    onLongPressCancel={
 
                       cancelLongPress
 
                     }
 
-                    onMouseLeave={
-
-                      cancelLongPress
-
-                    }
-
-                    onTouchStart={() =>
-
-                      startLongPress(
-
-                        product
-
-                      )
-
-                    }
-
-                    onTouchEnd={
-
-                      cancelLongPress
-
-                    }
-
-                    onTouchCancel={
-
-                      cancelLongPress
-
-                    }
-
-                    onContextMenu={(
-
-                      event
-
-                    ) =>
-
-                      event.preventDefault()
-
-                    }
->
-<div className="product-image-box">
-
-                      {product.image ? (
-<img
-
-                          className="product-image"
-
-                          src={
-
-                            product.image
-
-                          }
-
-                          alt={
-
-                            product.name ||
-
-                            "สินค้า"
-
-                          }
-
-                          onError={(
-
-                            event
-
-                          ) => {
-
-                            event.currentTarget.style.display =
-
-                              "none";
-
-                          }}
-
-                        />
-
-                      ) : (
-<span>
-
-                          ไม่มีรูป
-</span>
-
-                      )}
-</div>
-<div className="product-name">
-
-                      {
-
-                        product.name
-
-                      }
-</div>
-<div className="product-price">
-
-                      {
-
-                        normalPrice
-
-                      }{" "}
-
-                      บาท
-</div>
-
-                    {packEnabled && (
-<div
-
-                        style={{
-
-                          marginTop:
-
-                            "4px",
-
-                          fontSize:
-
-                            "11px",
-
-                          color:
-
-                            "#667085",
-
-                        }}
->
-
-                        กดค้าง: แพ็ก{" "}
-
-                        {
-
-                          product.packQty
-
-                        }{" "}
-
-                        ชิ้น{" "}
-
-                        {Number(
-
-                          product.packPrice
-
-                        ).toLocaleString()}{" "}
-
-                        บาท
-</div>
-
-                    )}
-<div
-
-                      className={
-
-                        lowStock
-
-                          ? "stock-text stock-negative"
-
-                          : "stock-text"
-
-                      }
->
-
-                      คงเหลือ{" "}
-
-                      {stock}
-</div>
-</button>
+                  />
 
                 );
 
@@ -1255,781 +901,141 @@ product.id
 
         )}
 </main>
-<aside className="cart-panel">
-<div className="cart-header">
-<h2>
+<CartPanel
 
-            ตะกร้า
-</h2>
-<span className="cart-badge">
+        cart={
 
-            {totalQty}
-</span>
-</div>
-<div className="cart-list">
+          cart
 
-          {cart.length === 0 ? (
-<p className="empty-cart">
+        }
 
-              ยังไม่มีสินค้า
-</p>
+        totalQty={
 
-          ) : (
+          totalQty
 
-            cart.map(
+        }
 
-              (
+        total={
 
-                item,
+          total
 
-                index
+        }
 
-              ) => (
-<div
+        onChangeCartQty={
 
-                  className="cart-item"
+          onChangeCartQty
 
-                  key={`${item.id}-${item.option}`}
->
-<div className="cart-item-header">
-<div>
-<strong>
+        }
 
-                        {
+        onIncreaseQty={
 
-                          item.name
+          onIncreaseQty
 
-                        }
-</strong>
-<div className="cart-option">
+        }
 
-                        {
+        onDecreaseQty={
 
-                          item.option
+          onDecreaseQty
 
-                        }{" "}
+        }
 
-                        ·{" "}
+        onRemoveItem={
 
-                        {
+          onRemoveItem
 
-                          item.price
+        }
 
-                        }{" "}
+        onPayment={
 
-                        บาท
-</div>
-</div>
-<button
+          handlePayment
 
-                      className="remove-button"
+        }
 
-                      type="button"
+      />
+<ProductOptionPopup
 
-                      onClick={() =>
+        product={
 
-                        onRemoveItem(
+          selectedProduct
 
-                          index
+        }
 
-                        )
+        selectedOption={
 
-                      }
->
+          selectedOption
 
-                      ลบ
-</button>
-</div>
-<div className="cart-item-bottom">
-<div className="quantity-controls">
-<button
+        }
 
-                        type="button"
+        quantity={
 
-                        onClick={() =>
+          popupQty
 
-                          onDecreaseQty(
+        }
 
-                            index
+        onSelectOption={
 
-                          )
+          setSelectedOption
 
-                        }
->
+        }
 
-                        −
-</button>
-<input
+        onChangeQuantity={
 
-                        className="quantity-input"
+          setPopupQty
 
-                        type="number"
+        }
 
-                        min="1"
+        onConfirm={
 
-                        value={
+          confirmPopup
 
-                          item.qty
+        }
 
-                        }
+        onClose={
 
-                        onChange={(
+          closePopup
 
-                          event
+        }
 
-                        ) =>
+      />
+<PackPopup
 
-                          onChangeCartQty(
+        product={
 
-                            index,
+          packProduct
 
-                            event.target
+        }
 
-                              .value
+        quantity={
 
-                          )
+          packPopupQty
 
-                        }
+        }
 
-                      />
-<button
+        stockUse={
 
-                        type="button"
+          packStockUse
 
-                        onClick={() =>
+        }
 
-                          onIncreaseQty(
+        onChangeQuantity={
 
-                            index
+          setPackPopupQty
 
-                          )
+        }
 
-                        }
->
+        onConfirm={
 
-                        +
-</button>
-</div>
-<strong>
+          confirmPackPopup
 
-                      {Number(
+        }
 
-                        item.price *
+        onClose={
 
-                          item.qty
+          closePackPopup
 
-                      ).toLocaleString()}{" "}
+        }
 
-                      บาท
-</strong>
-</div>
-</div>
-
-              )
-
-            )
-
-          )}
-</div>
-<div className="grand-total">
-<span>
-
-            รวมทั้งหมด
-</span>
-<span>
-
-            {total.toLocaleString()}{" "}
-
-            บาท
-</span>
-</div>
-<button
-
-          className="pay-button"
-
-          type="button"
-
-          disabled={
-
-            cart.length === 0
-
-          }
-
-          onClick={
-
-            handlePayment
-
-          }
->
-
-          คิดเงิน
-</button>
-</aside>
-
-      {selectedProduct &&
-
-        selectedOption && (
-<div
-
-            className="popup-overlay"
-
-            onClick={
-
-              closePopup
-
-            }
->
-<div
-
-              className="popup"
-
-              onClick={(
-
-                event
-
-              ) =>
-
-                event.stopPropagation()
-
-              }
->
-<h2>
-
-                {
-
-                  selectedProduct.name
-
-                }
-</h2>
-<div className="option-list">
-
-                {selectedProduct.options.map(
-
-                  (
-
-                    option
-
-                  ) => (
-<label
-
-                      className={
-selectedOption.id ===
-option.id
-
-                          ? "option-button selected-option"
-
-                          : "option-button"
-
-                      }
-
-                      key={
-option.id
-
-                      }
->
-<span>
-<input
-
-                          type="radio"
-
-                          name="product-option"
-
-                          checked={
-selectedOption.id ===
-option.id
-
-                          }
-
-                          onChange={() =>
-
-                            setSelectedOption({
-
-                              ...option,
-
-                              saleType:
-
-                                "unit",
-
-                              stockPerUnit:
-
-                                1,
-
-                            })
-
-                          }
-
-                        />{" "}
-
-                        {
-
-                          option.name
-
-                        }
-</span>
-<strong>
-
-                        {
-
-                          option.price
-
-                        }{" "}
-
-                        บาท
-</strong>
-</label>
-
-                  )
-
-                )}
-</div>
-<div className="popup-quantity">
-<button
-
-                  type="button"
-
-                  onClick={() =>
-
-                    setPopupQty(
-
-                      (
-
-                        quantity
-
-                      ) =>
-
-                        Math.max(
-
-                          1,
-
-                          Number(
-
-                            quantity
-
-                          ) - 1
-
-                        )
-
-                    )
-
-                  }
->
-
-                  −
-</button>
-<input
-
-                  className="quantity-input"
-
-                  type="number"
-
-                  min="1"
-
-                  value={
-
-                    popupQty
-
-                  }
-
-                  onChange={(
-
-                    event
-
-                  ) =>
-
-                    setPopupQty(
-
-                      Math.max(
-
-                        1,
-
-                        Number(
-
-                          event.target
-
-                            .value
-
-                        ) || 1
-
-                      )
-
-                    )
-
-                  }
-
-                />
-<button
-
-                  type="button"
-
-                  onClick={() =>
-
-                    setPopupQty(
-
-                      (
-
-                        quantity
-
-                      ) =>
-
-                        Number(
-
-                          quantity
-
-                        ) + 1
-
-                    )
-
-                  }
->
-
-                  +
-</button>
-</div>
-<div className="popup-total">
-
-                รวม{" "}
-
-                {(
-
-                  Number(
-
-                    selectedOption.price
-
-                  ) *
-
-                  Number(
-
-                    popupQty
-
-                  )
-
-                ).toLocaleString()}{" "}
-
-                บาท
-</div>
-<button
-
-                className="pay-button"
-
-                type="button"
-
-                onClick={
-
-                  confirmPopup
-
-                }
->
-
-                เพิ่มลงตะกร้า
-</button>
-<button
-
-                className="cancel-button"
-
-                type="button"
-
-                onClick={
-
-                  closePopup
-
-                }
->
-
-                ยกเลิก
-</button>
-</div>
-</div>
-
-        )}
-
-      {packProduct && (
-<div
-
-          className="popup-overlay"
-
-          onClick={
-
-            closePackPopup
-
-          }
->
-<div
-
-            className="popup"
-
-            onClick={(
-
-              event
-
-            ) =>
-
-              event.stopPropagation()
-
-            }
->
-<h2>
-
-              {
-
-                packProduct.name
-
-              }
-</h2>
-<div
-
-              style={{
-
-                marginBottom:
-
-                  "14px",
-
-                padding:
-
-                  "10px 12px",
-
-                borderRadius:
-
-                  "9px",
-
-                background:
-
-                  "#eff8ff",
-
-                color:
-
-                  "#175cd3",
-
-                textAlign:
-
-                  "center",
-
-                fontWeight:
-
-                  700,
-
-              }}
->
-
-              แพ็ก{" "}
-
-              {
-
-                packProduct.packQty
-
-              }{" "}
-
-              ชิ้น ·{" "}
-
-              {Number(
-
-                packProduct.packPrice
-
-              ).toLocaleString()}{" "}
-
-              บาท
-</div>
-<div className="popup-quantity">
-<button
-
-                type="button"
-
-                onClick={() =>
-
-                  setPackPopupQty(
-
-                    (
-
-                      quantity
-
-                    ) =>
-
-                      Math.max(
-
-                        1,
-
-                        Number(
-
-                          quantity
-
-                        ) - 1
-
-                      )
-
-                  )
-
-                }
->
-
-                −
-</button>
-<input
-
-                className="quantity-input"
-
-                type="number"
-
-                min="1"
-
-                value={
-
-                  packPopupQty
-
-                }
-
-                onChange={(
-
-                  event
-
-                ) =>
-
-                  setPackPopupQty(
-
-                    Math.max(
-
-                      1,
-
-                      Number(
-
-                        event.target
-
-                          .value
-
-                      ) || 1
-
-                    )
-
-                  )
-
-                }
-
-              />
-<button
-
-                type="button"
-
-                onClick={() =>
-
-                  setPackPopupQty(
-
-                    (
-
-                      quantity
-
-                    ) =>
-
-                      Number(
-
-                        quantity
-
-                      ) + 1
-
-                  )
-
-                }
->
-
-                +
-</button>
-</div>
-<div
-
-              style={{
-
-                marginTop:
-
-                  "10px",
-
-                marginBottom:
-
-                  "10px",
-
-                textAlign:
-
-                  "center",
-
-                color:
-
-                  "#475467",
-
-                fontSize:
-
-                  "13px",
-
-              }}
->
-
-              {packPopupQty} แพ็ก ={" "}
-<strong>
-
-                {
-
-                  packStockUse
-
-                }{" "}
-
-                ชิ้น
-</strong>
-</div>
-<div className="popup-total">
-
-              รวม{" "}
-
-              {(
-
-                Number(
-
-                  packProduct.packPrice ||
-
-                    0
-
-                ) *
-
-                Number(
-
-                  packPopupQty ||
-
-                    0
-
-                )
-
-              ).toLocaleString()}{" "}
-
-              บาท
-</div>
-<button
-
-              className="pay-button"
-
-              type="button"
-
-              onClick={
-
-                confirmPackPopup
-
-              }
->
-
-              เพิ่มแพ็กลงตะกร้า
-</button>
-<button
-
-              className="cancel-button"
-
-              type="button"
-
-              onClick={
-
-                closePackPopup
-
-              }
->
-
-              ยกเลิก
-</button>
-</div>
-</div>
-
-      )}
+      />
 </div>
 
   );
@@ -2037,3 +1043,4 @@ option.id
 }
 
 export default POSPage;
+ 
