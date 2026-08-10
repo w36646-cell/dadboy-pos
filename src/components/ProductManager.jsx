@@ -1,4 +1,12 @@
-import { useMemo, useState } from "react";
+import {
+
+  useMemo,
+
+  useState,
+
+} from "react";
+
+import PackSettings from "./product/PackSettings";
 
 function ProductManager({
 
@@ -12,9 +20,13 @@ function ProductManager({
 
 }) {
 
-  const [search, setSearch] =
+  const [
 
-    useState("");
+    search,
+
+    setSearch,
+
+  ] = useState("");
 
   const [
 
@@ -24,49 +36,43 @@ function ProductManager({
 
   ] = useState(null);
 
-  const [form, setForm] =
+  const [
 
-    useState({
+    form,
 
-      name: "",
+    setForm,
 
-      category: "",
+  ] = useState({
 
-      price: 0,
+    name: "",
 
-      cost: 0,
+    category: "",
 
-      image: "",
+    price: 0,
 
-      minStock: 5,
+    cost: 0,
 
-      trackStock: true,
+    image: "",
 
-      hasOption: false,
+    minStock: 5,
 
-      normalPrice: 0,
+    trackStock: true,
 
-      cupPrice: 25,
+    hasOption: false,
 
-      ownCupPrice: 20,
+    normalPrice: 0,
 
-      /*
+    cupPrice: 25,
 
-        ==========================
+    ownCupPrice: 20,
 
-        ขายยกแพ็ก
+    packQty: 1,
 
-        ==========================
+    packEnabled: false,
 
-      */
+    packPrice: 0,
 
-      packEnabled: false,
-
-      packQty: 1,
-
-      packPrice: 0,
-
-    });
+  });
 
   const list =
 
@@ -90,11 +96,19 @@ function ProductManager({
 
         (product) =>
 
-          product.name
+          String(
+
+            product.name || ""
+
+          )
 
             .toLowerCase()
 
-            .includes(keyword)
+            .includes(
+
+              keyword
+
+            )
 
       );
 
@@ -169,9 +183,7 @@ option.id ===
 
       category:
 
-        product.category ||
-
-        "",
+        product.category || "",
 
       price:
 
@@ -243,22 +255,6 @@ option.id ===
 
         ),
 
-      /*
-
-        ==========================
-
-        ค่าแพ็กเดิม
-
-        ==========================
-
-      */
-
-      packEnabled:
-
-        product.packEnabled ===
-
-        true,
-
       packQty:
 
         Math.max(
@@ -274,6 +270,12 @@ option.id ===
           ) || 1
 
         ),
+
+      packEnabled:
+
+        product.packEnabled ===
+
+        true,
 
       packPrice:
 
@@ -309,7 +311,9 @@ option.id ===
 
         ...current,
 
-        [field]: value,
+        [field]:
+
+          value,
 
       })
 
@@ -339,137 +343,153 @@ option.id ===
 
       new FileReader();
 
-    reader.onload = () => {
+    reader.onload =
 
-      const source =
+      () => {
 
-        String(
+        const source =
 
-          reader.result
+          String(
 
-        );
-
-      const image =
-
-        new Image();
-
-      image.onload = () => {
-
-        const canvas =
-
-          document.createElement(
-
-            "canvas"
+            reader.result
 
           );
 
-        const size = 512;
+        const image =
 
-        canvas.width =
+          new Image();
 
-          size;
+        image.onload =
 
-        canvas.height =
+          () => {
 
-          size;
+            const canvas =
 
-        const context =
+              document.createElement(
 
-          canvas.getContext(
+                "canvas"
 
-            "2d"
+              );
 
-          );
+            const size =
 
-        context.fillStyle =
+              512;
 
-          "#ffffff";
+            canvas.width =
 
-        context.fillRect(
+              size;
 
-          0,
+            canvas.height =
 
-          0,
+              size;
 
-          size,
+            const context =
 
-          size
+              canvas.getContext(
 
-        );
+                "2d"
 
-        const scale =
+              );
 
-          Math.min(
+            if (!context) {
 
-            400 /
+              return;
 
-              image.width,
+            }
 
-            400 /
+            context.fillStyle =
 
-              image.height
+              "#ffffff";
 
-          );
+            context.fillRect(
 
-        const width =
+              0,
 
-          image.width *
+              0,
 
-          scale;
+              size,
 
-        const height =
+              size
 
-          image.height *
+            );
 
-          scale;
+            const scale =
 
-        const x =
+              Math.min(
 
-          (size - width) /
+                400 /
 
-          2;
+                  image.width,
 
-        const y =
+                400 /
 
-          (size - height) /
+                  image.height
 
-          2;
+              );
 
-        context.drawImage(
+            const width =
 
-          image,
+              image.width *
 
-          x,
+              scale;
 
-          y,
+            const height =
 
-          width,
+              image.height *
 
-          height
+              scale;
 
-        );
+            const x =
 
-        updateField(
+              (size -
 
-          "image",
+                width) /
 
-          canvas.toDataURL(
+              2;
 
-            "image/jpeg",
+            const y =
 
-            0.82
+              (size -
 
-          )
+                height) /
 
-        );
+              2;
+
+            context.drawImage(
+
+              image,
+
+              x,
+
+              y,
+
+              width,
+
+              height
+
+            );
+
+            updateField(
+
+              "image",
+
+              canvas.toDataURL(
+
+                "image/jpeg",
+
+                0.82
+
+              )
+
+            );
+
+          };
+
+        image.src =
+
+          source;
 
       };
-
-      image.src =
-
-        source;
-
-    };
 
     reader.readAsDataURL(
 
@@ -481,7 +501,11 @@ option.id ===
 
   function saveProduct() {
 
-    if (!editingProduct) {
+    if (
+
+      !editingProduct
+
+    ) {
 
       return;
 
@@ -549,14 +573,6 @@ option.id ===
 
       );
 
-    const packEnabled =
-
-      Boolean(
-
-        form.packEnabled
-
-      );
-
     const packQty =
 
       Math.max(
@@ -575,6 +591,14 @@ option.id ===
 
       );
 
+    const packEnabled =
+
+      Boolean(
+
+        form.packEnabled
+
+      );
+
     const packPrice =
 
       Math.max(
@@ -589,16 +613,6 @@ option.id ===
 
       );
 
-    /*
-
-      ถ้าเปิดขายแพ็ก
-
-      ต้องมีอย่างน้อย 2 ชิ้น
-
-      และต้องมีราคาแพ็กมากกว่า 0
-
-    */
-
     if (
 
       packEnabled &&
@@ -609,7 +623,7 @@ option.id ===
 
       window.alert(
 
-        "จำนวนชิ้นต่อแพ็กต้องตั้งแต่ 2 ชิ้นขึ้นไป"
+        "ถ้าจะเปิดขายยกแพ็ก ต้องกำหนดจำนวนต่อแพ็กอย่างน้อย 2 ชิ้น"
 
       );
 
@@ -669,7 +683,11 @@ option.id ===
 
       hasOption:
 
-        form.hasOption,
+        Boolean(
+
+          form.hasOption
+
+        ),
 
       options:
 
@@ -705,11 +723,17 @@ option.id ===
 
                 price:
 
-                  Number(
+                  Math.max(
 
-                    form.cupPrice
+                    0,
 
-                  ) || 0,
+                    Number(
+
+                      form.cupPrice
+
+                    ) || 0
+
+                  ),
 
               },
 
@@ -725,11 +749,17 @@ option.id ===
 
                 price:
 
-                  Number(
+                  Math.max(
 
-                    form.ownCupPrice
+                    0,
 
-                  ) || 0,
+                    Number(
+
+                      form.ownCupPrice
+
+                    ) || 0
+
+                  ),
 
               },
 
@@ -737,25 +767,9 @@ option.id ===
 
           : [],
 
-      /*
-
-        ==========================
-
-        ขายยกแพ็ก
-
-        ==========================
-
-      */
+      packQty,
 
       packEnabled,
-
-      packQty:
-
-        packEnabled
-
-          ? packQty
-
-          : 1,
 
       packPrice:
 
@@ -803,7 +817,9 @@ option.id ===
 
             แก้ชื่อ ราคา ต้นทุน รูป
 
-            สต๊อก และราคาขายยกแพ็ก
+            การติดตามสต๊อก
+
+            และข้อมูลแพ็ก
 </p>
 </div>
 <button
@@ -869,6 +885,10 @@ option.id ===
 <th>
 
                   ราคาขาย
+</th>
+<th>
+
+                  บรรจุ/แพ็ก
 </th>
 <th>
 
@@ -958,12 +978,6 @@ option.id ===
 
                       minStock;
 
-                  const packEnabled =
-
-                    item.packEnabled ===
-
-                    true;
-
                   const packQty =
 
                     Math.max(
@@ -979,6 +993,12 @@ option.id ===
                       ) || 1
 
                     );
+
+                  const packEnabled =
+
+                    item.packEnabled ===
+
+                    true;
 
                   const packPrice =
 
@@ -1003,6 +1023,24 @@ option.id ===
 item.id
 
                       }
+
+                      onClick={() =>
+
+                        openEdit(
+
+                          item
+
+                        )
+
+                      }
+
+                      style={{
+
+                        cursor:
+
+                          "pointer",
+
+                      }}
 >
 <td>
 <div className="manager-image-box">
@@ -1043,37 +1081,30 @@ item.id
 </td>
 <td>
 
-                        {
+                        {Number(
 
-                          normalPrice
+                          normalPrice ||
 
-                        }{" "}
+                            0
+
+                        ).toLocaleString()}{" "}
 
                         บาท
 </td>
 <td>
 
-                        {packEnabled ? (
+                        {packQty >=
+
+                        2 ? (
 <>
 
                             {
 
-                              packPrice
+                              packQty
 
                             }{" "}
 
-                            บาท
-<br />
-<small>
-
-                              {
-
-                                packQty
-
-                              }{" "}
-
-                              ชิ้น/แพ็ก
-</small>
+                            ชิ้น
 </>
 
                         ) : (
@@ -1084,7 +1115,33 @@ item.id
 </td>
 <td>
 
-                        {cost} บาท
+                        {packEnabled ? (
+<>
+
+                            {packPrice.toLocaleString()}{" "}
+
+                            บาท
+</>
+
+                        ) : packQty >=
+
+                          2 ? (
+<small>
+
+                            ไม่เปิดขายแพ็ก
+</small>
+
+                        ) : (
+
+                          "-"
+
+                        )}
+</td>
+<td>
+
+                        {cost.toLocaleString()}{" "}
+
+                        บาท
 </td>
 <td
 
@@ -1124,15 +1181,21 @@ item.id
 
                           type="button"
 
-                          onClick={() =>
+                          onClick={(
+
+                            event
+
+                          ) => {
+
+                            event.stopPropagation();
 
                             openEdit(
 
                               item
 
-                            )
+                            );
 
-                          }
+                          }}
 >
 
                           แก้ไข
@@ -1462,192 +1525,75 @@ item.id
 </div>
 
               )}
-<hr />
-<h3>
+<PackSettings
 
-                ขายยกแพ็ก
-</h3>
-<label className="manager-checkbox">
-<input
+                packQty={
 
-                  type="checkbox"
+                  form.packQty
 
-                  checked={
+                }
 
-                    form.packEnabled
+                packEnabled={
 
-                  }
+                  form.packEnabled
 
-                  onChange={(
+                }
 
-                    event
+                packPrice={
 
-                  ) =>
+                  form.packPrice
 
-                    updateField(
+                }
 
-                      "packEnabled",
+                onChangePackQty={(
 
-                      event.target
+                  value
 
-                        .checked
+                ) =>
 
-                    )
+                  updateField(
 
-                  }
+                    "packQty",
 
-                />
+                    value
 
-                สินค้านี้ขายยกแพ็กได้
-</label>
+                  )
 
-              {form.packEnabled && (
-<>
-<label className="manager-label">
+                }
 
-                    จำนวนชิ้นต่อ 1 แพ็ก
-</label>
-<input
+                onChangePackEnabled={(
 
-                    className="manager-input"
+                  value
 
-                    type="number"
+                ) =>
 
-                    min="2"
+                  updateField(
 
-                    step="1"
+                    "packEnabled",
 
-                    value={
+                    value
 
-                      form.packQty
+                  )
 
-                    }
+                }
 
-                    onChange={(
+                onChangePackPrice={(
 
-                      event
+                  value
 
-                    ) =>
+                ) =>
 
-                      updateField(
+                  updateField(
 
-                        "packQty",
+                    "packPrice",
 
-                        event.target
+                    value
 
-                          .value
+                  )
 
-                      )
+                }
 
-                    }
-
-                  />
-<label className="manager-label">
-
-                    ราคาขายต่อ 1 แพ็ก
-</label>
-<input
-
-                    className="manager-input"
-
-                    type="number"
-
-                    min="0"
-
-                    step="0.01"
-
-                    value={
-
-                      form.packPrice
-
-                    }
-
-                    onChange={(
-
-                      event
-
-                    ) =>
-
-                      updateField(
-
-                        "packPrice",
-
-                        event.target
-
-                          .value
-
-                      )
-
-                    }
-
-                  />
-<small>
-
-                    ตัวอย่าง: 6 ชิ้น/แพ็ก ราคา 95 บาท
-
-                    ระบบ Stock จะยังนับเป็นจำนวนชิ้น
-</small>
-<div
-
-                    style={{
-
-                      marginTop:
-
-                        "10px",
-
-                      padding:
-
-                        "10px 12px",
-
-                      borderRadius:
-
-                        "8px",
-
-                      background:
-
-                        "#f8fafc",
-
-                      fontSize:
-
-                        "13px",
-
-                    }}
->
-
-                    1 แพ็ก ={" "}
-<strong>
-
-                      {Math.max(
-
-                        1,
-
-                        Number(
-
-                          form.packQty
-
-                        ) || 1
-
-                      )}{" "}
-
-                      ชิ้น
-</strong>
-<br />
-
-                    ราคาแพ็ก ={" "}
-<strong>
-
-                      {Number(
-
-                        form.packPrice
-
-                      ) || 0}{" "}
-
-                      บาท
-</strong>
-</div>
-</>
-
-              )}
+              />
 <hr />
 <h3>
 
@@ -1728,10 +1674,6 @@ item.id
                     }
 
                   />
-<small>
-
-                    ระบบจะแจ้งเตือนเมื่อคงเหลือเท่ากับหรือต่ำกว่าจำนวนนี้
-</small>
 </>
 
               )}
@@ -1859,4 +1801,3 @@ item.id
 }
 
 export default ProductManager;
- 

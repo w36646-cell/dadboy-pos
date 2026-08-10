@@ -1,4 +1,10 @@
-import { useMemo, useState } from "react";
+import {
+
+  useMemo,
+
+  useState,
+
+} from "react";
 
 function StockManager({
 
@@ -12,78 +18,436 @@ function StockManager({
 
 }) {
 
-  const [searchText, setSearchText] = useState("");
+  const [
 
-  const [selectedProduct, setSelectedProduct] =
+    searchText,
 
-    useState(null);
+    setSearchText,
 
-  const [receiveQty, setReceiveQty] = useState(1);
+  ] = useState("");
 
-  const filteredProducts = useMemo(() => {
+  const [
 
-    const keyword = searchText.trim().toLowerCase();
+    selectedProduct,
 
-    if (!keyword) {
+    setSelectedProduct,
 
-      return products;
+  ] = useState(null);
 
-    }
+  const [
 
-    return products.filter((product) =>
+    receiveQty,
 
-      product.name.toLowerCase().includes(keyword)
+    setReceiveQty,
+
+  ] = useState(1);
+
+  const [
+
+    receiveUnit,
+
+    setReceiveUnit,
+
+  ] = useState("unit");
+
+  const filteredProducts =
+
+    useMemo(() => {
+
+      const keyword =
+
+        searchText
+
+          .trim()
+
+          .toLowerCase();
+
+      if (!keyword) {
+
+        return products;
+
+      }
+
+      return products.filter(
+
+        (product) =>
+
+          String(
+
+            product.name || ""
+
+          )
+
+            .toLowerCase()
+
+            .includes(keyword)
+
+      );
+
+    }, [
+
+      products,
+
+      searchText,
+
+    ]);
+
+  /*
+
+    มีแพ็กสำหรับการรับสินค้าเข้า
+
+    เมื่อกำหนด packQty ตั้งแต่ 2 ขึ้นไป
+
+    ไม่สนว่า packEnabled
+
+    เปิดขายแพ็กอยู่หรือไม่
+
+  */
+
+  function hasPack(
+
+    product
+
+  ) {
+
+    return (
+
+      Math.max(
+
+        1,
+
+        Number(
+
+          product?.packQty ??
+
+            1
+
+        ) || 1
+
+      ) >= 2
 
     );
 
-  }, [products, searchText]);
+  }
 
-  function selectProduct(product) {
+  function getPackQty(
 
-    setSelectedProduct(product);
+    product
+
+  ) {
+
+    return Math.max(
+
+      1,
+
+      Math.floor(
+
+        Number(
+
+          product?.packQty ??
+
+            1
+
+        ) || 1
+
+      )
+
+    );
+
+  }
+
+  function selectProduct(
+
+    product
+
+  ) {
+
+    setSelectedProduct(
+
+      product
+
+    );
 
     setReceiveQty(1);
+
+    /*
+
+      ถ้าสินค้ามี packQty
+
+      ให้เริ่มต้นเป็นแพ็กเลย
+
+    */
+
+    setReceiveUnit(
+
+      hasPack(product)
+
+        ? "pack"
+
+        : "unit"
+
+    );
+
+  }
+
+  function getReceivePieces() {
+
+    const quantity =
+
+      Number(
+
+        receiveQty
+
+      );
+
+    if (
+
+      !Number.isFinite(
+
+        quantity
+
+      ) ||
+
+      quantity <= 0
+
+    ) {
+
+      return 0;
+
+    }
+
+    if (
+
+      receiveUnit ===
+
+        "pack" &&
+
+      hasPack(
+
+        selectedProduct
+
+      )
+
+    ) {
+
+      return (
+
+        quantity *
+
+        getPackQty(
+
+          selectedProduct
+
+        )
+
+      );
+
+    }
+
+    return quantity;
 
   }
 
   function confirmReceive() {
 
-    if (!selectedProduct) {
+    if (
+
+      !selectedProduct
+
+    ) {
 
       return;
 
     }
 
-    const quantity = Number(receiveQty);
+    const quantity =
 
-    if (!Number.isFinite(quantity) || quantity <= 0) {
+      Number(
 
-      window.alert("กรุณาใส่จำนวนที่รับเข้า");
+        receiveQty
+
+      );
+
+    if (
+
+      !Number.isFinite(
+
+        quantity
+
+      ) ||
+
+      quantity <= 0
+
+    ) {
+
+      window.alert(
+
+        "กรุณาใส่จำนวนที่รับเข้า"
+
+      );
 
       return;
 
     }
 
-    onAddStock(selectedProduct.id, quantity);
+    const pieces =
 
-    window.alert(
+      getReceivePieces();
 
-      `เพิ่มสต๊อก ${selectedProduct.name} จำนวน ${quantity} แล้ว`
+    if (
+
+      pieces <= 0
+
+    ) {
+
+      window.alert(
+
+        "จำนวนรับเข้าไม่ถูกต้อง"
+
+      );
+
+      return;
+
+    }
+
+    onAddStock(
+selectedProduct.id,
+
+      pieces
 
     );
 
-    setSelectedProduct(null);
+    if (
+
+      receiveUnit ===
+
+        "pack" &&
+
+      hasPack(
+
+        selectedProduct
+
+      )
+
+    ) {
+
+      window.alert(
+
+        `รับสินค้าเข้าเรียบร้อย\n${selectedProduct.name}\n${quantity} แพ็ก × ${getPackQty(
+
+          selectedProduct
+
+        )} ชิ้น = ${pieces} ชิ้น`
+
+      );
+
+    } else {
+
+      window.alert(
+
+        `รับสินค้าเข้าเรียบร้อย\n${selectedProduct.name}\n${pieces} ชิ้น`
+
+      );
+
+    }
+
+    setSelectedProduct(
+
+      null
+
+    );
 
     setReceiveQty(1);
 
+    setReceiveUnit(
+
+      "unit"
+
+    );
+
   }
+
+  function handleKeyDown(
+
+    event
+
+  ) {
+
+    if (
+
+      event.key ===
+
+      "Enter"
+
+    ) {
+
+      event.preventDefault();
+
+      confirmReceive();
+
+    }
+
+  }
+
+  const currentStock =
+
+    selectedProduct
+
+      ? Number(
+
+          inventory[
+selectedProduct.id
+
+          ] ?? 0
+
+        )
+
+      : 0;
+
+  const receivePieces =
+
+    selectedProduct
+
+      ? getReceivePieces()
+
+      : 0;
+
+  const newStock =
+
+    currentStock +
+
+    receivePieces;
+
+  const selectedHasPack =
+
+    hasPack(
+
+      selectedProduct
+
+    );
+
+  const selectedPackQty =
+
+    getPackQty(
+
+      selectedProduct
+
+    );
 
   return (
 <div className="stock-page">
 <div className="stock-page-header">
 <div>
-<h1>รับสินค้าเข้า</h1>
-<p>เลือกสินค้าแล้วเพิ่มจำนวนสต๊อก</p>
+<h1>
+
+            รับสินค้าเข้า
+</h1>
+<p>
+
+            เลือกรับเป็นชิ้น
+
+            หรือแพ็กได้
+</p>
 </div>
 <button
 
@@ -91,7 +455,11 @@ function StockManager({
 
           type="button"
 
-          onClick={onClose}
+          onClick={
+
+            onClose
+
+          }
 >
 
           กลับหน้าขาย
@@ -105,11 +473,25 @@ function StockManager({
 
         placeholder="ค้นหาสินค้าที่จะรับเข้า..."
 
-        value={searchText}
+        value={
 
-        onChange={(event) =>
+          searchText
 
-          setSearchText(event.target.value)
+        }
+
+        onChange={(
+
+          event
+
+        ) =>
+
+          setSearchText(
+
+            event.target
+
+              .value
+
+          )
 
         }
 
@@ -117,78 +499,164 @@ function StockManager({
 <div className="stock-layout">
 <div className="stock-product-grid">
 
-          {filteredProducts.map((product) => {
+          {filteredProducts.map(
 
-            const stock = Number(
+            (product) => {
 
-              inventory[product.id] ?? 50
+              const stock =
 
-            );
+                Number(
 
-            return (
+                  inventory[
+product.id
+
+                  ] ?? 0
+
+                );
+
+              const packQty =
+
+                getPackQty(
+
+                  product
+
+                );
+
+              return (
 <button
 
-                type="button"
-
-                className={
-
-                  selectedProduct?.id === product.id
-
-                    ? "stock-product-card selected"
-
-                    : "stock-product-card"
-
-                }
-
-                key={product.id}
-
-                onClick={() => selectProduct(product)}
->
-<div className="stock-product-image">
-
-                  {product.image ? (
-<img
-
-                      src={product.image}
-
-                      alt={product.name}
-
-                      onError={(event) => {
-
-                        event.currentTarget.style.display =
-
-                          "none";
-
-                      }}
-
-                    />
-
-                  ) : (
-<span>ไม่มีรูป</span>
-
-                  )}
-</div>
-<strong>{product.name}</strong>
-<div
+                  type="button"
 
                   className={
 
-                    stock < 0
+                    selectedProduct?.id ===
+product.id
 
-                      ? "stock-current negative"
+                      ? "stock-product-card selected"
 
-                      : "stock-current"
+                      : "stock-product-card"
+
+                  }
+
+                  key={
+product.id
+
+                  }
+
+                  onClick={() =>
+
+                    selectProduct(
+
+                      product
+
+                    )
 
                   }
 >
+<div className="stock-product-image">
 
-                  คงเหลือ {stock}
+                    {product.image ? (
+<img
+
+                        src={
+
+                          product.image
+
+                        }
+
+                        alt={
+
+                          product.name
+
+                        }
+
+                        onError={(
+
+                          event
+
+                        ) => {
+
+                          event.currentTarget.style.display =
+
+                            "none";
+
+                        }}
+
+                      />
+
+                    ) : (
+<span>
+
+                        ไม่มีรูป
+</span>
+
+                    )}
 </div>
+<strong>
+
+                    {
+
+                      product.name
+
+                    }
+</strong>
+<div
+
+                    className={
+
+                      stock < 0
+
+                        ? "stock-current negative"
+
+                        : "stock-current"
+
+                    }
+>
+
+                    คงเหลือ{" "}
+
+                    {stock}
+</div>
+
+                  {hasPack(
+
+                    product
+
+                  ) && (
+<div
+
+                      style={{
+
+                        marginTop:
+
+                          "6px",
+
+                        fontSize:
+
+                          "12px",
+
+                        color:
+
+                          "#667085",
+
+                      }}
+>
+
+                      1 แพ็ก ={" "}
+
+                      {packQty}{" "}
+
+                      ชิ้น
+</div>
+
+                  )}
 </button>
 
-            );
+              );
 
-          })}
+            }
+
+          )}
 </div>
 <aside className="stock-form-panel">
 
@@ -200,22 +668,227 @@ function StockManager({
 
           ) : (
 <>
-<h2>{selectedProduct.name}</h2>
+<h2>
+
+                {
+
+                  selectedProduct.name
+
+                }
+</h2>
 <div className="stock-old-value">
 
                 สต๊อกปัจจุบัน{" "}
 <strong>
 
-                  {Number(
+                  {
 
-                    inventory[selectedProduct.id] ?? 50
+                    currentStock
 
-                  )}
+                  }
 </strong>
 </div>
+
+              {selectedHasPack && (
+<>
 <label className="stock-label">
 
-                จำนวนที่รับเข้า
+                    รับเข้าเป็น
+</label>
+<div
+
+                    style={{
+
+                      display:
+
+                        "grid",
+
+                      gridTemplateColumns:
+
+                        "1fr 1fr",
+
+                      gap:
+
+                        "8px",
+
+                      marginTop:
+
+                        "8px",
+
+                      marginBottom:
+
+                        "12px",
+
+                    }}
+>
+<button
+
+                      type="button"
+
+                      onClick={() =>
+
+                        setReceiveUnit(
+
+                          "pack"
+
+                        )
+
+                      }
+
+                      style={{
+
+                        padding:
+
+                          "12px",
+
+                        borderRadius:
+
+                          "8px",
+
+                        border:
+
+                          receiveUnit ===
+
+                          "pack"
+
+                            ? "2px solid #1976d2"
+
+                            : "1px solid #d0d5dd",
+
+                        background:
+
+                          receiveUnit ===
+
+                          "pack"
+
+                            ? "#e3f2fd"
+
+                            : "#ffffff",
+
+                        fontWeight:
+
+                          "700",
+
+                      }}
+>
+
+                      แพ็ก
+</button>
+<button
+
+                      type="button"
+
+                      onClick={() =>
+
+                        setReceiveUnit(
+
+                          "unit"
+
+                        )
+
+                      }
+
+                      style={{
+
+                        padding:
+
+                          "12px",
+
+                        borderRadius:
+
+                          "8px",
+
+                        border:
+
+                          receiveUnit ===
+
+                          "unit"
+
+                            ? "2px solid #1976d2"
+
+                            : "1px solid #d0d5dd",
+
+                        background:
+
+                          receiveUnit ===
+
+                          "unit"
+
+                            ? "#e3f2fd"
+
+                            : "#ffffff",
+
+                        fontWeight:
+
+                          "700",
+
+                      }}
+>
+
+                      ชิ้น / ขวด
+</button>
+</div>
+</>
+
+              )}
+
+              {selectedHasPack &&
+
+                receiveUnit ===
+
+                  "pack" && (
+<div
+
+                    style={{
+
+                      padding:
+
+                        "10px",
+
+                      marginBottom:
+
+                        "12px",
+
+                      borderRadius:
+
+                        "8px",
+
+                      background:
+
+                        "#f8fafc",
+
+                      color:
+
+                        "#475467",
+
+                    }}
+>
+
+                    1 แพ็ก ={" "}
+<strong>
+
+                      {
+
+                        selectedPackQty
+
+                      }
+</strong>{" "}
+
+                    ชิ้น
+</div>
+
+                )}
+<label className="stock-label">
+
+                {selectedHasPack &&
+
+                receiveUnit ===
+
+                  "pack"
+
+                  ? "จำนวนแพ็ก"
+
+                  : "จำนวนชิ้น / ขวด"}
 </label>
 <div className="stock-qty-controls">
 <button
@@ -224,9 +897,21 @@ function StockManager({
 
                   onClick={() =>
 
-                    setReceiveQty((qty) =>
+                    setReceiveQty(
 
-                      Math.max(1, Number(qty) - 1)
+                      (qty) =>
+
+                        Math.max(
+
+                          1,
+
+                          Number(
+
+                            qty
+
+                          ) - 1
+
+                        )
 
                     )
 
@@ -241,11 +926,31 @@ function StockManager({
 
                   min="1"
 
-                  value={receiveQty}
+                  value={
 
-                  onChange={(event) =>
+                    receiveQty
 
-                    setReceiveQty(event.target.value)
+                  }
+
+                  onChange={(
+
+                    event
+
+                  ) =>
+
+                    setReceiveQty(
+
+                      event.target
+
+                        .value
+
+                    )
+
+                  }
+
+                  onKeyDown={
+
+                    handleKeyDown
 
                   }
 
@@ -258,9 +963,15 @@ function StockManager({
 
                   onClick={() =>
 
-                    setReceiveQty((qty) =>
+                    setReceiveQty(
 
-                      Number(qty || 0) + 1
+                      (qty) =>
+
+                        Number(
+
+                          qty || 0
+
+                        ) + 1
 
                     )
 
@@ -270,16 +981,79 @@ function StockManager({
                   +
 </button>
 </div>
+
+              {selectedHasPack &&
+
+                receiveUnit ===
+
+                  "pack" && (
+<div
+
+                    style={{
+
+                      padding:
+
+                        "10px",
+
+                      marginTop:
+
+                        "12px",
+
+                      borderRadius:
+
+                        "8px",
+
+                      background:
+
+                        "#fff7ed",
+
+                      color:
+
+                        "#9a3412",
+
+                      fontWeight:
+
+                        "700",
+
+                    }}
+>
+
+                    {Number(
+
+                      receiveQty
+
+                    ) || 0}{" "}
+
+                    แพ็ก ×{" "}
+
+                    {
+
+                      selectedPackQty
+
+                    }{" "}
+
+                    ={" "}
+
+                    {
+
+                      receivePieces
+
+                    }{" "}
+
+                    ชิ้น
+</div>
+
+                )}
 <div className="stock-new-value">
 
                 หลังรับเข้า จะเหลือ{" "}
 <strong>
 
-                  {Number(
+                  {
 
-                    inventory[selectedProduct.id] ?? 50
+                    newStock
 
-                  ) + (Number(receiveQty) || 0)}
+                  }
 </strong>
 </div>
 <button
@@ -288,11 +1062,40 @@ function StockManager({
 
                 type="button"
 
-                onClick={confirmReceive}
+                onClick={
+
+                  confirmReceive
+
+                }
 >
 
                 เพิ่มสต๊อก
 </button>
+<div
+
+                style={{
+
+                  marginTop:
+
+                    "8px",
+
+                  textAlign:
+
+                    "center",
+
+                  color:
+
+                    "#667085",
+
+                  fontSize:
+
+                    "12px",
+
+                }}
+>
+
+                กด Enter เพื่อรับสินค้าเข้า
+</div>
 </>
 
           )}
