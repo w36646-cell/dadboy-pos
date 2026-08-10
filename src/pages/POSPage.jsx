@@ -2037,4 +2037,3 @@ option.id
 }
 
 export default POSPage;
- 
