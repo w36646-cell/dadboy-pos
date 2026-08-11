@@ -500,13 +500,17 @@ function POSPage({
 
     });
 
-    setCartPulse(true);
+    setTimeout(() => {
+
+      setCartPulse(true);
+
+    }, 300);
 
     setTimeout(() => {
 
       setCartPulse(false);
 
-    }, 420);
+    }, 720);
 
     setTimeout(() => {
 
@@ -1051,6 +1055,26 @@ option.id ===
               }{" "}
 
               สินค้า
+</span>
+<span
+
+              className={
+
+                cartPulse
+
+                  ? "pos-header-total pulse"
+
+                  : "pos-header-total"
+
+              }
+
+              aria-live="polite"
+>
+
+              รวม{" "}
+<b>{Number(total || 0).toLocaleString()}</b>{" "}
+
+              บาท
 </span>
 </div>
 <div className="pos-sync-corner">

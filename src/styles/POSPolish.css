@@ -8,11 +8,11 @@
 
 .employee-pos-topbar {
 
-  position: sticky !important;
+  position: static !important;
 
-  top: 0 !important;
+  top: auto !important;
 
-  z-index: 1200 !important;
+  z-index: auto !important;
 
   background:
 
@@ -41,7 +41,7 @@
 
   position: sticky !important;
 
-  top: 56px !important;
+  top: 0 !important;
 
   z-index: 1100 !important;
 
