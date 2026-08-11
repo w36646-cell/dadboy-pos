@@ -1884,3 +1884,75 @@ button {
 
 }
 
+/* ===== Match image editor preview to POS card size ===== */
+
+.manager-preview.manager-image-editor-preview {
+
+  width: 118px !important;
+
+  min-width: 118px !important;
+
+  max-width: 118px !important;
+
+  height: 150px !important;
+
+  min-height: 150px !important;
+
+  max-height: 150px !important;
+
+  margin-left: auto !important;
+
+  margin-right: auto !important;
+
+  padding: 8px 5px 35px !important;
+
+  border-radius: 13px !important;
+
+}
+
+
+/* จอใหญ่ ให้ใกล้การ์ด POS บนคอม */
+
+@media (min-width: 1000px) {
+
+  .manager-preview.manager-image-editor-preview {
+
+    width: 180px !important;
+
+    min-width: 180px !important;
+
+    max-width: 180px !important;
+
+    height: 172px !important;
+
+    min-height: 172px !important;
+
+    max-height: 172px !important;
+
+  }
+
+}
+
+
+/* จอใหญ่กว่า 1350px */
+
+@media (min-width: 1350px) {
+
+  .manager-preview.manager-image-editor-preview {
+
+    width: 210px !important;
+
+    min-width: 210px !important;
+
+    max-width: 210px !important;
+
+    height: 184px !important;
+
+    min-height: 184px !important;
+
+    max-height: 184px !important;
+
+  }
+
+}
+ 
