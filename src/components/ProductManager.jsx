@@ -8,6 +8,48 @@ import {
 
 import PackSettings from "./product/PackSettings";
 
+import {
+
+  saveCloudProduct,
+
+} from "../services/productService";
+
+function createEmptyForm() {
+
+  return {
+
+    name: "",
+
+    category: "",
+
+    price: 0,
+
+    cost: 0,
+
+    image: "",
+
+    minStock: 5,
+
+    trackStock: true,
+
+    hasOption: false,
+
+    normalPrice: 0,
+
+    cupPrice: 25,
+
+    ownCupPrice: 20,
+
+    packQty: 1,
+
+    packEnabled: false,
+
+    packPrice: 0,
+
+  };
+
+}
+
 function ProductManager({
 
   products,
@@ -38,41 +80,31 @@ function ProductManager({
 
   const [
 
+    isCreating,
+
+    setIsCreating,
+
+  ] = useState(false);
+
+  const [
+
+    saving,
+
+    setSaving,
+
+  ] = useState(false);
+
+  const [
+
     form,
 
     setForm,
 
-  ] = useState({
+  ] = useState(
 
-    name: "",
+    createEmptyForm()
 
-    category: "",
-
-    price: 0,
-
-    cost: 0,
-
-    image: "",
-
-    minStock: 5,
-
-    trackStock: true,
-
-    hasOption: false,
-
-    normalPrice: 0,
-
-    cupPrice: 25,
-
-    ownCupPrice: 20,
-
-    packQty: 1,
-
-    packEnabled: false,
-
-    packPrice: 0,
-
-  });
+  );
 
   const list =
 
@@ -119,6 +151,40 @@ function ProductManager({
       search,
 
     ]);
+
+  function openCreate() {
+
+    /*
+
+      ใช้ timestamp เป็น ID ใหม่
+
+      ไม่ชนกับสินค้าเดิม
+
+    */
+
+    const newId =
+
+      Date.now();
+
+    setEditingProduct({
+
+      id: newId,
+
+    });
+
+    setIsCreating(
+
+      true
+
+    );
+
+    setForm(
+
+      createEmptyForm()
+
+    );
+
+  }
 
   function openEdit(
 
@@ -175,6 +241,12 @@ option.id ===
 
     );
 
+    setIsCreating(
+
+      false
+
+    );
+
     setForm({
 
       name:
@@ -183,13 +255,17 @@ option.id ===
 
       category:
 
-        product.category || "",
+        product.category ||
+
+        "",
 
       price:
 
         Number(
 
-          product.price || 0
+          product.price ||
+
+            0
 
         ),
 
@@ -197,7 +273,9 @@ option.id ===
 
         Number(
 
-          product.cost || 0
+          product.cost ||
+
+            0
 
         ),
 
@@ -294,6 +372,28 @@ option.id ===
         ),
 
     });
+
+  }
+
+  function closeEditor() {
+
+    setEditingProduct(
+
+      null
+
+    );
+
+    setIsCreating(
+
+      false
+
+    );
+
+    setForm(
+
+      createEmptyForm()
+
+    );
 
   }
 
@@ -499,33 +599,7 @@ option.id ===
 
   }
 
-  function saveProduct() {
-
-    if (
-
-      !editingProduct
-
-    ) {
-
-      return;
-
-    }
-
-    if (
-
-      !form.name.trim()
-
-    ) {
-
-      window.alert(
-
-        "กรุณาใส่ชื่อสินค้า"
-
-      );
-
-      return;
-
-    }
+  function buildProduct() {
 
     const normalPrice =
 
@@ -613,43 +687,7 @@ option.id ===
 
       );
 
-    if (
-
-      packEnabled &&
-
-      packQty < 2
-
-    ) {
-
-      window.alert(
-
-        "ถ้าจะเปิดขายยกแพ็ก ต้องกำหนดจำนวนต่อแพ็กอย่างน้อย 2 ชิ้น"
-
-      );
-
-      return;
-
-    }
-
-    if (
-
-      packEnabled &&
-
-      packPrice <= 0
-
-    ) {
-
-      window.alert(
-
-        "กรุณาใส่ราคาขายต่อแพ็ก"
-
-      );
-
-      return;
-
-    }
-
-    const updatedProduct = {
+    const product = {
 
       ...editingProduct,
 
@@ -781,27 +819,255 @@ option.id ===
 
     };
 
-    delete updatedProduct
+    delete product
 
       .hasOptions;
 
-    onSaveProduct(
+    return product;
 
-      updatedProduct
+  }
+
+  async function saveProduct() {
+
+    if (
+
+      !editingProduct ||
+
+      saving
+
+    ) {
+
+      return;
+
+    }
+
+    if (
+
+      !form.name.trim()
+
+    ) {
+
+      window.alert(
+
+        "กรุณาใส่ชื่อสินค้า"
+
+      );
+
+      return;
+
+    }
+
+    const packQty =
+
+      Math.max(
+
+        1,
+
+        Math.floor(
+
+          Number(
+
+            form.packQty
+
+          ) || 1
+
+        )
+
+      );
+
+    const packEnabled =
+
+      Boolean(
+
+        form.packEnabled
+
+      );
+
+    const packPrice =
+
+      Math.max(
+
+        0,
+
+        Number(
+
+          form.packPrice
+
+        ) || 0
+
+      );
+
+    if (
+
+      packEnabled &&
+
+      packQty < 2
+
+    ) {
+
+      window.alert(
+
+        "ถ้าจะเปิดขายยกแพ็ก ต้องกำหนดจำนวนต่อแพ็กอย่างน้อย 2 ชิ้น"
+
+      );
+
+      return;
+
+    }
+
+    if (
+
+      packEnabled &&
+
+      packPrice <= 0
+
+    ) {
+
+      window.alert(
+
+        "กรุณาใส่ราคาขายต่อแพ็ก"
+
+      );
+
+      return;
+
+    }
+
+    const updatedProduct =
+
+      buildProduct();
+
+    setSaving(
+
+      true
 
     );
 
-    setEditingProduct(
+    try {
 
-      null
+      /*
 
-    );
+        =========================
 
-    window.alert(
+        เพิ่มสินค้าใหม่
 
-      "บันทึกสินค้าเรียบร้อย"
+        =========================
 
-    );
+        เพิ่มตรงเข้า Supabase
+
+        Stock เริ่มต้น = 0
+
+        หลังบันทึกเสร็จ
+
+        Reload แอป
+
+        ระบบจะโหลด Product
+
+        จาก Supabase ใหม่
+
+      */
+
+      if (
+
+        isCreating
+
+      ) {
+
+        if (
+
+          typeof navigator !==
+
+            "undefined" &&
+
+          navigator.onLine ===
+
+            false
+
+        ) {
+
+          window.alert(
+
+            "การเพิ่มสินค้าใหม่ต้องเชื่อมต่ออินเทอร์เน็ตก่อน"
+
+          );
+
+          return;
+
+        }
+
+        await saveCloudProduct(
+
+          updatedProduct,
+
+          0
+
+        );
+
+        window.alert(
+
+          "เพิ่มสินค้าเรียบร้อย\nStock เริ่มต้นเป็น 0"
+
+        );
+
+        window.location.reload();
+
+        return;
+
+      }
+
+      /*
+
+        =========================
+
+        แก้ไขสินค้าเดิม
+
+        =========================
+
+      */
+
+      await onSaveProduct(
+
+        updatedProduct
+
+      );
+
+      closeEditor();
+
+      window.alert(
+
+        "บันทึกสินค้าเรียบร้อย"
+
+      );
+
+    } catch (error) {
+
+      console.error(
+
+        "Save product error:",
+
+        error
+
+      );
+
+      window.alert(
+
+        isCreating
+
+          ? "เพิ่มสินค้าไม่สำเร็จ กรุณาลองใหม่"
+
+          : "บันทึกสินค้าไม่สำเร็จ กรุณาลองใหม่"
+
+      );
+
+    } finally {
+
+      setSaving(
+
+        false
+
+      );
+
+    }
 
   }
 
@@ -815,28 +1081,80 @@ option.id ===
 </h1>
 <p>
 
-            แก้ชื่อ ราคา ต้นทุน รูป
+            เพิ่มสินค้า แก้ชื่อ ราคา ต้นทุน รูป
 
-            การติดตามสต๊อก
-
-            และข้อมูลแพ็ก
+            การติดตามสต๊อก และข้อมูลแพ็ก
 </p>
 </div>
+<div
+
+          style={{
+
+            display:
+
+              "flex",
+
+            alignItems:
+
+              "center",
+
+            gap:
+
+              "8px",
+
+            flexWrap:
+
+              "wrap",
+
+          }}
+>
 <button
 
-          className="stock-close-button"
+            className="manager-save-button"
 
-          type="button"
+            type="button"
 
-          onClick={
+            onClick={
 
-            onClose
+              openCreate
 
-          }
+            }
+
+            style={{
+
+              minHeight:
+
+                "42px",
+
+              padding:
+
+                "10px 18px",
+
+              fontWeight:
+
+                "800",
+
+            }}
 >
 
-          กลับหน้าขาย
+            + เพิ่มสินค้า
 </button>
+<button
+
+            className="stock-close-button"
+
+            type="button"
+
+            onClick={
+
+              onClose
+
+            }
+>
+
+            กลับหน้าขาย
+</button>
+</div>
 </div>
 <input
 
@@ -929,7 +1247,7 @@ option.id ===
                       inventory[
 item.id
 
-                      ] ?? 50
+                      ] ?? 0
 
                     );
 
@@ -937,7 +1255,11 @@ item.id
 
                     item.options?.find(
 
-                      (option) =>
+                      (
+
+                        option
+
+                      ) =>
 option.id ===
 
                         "normal"
@@ -950,7 +1272,9 @@ option.id ===
 
                     Number(
 
-                      item.cost || 0
+                      item.cost ||
+
+                        0
 
                     );
 
@@ -1095,47 +1419,25 @@ item.id
 
                         {packQty >=
 
-                        2 ? (
-<>
+                        2
 
-                            {
+                          ? `${packQty} ชิ้น`
 
-                              packQty
-
-                            }{" "}
-
-                            ชิ้น
-</>
-
-                        ) : (
-
-                          "-"
-
-                        )}
+                          : "-"}
 </td>
 <td>
 
-                        {packEnabled ? (
-<>
+                        {packEnabled
 
-                            {packPrice.toLocaleString()}{" "}
+                          ? `${packPrice.toLocaleString()} บาท`
 
-                            บาท
-</>
+                          : packQty >=
 
-                        ) : packQty >=
+                            2
 
-                          2 ? (
-<small>
+                          ? "ไม่เปิดขายแพ็ก"
 
-                            ไม่เปิดขายแพ็ก
-</small>
-
-                        ) : (
-
-                          "-"
-
-                        )}
+                          : "-"}
 </td>
 <td>
 
@@ -1156,7 +1458,11 @@ item.id
                         }
 >
 
-                        {stock}
+                        {
+
+                          stock
+
+                        }
 </td>
 <td>
 
@@ -1216,14 +1522,20 @@ item.id
           {!editingProduct ? (
 <div className="product-edit-empty">
 
-              เลือกสินค้าที่ต้องการแก้ไข
+              กด “+ เพิ่มสินค้า”
+
+              หรือเลือกสินค้าที่ต้องการแก้ไข
 </div>
 
           ) : (
 <>
 <h2>
 
-                แก้ไขสินค้า
+                {isCreating
+
+                  ? "เพิ่มสินค้าใหม่"
+
+                  : "แก้ไขสินค้า"}
 </h2>
 <label className="manager-label">
 
@@ -1753,6 +2065,53 @@ item.id
 
                 )}
 </div>
+
+              {isCreating && (
+<div
+
+                  style={{
+
+                    marginTop:
+
+                      "10px",
+
+                    padding:
+
+                      "10px",
+
+                    borderRadius:
+
+                      "8px",
+
+                    background:
+
+                      "#f2f4f7",
+
+                    color:
+
+                      "#475467",
+
+                    fontSize:
+
+                      "12px",
+
+                    lineHeight:
+
+                      "1.5",
+
+                  }}
+>
+
+                  สินค้าใหม่จะเริ่ม Stock ที่ 0
+
+                  หลังจากเพิ่มแล้วสามารถเข้า
+
+                  “รับสินค้าเข้า”
+
+                  เพื่อเพิ่มจำนวนสต๊อกได้
+</div>
+
+              )}
 <div className="manager-actions">
 <button
 
@@ -1760,13 +2119,15 @@ item.id
 
                   type="button"
 
-                  onClick={() =>
+                  onClick={
 
-                    setEditingProduct(
+                    closeEditor
 
-                      null
+                  }
 
-                    )
+                  disabled={
+
+                    saving
 
                   }
 >
@@ -1784,9 +2145,23 @@ item.id
                     saveProduct
 
                   }
+
+                  disabled={
+
+                    saving
+
+                  }
 >
 
-                  บันทึก
+                  {saving
+
+                    ? "กำลังบันทึก..."
+
+                    : isCreating
+
+                    ? "เพิ่มสินค้า"
+
+                    : "บันทึก"}
 </button>
 </div>
 </>
@@ -1801,3 +2176,4 @@ item.id
 }
 
 export default ProductManager;
+ 
