@@ -1,5 +1,100 @@
 import { useMemo, useState } from "react";
 
+
+
+function parseProductImageSettings(value) {
+
+  const defaults = {
+
+    src: "",
+
+    scale: 1,
+
+    x: 0,
+
+    y: 0,
+
+  };
+
+  if (!value) return defaults;
+
+  if (
+
+    typeof value !== "string" ||
+
+    !value.trim().startsWith("{")
+
+  ) {
+
+    return {
+
+      ...defaults,
+
+      src: String(value || ""),
+
+    };
+
+  }
+
+  try {
+
+    const parsed = JSON.parse(value);
+
+    return {
+
+      src: String(parsed.src || ""),
+
+      scale: Number(parsed.scale || 1),
+
+      x: Number(parsed.x || 0),
+
+      y: Number(parsed.y || 0),
+
+    };
+
+  } catch {
+
+    return {
+
+      ...defaults,
+
+      src: value,
+
+    };
+
+  }
+
+}
+
+function serializeProductImageSettings(
+
+  src,
+
+  scale,
+
+  x,
+
+  y
+
+) {
+
+  if (!src) return "";
+
+  return JSON.stringify({
+
+    src,
+
+    scale: Number(scale || 1),
+
+    x: Number(x || 0),
+
+    y: Number(y || 0),
+
+  });
+
+}
+
+
 function ProductPage({
 
   products,
@@ -29,6 +124,12 @@ function ProductPage({
     cost: 0,
 
     image: "",
+
+    imageScale: 1,
+
+    imageX: 0,
+
+    imageY: 0,
 
     hasOption: false,
 
@@ -98,6 +199,14 @@ function ProductPage({
 
       product.hasOptions === true;
 
+    const imageSettings =
+
+      parseProductImageSettings(
+
+        product.image
+
+      );
+
     setEditingProduct(product);
 
     setForm({
@@ -110,7 +219,19 @@ function ProductPage({
 
       cost: Number(product.cost || 0),
 
-      image: product.image || "",
+      image: imageSettings.src,
+
+      imageScale:
+
+        imageSettings.scale,
+
+      imageX:
+
+        imageSettings.x,
+
+      imageY:
+
+        imageSettings.y,
 
       hasOption,
 
@@ -324,7 +445,19 @@ function ProductPage({
 
       cost,
 
-      image: form.image,
+      image:
+
+        serializeProductImageSettings(
+
+          form.image,
+
+          form.imageScale,
+
+          form.imageX,
+
+          form.imageY
+
+        ),
 
       hasOption: form.hasOption,
 
@@ -491,12 +624,20 @@ option.id ===
 <td>
 <div className="manager-image-box">
 
-                        {item.image ? (
+                        {parseProductImageSettings(
+
+                          item.image
+
+                        ).src ? (
 <img
 
                             src={
 
-                              item.image
+                              parseProductImageSettings(
+
+                                item.image
+
+                              ).src
 
                             }
 
@@ -871,7 +1012,7 @@ option.id ===
 
                 />
 </label>
-<div className="manager-preview">
+<div className="manager-preview manager-image-editor-preview">
 
                 {form.image ? (
 <img
@@ -879,6 +1020,14 @@ option.id ===
                     src={form.image}
 
                     alt="ตัวอย่างสินค้า"
+
+                    style={{
+
+                      transform:
+
+                        `translate(${form.imageX}%, ${form.imageY}%) scale(${form.imageScale})`,
+
+                    }}
 
                   />
 
@@ -889,6 +1038,123 @@ option.id ===
 </span>
 
                 )}
+</div>
+<div className="manager-image-controls">
+<label>
+<span>
+
+ซูมรูป
+<b>{Number(form.imageScale).toFixed(2)}x</b>
+</span>
+<input
+
+type="range"
+
+min="0.6"
+
+max="2.5"
+
+step="0.05"
+
+value={form.imageScale}
+
+onChange={(event) =>
+
+  updateField(
+
+    "imageScale",
+
+    Number(event.target.value)
+
+  )
+
+}
+
+/>
+</label>
+<label>
+<span>
+
+ตำแหน่งแนวนอน X
+<b>{form.imageX}%</b>
+</span>
+<input
+
+type="range"
+
+min="-50"
+
+max="50"
+
+step="1"
+
+value={form.imageX}
+
+onChange={(event) =>
+
+  updateField(
+
+    "imageX",
+
+    Number(event.target.value)
+
+  )
+
+}
+
+/>
+</label>
+<label>
+<span>
+
+ตำแหน่งแนวตั้ง Y
+<b>{form.imageY}%</b>
+</span>
+<input
+
+type="range"
+
+min="-50"
+
+max="50"
+
+step="1"
+
+value={form.imageY}
+
+onChange={(event) =>
+
+  updateField(
+
+    "imageY",
+
+    Number(event.target.value)
+
+  )
+
+}
+
+/>
+</label>
+<button
+
+type="button"
+
+className="manager-image-reset"
+
+onClick={() => {
+
+  updateField("imageScale", 1);
+
+  updateField("imageX", 0);
+
+  updateField("imageY", 0);
+
+}}
+>
+
+รีเซ็ตตำแหน่งรูป
+</button>
 </div>
 <div className="manager-actions">
 <button
@@ -938,4 +1204,3 @@ option.id ===
 }
 
 export default ProductPage;
- 

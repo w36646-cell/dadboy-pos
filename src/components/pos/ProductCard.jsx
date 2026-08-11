@@ -24,6 +24,73 @@ function getProductTheme(index) {
 
 }
 
+
+
+function getProductImageSettings(value) {
+
+  const defaults = {
+
+    src: "",
+
+    scale: 1,
+
+    x: 0,
+
+    y: 0,
+
+  };
+
+  if (!value) return defaults;
+
+  if (typeof value !== "string") {
+
+    return defaults;
+
+  }
+
+  if (!value.trim().startsWith("{")) {
+
+    return {
+
+      ...defaults,
+
+      src: value,
+
+    };
+
+  }
+
+  try {
+
+    const parsed = JSON.parse(value);
+
+    return {
+
+      src: String(parsed.src || ""),
+
+      scale: Number(parsed.scale || 1),
+
+      x: Number(parsed.x || 0),
+
+      y: Number(parsed.y || 0),
+
+    };
+
+  } catch {
+
+    return {
+
+      ...defaults,
+
+      src: value,
+
+    };
+
+  }
+
+}
+
+
 function ProductCard({
 
   index = 0,
@@ -41,6 +108,14 @@ function ProductCard({
   onLongPressCancel,
 
 }) {
+
+  const imageSettings =
+
+    getProductImageSettings(
+
+      product.image
+
+    );
 
   return (
 <button
@@ -73,16 +148,32 @@ function ProductCard({
 >
 <div className="pos-card-image-area">
 
-        {product.image ? (
+        {imageSettings.src ? (
 <img
 
             className="pos-card-image"
 
-            src={product.image}
+            src={imageSettings.src}
 
             alt={product.name || "สินค้า"}
 
             decoding="async"
+
+            style={{
+
+              "--product-image-scale":
+
+                imageSettings.scale,
+
+              "--product-image-x":
+
+                `${imageSettings.x}%`,
+
+              "--product-image-y":
+
+                `${imageSettings.y}%`,
+
+            }}
 
           />
 
@@ -128,4 +219,3 @@ function ProductCard({
 }
 
 export default ProductCard;
-

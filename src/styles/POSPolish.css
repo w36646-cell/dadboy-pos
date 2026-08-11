@@ -1781,3 +1781,353 @@
 
 }
 
+/* =========================================================
+
+   DADBOY PRODUCT CARD V3.2
+
+   compact mobile + image positioning controls
+
+========================================================= */
+
+/* ใช้ค่าที่ผู้ใช้ตั้งเอง ถ้าไม่มีจะ fallback = 1 / 0 / 0 */
+
+.product-card.pos-image-card .pos-card-image,
+
+.pos-modern-grid .pos-image-card .pos-card-image {
+
+  transform:
+
+    translate(
+
+      var(--product-image-x, 0%),
+
+      var(--product-image-y, 0%)
+
+    )
+
+    scale(
+
+      calc(
+
+        1.24 *
+
+        var(--product-image-scale, 1)
+
+      )
+
+    ) !important;
+
+}
+
+/* แถบสูง แต่ใสมาก */
+
+.product-card.pos-image-card .pos-card-shade,
+
+.pos-modern-grid .pos-image-card .pos-card-shade {
+
+  height: 38% !important;
+
+  background:
+
+    linear-gradient(
+
+      180deg,
+
+      rgba(20,20,20,0.02) 0%,
+
+      rgba(20,20,20,0.08) 40%,
+
+      rgba(20,20,20,0.18) 100%
+
+    ) !important;
+
+  backdrop-filter: none !important;
+
+  -webkit-backdrop-filter: none !important;
+
+}
+
+.product-card.pos-image-card .pos-card-info,
+
+.pos-modern-grid .pos-image-card .pos-card-info {
+
+  height: 38% !important;
+
+}
+
+/* ชื่อใหญ่ + หนา */
+
+.product-card.pos-image-card .pos-card-name,
+
+.pos-modern-grid .pos-image-card .pos-card-name {
+
+  font-weight: 950 !important;
+
+}
+
+/* Desktop */
+
+@media (min-width: 1000px) {
+
+  .product-card.pos-image-card .pos-card-image,
+
+  .pos-modern-grid .pos-image-card .pos-card-image {
+
+    transform:
+
+      translate(
+
+        var(--product-image-x, 0%),
+
+        var(--product-image-y, 0%)
+
+      )
+
+      scale(
+
+        calc(
+
+          1.26 *
+
+          var(--product-image-scale, 1)
+
+        )
+
+      ) !important;
+
+  }
+
+}
+
+/* Mobile */
+
+@media (max-width: 720px) {
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card {
+
+    height: 124px !important;
+
+    min-height: 124px !important;
+
+    max-height: 124px !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-image-area {
+
+    padding:
+
+      1px
+
+      1px
+
+      32px !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-image {
+
+    transform:
+
+      translate(
+
+        var(--product-image-x, 0%),
+
+        var(--product-image-y, 0%)
+
+      )
+
+      scale(
+
+        calc(
+
+          1.27 *
+
+          var(--product-image-scale, 1)
+
+        )
+
+      ) !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-name {
+
+    font-size: 15px !important;
+
+    font-weight: 950 !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-price {
+
+    font-size: 12px !important;
+
+    font-weight: 850 !important;
+
+  }
+
+}
+
+@media (max-width: 390px) {
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card {
+
+    height: 120px !important;
+
+    min-height: 120px !important;
+
+    max-height: 120px !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-name {
+
+    font-size: 14px !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-price {
+
+    font-size: 11px !important;
+
+  }
+
+}
+
+
+/* =========================================================
+
+   PRODUCT IMAGE EDITOR
+
+========================================================= */
+
+.manager-image-editor-preview {
+
+  position: relative;
+
+  overflow: hidden;
+
+  min-height: 260px;
+
+}
+
+.manager-image-editor-preview img {
+
+  width: 100%;
+
+  height: 260px;
+
+  object-fit: contain;
+
+  transform-origin: center;
+
+  transition: transform .12s ease;
+
+}
+
+.manager-image-controls {
+
+  display: grid;
+
+  gap: 12px;
+
+  margin-top: 12px;
+
+  padding: 14px;
+
+  border: 1px solid #e4e7ec;
+
+  border-radius: 14px;
+
+  background: #f9fafb;
+
+}
+
+.manager-image-controls label {
+
+  display: grid;
+
+  gap: 6px;
+
+}
+
+.manager-image-controls label > span {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  font-weight: 800;
+
+  color: #344054;
+
+}
+
+.manager-image-controls input[type="range"] {
+
+  width: 100%;
+
+}
+
+.manager-image-reset {
+
+  min-height: 42px;
+
+  border: 1px solid #d0d5dd;
+
+  border-radius: 10px;
+
+  background: #fff;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+}
