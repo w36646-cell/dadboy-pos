@@ -14,6 +14,109 @@ import {
 
 } from "../services/productService";
 
+
+
+function parseProductImageSettings(value) {
+
+  const defaults = {
+
+    src: "",
+
+    scale: 1,
+
+    x: 0,
+
+    y: 0,
+
+  };
+
+  if (!value) {
+
+    return defaults;
+
+  }
+
+  if (
+
+    typeof value !== "string" ||
+
+    !value.trim().startsWith("{")
+
+  ) {
+
+    return {
+
+      ...defaults,
+
+      src: String(value || ""),
+
+    };
+
+  }
+
+  try {
+
+    const parsed = JSON.parse(value);
+
+    return {
+
+      src: String(parsed.src || ""),
+
+      scale: Number(parsed.scale || 1),
+
+      x: Number(parsed.x || 0),
+
+      y: Number(parsed.y || 0),
+
+    };
+
+  } catch {
+
+    return {
+
+      ...defaults,
+
+      src: value,
+
+    };
+
+  }
+
+}
+
+function serializeProductImageSettings(
+
+  src,
+
+  scale,
+
+  x,
+
+  y
+
+) {
+
+  if (!src) {
+
+    return "";
+
+  }
+
+  return JSON.stringify({
+
+    src,
+
+    scale: Number(scale || 1),
+
+    x: Number(x || 0),
+
+    y: Number(y || 0),
+
+  });
+
+}
+
+
 function createEmptyForm() {
 
   return {
@@ -27,6 +130,12 @@ function createEmptyForm() {
     cost: 0,
 
     image: "",
+
+    imageScale: 1,
+
+    imageX: 0,
+
+    imageY: 0,
 
     minStock: 5,
 
@@ -235,6 +344,14 @@ option.id ===
 
         true;
 
+    const imageSettings =
+
+      parseProductImageSettings(
+
+        product.image
+
+      );
+
     setEditingProduct(
 
       product
@@ -281,7 +398,19 @@ option.id ===
 
       image:
 
-        product.image || "",
+        imageSettings.src,
+
+      imageScale:
+
+        imageSettings.scale,
+
+      imageX:
+
+        imageSettings.x,
+
+      imageY:
+
+        imageSettings.y,
 
       minStock:
 
@@ -577,9 +706,33 @@ option.id ===
 
                 "image/jpeg",
 
-                0.82
+                0.92
 
               )
+
+            );
+
+            updateField(
+
+              "imageScale",
+
+              1
+
+            );
+
+            updateField(
+
+              "imageX",
+
+              0
+
+            );
+
+            updateField(
+
+              "imageY",
+
+              0
 
             );
 
@@ -707,7 +860,17 @@ option.id ===
 
       image:
 
-        form.image,
+        serializeProductImageSettings(
+
+          form.image,
+
+          form.imageScale,
+
+          form.imageX,
+
+          form.imageY
+
+        ),
 
       minStock,
 
@@ -1369,12 +1532,20 @@ item.id
 <td>
 <div className="manager-image-box">
 
-                          {item.image ? (
+                          {parseProductImageSettings(
+
+                            item.image
+
+                          ).src ? (
 <img
 
                               src={
 
-                                item.image
+                                parseProductImageSettings(
+
+                                  item.image
+
+                                ).src
 
                               }
 
@@ -2042,7 +2213,7 @@ item.id
 
                 />
 </label>
-<div className="manager-preview">
+<div className="manager-preview manager-image-editor-preview">
 
                 {form.image ? (
 <img
@@ -2055,6 +2226,14 @@ item.id
 
                     alt="ตัวอย่างสินค้า"
 
+                    style={{
+
+                      transform:
+
+                        `translate(${form.imageX}%, ${form.imageY}%) scale(${form.imageScale})`,
+
+                    }}
+
                   />
 
                 ) : (
@@ -2064,6 +2243,150 @@ item.id
 </span>
 
                 )}
+</div>
+<div className="manager-image-controls">
+<label>
+<span>
+
+ซูมรูป
+<b>
+
+{Number(form.imageScale).toFixed(2)}x
+</b>
+</span>
+<input
+
+type="range"
+
+min="0.5"
+
+max="3"
+
+step="0.05"
+
+value={form.imageScale}
+
+onChange={(event) =>
+
+  updateField(
+
+    "imageScale",
+
+    Number(event.target.value)
+
+  )
+
+}
+
+/>
+</label>
+<label>
+<span>
+
+เลื่อนรูป ซ้าย / ขวา
+<b>
+
+{form.imageX}%
+</b>
+</span>
+<input
+
+type="range"
+
+min="-60"
+
+max="60"
+
+step="1"
+
+value={form.imageX}
+
+onChange={(event) =>
+
+  updateField(
+
+    "imageX",
+
+    Number(event.target.value)
+
+  )
+
+}
+
+/>
+</label>
+<label>
+<span>
+
+เลื่อนรูป ขึ้น / ลง
+<b>
+
+{form.imageY}%
+</b>
+</span>
+<input
+
+type="range"
+
+min="-60"
+
+max="60"
+
+step="1"
+
+value={form.imageY}
+
+onChange={(event) =>
+
+  updateField(
+
+    "imageY",
+
+    Number(event.target.value)
+
+  )
+
+}
+
+/>
+</label>
+<button
+
+type="button"
+
+className="manager-image-reset"
+
+onClick={() => {
+
+  updateField(
+
+    "imageScale",
+
+    1
+
+  );
+
+  updateField(
+
+    "imageX",
+
+    0
+
+  );
+
+  updateField(
+
+    "imageY",
+
+    0
+
+  );
+
+}}
+>
+
+รีเซ็ตรูป
+</button>
 </div>
 
               {isCreating && (
@@ -2176,4 +2499,3 @@ item.id
 }
 
 export default ProductManager;
- 
