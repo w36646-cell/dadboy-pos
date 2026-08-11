@@ -1016,3 +1016,338 @@
 
 }
 
+
+/* =========================================================
+
+   DADBOY PRODUCT CARD V2
+
+   Large product image + translucent bottom label
+
+========================================================= */
+
+/* การ์ด */
+
+.product-card.pos-image-card,
+
+.pos-modern-grid .pos-image-card {
+
+  overflow: hidden !important;
+
+  border-radius: 14px !important;
+
+  border: 1px solid rgba(255,255,255,.88) !important;
+
+  box-shadow:
+
+    0 4px 12px rgba(16,24,40,.16) !important;
+
+}
+
+/* รูปสินค้า — ให้กินพื้นที่การ์ดมากขึ้น */
+
+.pos-card-image-area {
+
+  inset: 0 !important;
+
+  padding: 7px 8px 42px !important;
+
+  display: flex !important;
+
+  align-items: center !important;
+
+  justify-content: center !important;
+
+}
+
+.pos-card-image {
+
+  width: 100% !important;
+
+  height: 100% !important;
+
+  max-width: 100% !important;
+
+  max-height: 100% !important;
+
+  object-fit: contain !important;
+
+  object-position: center !important;
+
+  filter:
+
+    drop-shadow(0 3px 3px rgba(0,0,0,.16)) !important;
+
+}
+
+/* เปลี่ยน gradient ดำเดิมเป็นแถบโปร่งด้านล่าง */
+
+.pos-card-shade {
+
+  inset: auto 0 0 0 !important;
+
+  height: 39% !important;
+
+  background:
+
+    rgba(35, 35, 35, .62) !important;
+
+  backdrop-filter: blur(2px);
+
+  -webkit-backdrop-filter: blur(2px);
+
+}
+
+/* กล่องข้อความวางกลางแถบ */
+
+.pos-card-info {
+
+  left: 0 !important;
+
+  right: 0 !important;
+
+  bottom: 0 !important;
+
+  height: 39% !important;
+
+  padding: 5px 7px 6px !important;
+
+  display: flex !important;
+
+  flex-direction: column !important;
+
+  justify-content: center !important;
+
+  align-items: center !important;
+
+  box-sizing: border-box !important;
+
+  text-align: center !important;
+
+}
+
+/* ชื่อสินค้า */
+
+.pos-card-name {
+
+  width: 100% !important;
+
+  margin: 0 !important;
+
+  color: #fff !important;
+
+  font-size: 17px !important;
+
+  font-weight: 800 !important;
+
+  line-height: 1.08 !important;
+
+  white-space: normal !important;
+
+  overflow: hidden !important;
+
+  display: -webkit-box !important;
+
+  -webkit-box-orient: vertical !important;
+
+  -webkit-line-clamp: 2 !important;
+
+  text-shadow:
+
+    0 1px 2px rgba(0,0,0,.7) !important;
+
+}
+
+/* ราคา */
+
+.pos-card-price {
+
+  margin-top: 3px !important;
+
+  color: #fff !important;
+
+  font-size: 19px !important;
+
+  font-weight: 900 !important;
+
+  line-height: 1 !important;
+
+  text-shadow:
+
+    0 1px 2px rgba(0,0,0,.7) !important;
+
+}
+
+/* ข้อความกดค้าง */
+
+.pos-card-pack-text {
+
+  margin-top: 3px !important;
+
+  color: rgba(255,255,255,.82) !important;
+
+  font-size: 9px !important;
+
+  line-height: 1 !important;
+
+}
+
+/* PACK badge */
+
+.pos-pack-badge {
+
+  z-index: 6 !important;
+
+  background: rgba(17,24,39,.82) !important;
+
+  color: #fff !important;
+
+}
+
+/* =========================================================
+
+   COMPUTER
+
+========================================================= */
+
+@media (min-width: 1000px) {
+
+  .product-card.pos-image-card,
+
+  .pos-modern-grid .pos-image-card {
+
+    height: 190px !important;
+
+    min-height: 190px !important;
+
+    max-height: 190px !important;
+
+  }
+
+  .pos-card-image-area {
+
+    padding:
+
+      8px 10px 50px !important;
+
+  }
+
+  .pos-card-name {
+
+    font-size: 18px !important;
+
+  }
+
+  .pos-card-price {
+
+    font-size: 21px !important;
+
+  }
+
+}
+
+/* =========================================================
+
+   MOBILE
+
+========================================================= */
+
+@media (max-width: 720px) {
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .pos-modern-grid
+
+  .pos-image-card {
+
+    height: 142px !important;
+
+    min-height: 142px !important;
+
+    max-height: 142px !important;
+
+    border-radius: 11px !important;
+
+  }
+
+  .pos-card-image-area {
+
+    padding:
+
+      5px 4px 46px !important;
+
+  }
+
+  .pos-card-shade {
+
+    height: 40% !important;
+
+  }
+
+  .pos-card-info {
+
+    height: 40% !important;
+
+    padding:
+
+      4px 4px 5px !important;
+
+  }
+
+  .pos-card-name {
+
+    font-size: 14px !important;
+
+    line-height: 1.05 !important;
+
+  }
+
+  .pos-card-price {
+
+    margin-top: 3px !important;
+
+    font-size: 16px !important;
+
+  }
+
+  .pos-card-pack-text {
+
+    font-size: 7px !important;
+
+  }
+
+}
+
+@media (max-width: 390px) {
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .pos-modern-grid
+
+  .pos-image-card {
+
+    height: 136px !important;
+
+    min-height: 136px !important;
+
+    max-height: 136px !important;
+
+  }
+
+  .pos-card-name {
+
+    font-size: 13px !important;
+
+  }
+
+  .pos-card-price {
+
+    font-size: 15px !important;
+
+  }
+
+}
+
