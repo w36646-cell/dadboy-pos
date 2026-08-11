@@ -977,3 +977,42 @@
 
 }
 
+
+/* ===== DADBOY MOBILE STICKY FIX ===== */
+
+@media (max-width: 720px) {
+
+  .app.pos-page.pos-modern {
+
+    overflow-x: clip !important;
+
+    overflow-y: visible !important;
+
+  }
+
+  .pos-modern .product-panel {
+
+    overflow: visible !important;
+
+  }
+
+  .employee-pos-topbar {
+
+    position: static !important;
+
+    top: auto !important;
+
+  }
+
+  .pos-sticky-sales-header {
+
+    position: sticky !important;
+
+    top: 0 !important;
+
+    z-index: 1100 !important;
+
+  }
+
+}
+
