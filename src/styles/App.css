@@ -1595,3 +1595,292 @@ button {
 
 }
  
+
+/* =========================================================
+
+   DADBOY PRODUCT IMAGE EDITOR CARD PREVIEW
+
+   Preview นี้ใช้สัดส่วนเดียวกับการ์ดหน้าขาย POS
+
+   เพื่อให้ปรับ Zoom / X / Y ได้ตรงกับของจริง
+
+========================================================= */
+
+.product-edit-panel {
+
+  scroll-margin-top: 12px;
+
+}
+
+
+/* ตัว Preview = การ์ดหน้าขาย */
+
+.manager-preview.manager-image-editor-preview {
+
+  position: relative;
+
+  width: 100%;
+
+  height: 150px;
+
+  min-height: 150px;
+
+  max-height: 150px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  overflow: hidden;
+
+  margin-top: 12px;
+
+  padding:
+
+    8px
+
+    5px
+
+    35px;
+
+  box-sizing: border-box;
+
+  border: 0;
+
+  border-radius: 13px;
+
+  background:
+
+    linear-gradient(
+
+      145deg,
+
+      #667085,
+
+      #344054
+
+    );
+
+  box-shadow:
+
+    0 3px 9px
+
+    rgba(
+
+      16,
+
+      24,
+
+      40,
+
+      0.15
+
+    );
+
+  color: #ffffff;
+
+}
+
+
+/* รูปใช้หลักเดียวกับการ์ด POS */
+
+.manager-preview.manager-image-editor-preview img {
+
+  display: block;
+
+  width: 100% !important;
+
+  height: 100% !important;
+
+  max-width: none !important;
+
+  max-height: none !important;
+
+  object-fit: contain !important;
+
+  object-position:
+
+    center !important;
+
+  transform-origin:
+
+    center center;
+
+  will-change:
+
+    transform;
+
+  filter:
+
+    drop-shadow(
+
+      0 5px 4px
+
+      rgba(
+
+        0,
+
+        0,
+
+        0,
+
+        0.18
+
+      )
+
+    );
+
+}
+
+
+/* เส้นบอกขอบเขตการ์ด */
+
+.manager-preview.manager-image-editor-preview::after {
+
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  pointer-events: none;
+
+  border:
+
+    1px solid
+
+    rgba(
+
+      255,
+
+      255,
+
+      255,
+
+      0.45
+
+    );
+
+  border-radius:
+
+    13px;
+
+  box-shadow:
+
+    inset 0 0 0 1px
+
+    rgba(
+
+      0,
+
+      0,
+
+      0,
+
+      0.05
+
+    );
+
+}
+
+
+/* Controls */
+
+.manager-image-controls {
+
+  display: grid;
+
+  gap: 12px;
+
+  margin-top: 14px;
+
+  padding: 14px;
+
+  border-radius: 10px;
+
+  background: #f5f7fa;
+
+}
+
+
+.manager-image-controls label {
+
+  display: grid;
+
+  gap: 6px;
+
+}
+
+
+.manager-image-controls label > span {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 10px;
+
+  color: #344054;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+}
+
+
+.manager-image-controls input[type="range"] {
+
+  width: 100%;
+
+}
+
+
+.manager-image-reset {
+
+  width: 100%;
+
+  padding: 10px 12px;
+
+  border: 0;
+
+  border-radius: 8px;
+
+  background: #667085;
+
+  color: #ffffff;
+
+  font-weight: 700;
+
+}
+
+
+/* มือถือ:
+
+   ให้แผงแก้ไขที่เลื่อนมาหยุดเกือบชิดบนจอ */
+
+@media (max-width: 900px) {
+
+  .product-edit-panel {
+
+    scroll-margin-top: 8px;
+
+  }
+
+
+  .manager-preview.manager-image-editor-preview {
+
+    height: 150px;
+
+    min-height: 150px;
+
+    max-height: 150px;
+
+  }
+
+}
+

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 
 
@@ -108,6 +108,8 @@ function ProductPage({
 }) {
 
   const [search, setSearch] = useState("");
+
+  const editPanelRef = useRef(null);
 
   const [editingProduct, setEditingProduct] =
 
@@ -256,6 +258,22 @@ function ProductPage({
         ownCupOption?.price ?? 20
 
       ),
+
+    });
+
+    window.requestAnimationFrame(() => {
+
+      window.requestAnimationFrame(() => {
+
+        editPanelRef.current?.scrollIntoView({
+
+          behavior: "smooth",
+
+          block: "start",
+
+        });
+
+      });
 
     });
 
@@ -710,7 +728,12 @@ option.id ===
 </tbody>
 </table>
 </div>
-<aside className="product-edit-panel">
+<aside
+
+  ref={editPanelRef}
+
+  className="product-edit-panel"
+>
 
           {!editingProduct ? (
 <div className="product-edit-empty">
