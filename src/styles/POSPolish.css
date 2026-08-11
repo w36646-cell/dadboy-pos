@@ -1,0 +1,979 @@
+/* =========================================================
+
+   DADBOY POS — SALES SCREEN POLISH
+
+========================================================= */
+
+/* ส่วนบนค้างไว้ */
+
+.employee-pos-topbar {
+
+  position: sticky !important;
+
+  top: 0 !important;
+
+  z-index: 1200 !important;
+
+  background:
+
+    rgba(249, 250, 251, 0.97) !important;
+
+  backdrop-filter:
+
+    blur(12px);
+
+  -webkit-backdrop-filter:
+
+    blur(12px);
+
+  box-shadow:
+
+    0 1px 0
+
+    rgba(16, 24, 40, 0.08);
+
+}
+
+
+/* หัวขายสินค้า freeze */
+
+.pos-sticky-sales-header {
+
+  position: sticky !important;
+
+  top: 56px !important;
+
+  z-index: 1100 !important;
+
+  margin:
+
+    0 -4px 10px !important;
+
+  padding:
+
+    8px 4px 9px !important;
+
+  background:
+
+    rgba(249, 250, 251, 0.97);
+
+  backdrop-filter:
+
+    blur(12px);
+
+  -webkit-backdrop-filter:
+
+    blur(12px);
+
+  border-bottom:
+
+    1px solid
+
+    rgba(16, 24, 40, 0.08);
+
+}
+
+
+/* ขายสินค้า / จำนวนสินค้า / ยอดรวม */
+
+.pos-title-row {
+
+  gap: 10px !important;
+
+  align-items:
+
+    center !important;
+
+  flex-wrap:
+
+    wrap !important;
+
+}
+
+.pos-title-row h1 {
+
+  font-size:
+
+    clamp(
+
+      28px,
+
+      3vw,
+
+      38px
+
+    ) !important;
+
+}
+
+.pos-product-count {
+
+  font-size:
+
+    clamp(
+
+      14px,
+
+      1.35vw,
+
+      18px
+
+    ) !important;
+
+  color:
+
+    #344054 !important;
+
+}
+
+
+/* ยอดรวมด้านบน */
+
+.pos-header-total {
+
+  display:
+
+    inline-flex;
+
+  align-items:
+
+    center;
+
+  min-height:
+
+    32px;
+
+  padding:
+
+    5px 11px;
+
+  border:
+
+    1px solid #b2ddff;
+
+  border-radius:
+
+    999px;
+
+  background:
+
+    #eff8ff;
+
+  color:
+
+    #175cd3;
+
+  font-size:
+
+    clamp(
+
+      14px,
+
+      1.45vw,
+
+      19px
+
+    );
+
+  font-weight:
+
+    900;
+
+  line-height:
+
+    1;
+
+  white-space:
+
+    nowrap;
+
+  box-shadow:
+
+    0 2px 8px
+
+    rgba(
+
+      46,
+
+      144,
+
+      250,
+
+      0.15
+
+    );
+
+  transform-origin:
+
+    center;
+
+}
+
+.pos-header-total b {
+
+  font-weight:
+
+    900;
+
+}
+
+.pos-header-total.pulse {
+
+  animation:
+
+    pos-cart-pulse
+
+    0.42s ease;
+
+}
+
+@keyframes pos-cart-pulse {
+
+  0% {
+
+    transform:
+
+      scale(1);
+
+  }
+
+  45% {
+
+    transform:
+
+      scale(1.16);
+
+    box-shadow:
+
+      0 0 0 9px
+
+      rgba(
+
+        46,
+
+        144,
+
+        250,
+
+        0.14
+
+      );
+
+  }
+
+  100% {
+
+    transform:
+
+      scale(1);
+
+  }
+
+}
+
+
+/* =========================================================
+
+   การ์ดสินค้า
+
+========================================================= */
+
+.product-card.pos-image-card,
+
+.pos-modern-grid
+
+.pos-image-card {
+
+  isolation:
+
+    isolate;
+
+  border:
+
+    1px solid
+
+    rgba(
+
+      255,
+
+      255,
+
+      255,
+
+      0.9
+
+    ) !important;
+
+  box-shadow:
+
+    0 5px 14px
+
+      rgba(
+
+        16,
+
+        24,
+
+        40,
+
+        0.18
+
+      ),
+
+    inset 0 0 0 1px
+
+      rgba(
+
+        16,
+
+        24,
+
+        40,
+
+        0.06
+
+      ) !important;
+
+}
+
+
+/* รูปใหญ่ขึ้น */
+
+.pos-card-image-area {
+
+  padding:
+
+    7px
+
+    8px
+
+    43px !important;
+
+}
+
+
+/* ช่วยแยกสินค้ากับสีพื้น */
+
+.pos-card-image {
+
+  image-rendering:
+
+    auto;
+
+  transform:
+
+    translateZ(0);
+
+  filter:
+
+    drop-shadow(
+
+      0 5px 4px
+
+      rgba(
+
+        0,
+
+        0,
+
+        0,
+
+        0.30
+
+      )
+
+    )
+
+    drop-shadow(
+
+      0 0 1px
+
+      rgba(
+
+        255,
+
+        255,
+
+        255,
+
+        0.95
+
+      )
+
+    ) !important;
+
+}
+
+
+/* ด้านล่างเข้มขึ้นเพื่ออ่านหนังสือ */
+
+.pos-card-shade {
+
+  inset:
+
+    47% 0 0 !important;
+
+  background:
+
+    linear-gradient(
+
+      180deg,
+
+      transparent 0%,
+
+      rgba(
+
+        0,
+
+        0,
+
+        0,
+
+        0.18
+
+      ) 20%,
+
+      rgba(
+
+        0,
+
+        0,
+
+        0,
+
+        0.82
+
+      ) 100%
+
+    ) !important;
+
+}
+
+
+/* ชื่อสินค้า */
+
+.pos-card-info {
+
+  left:
+
+    7px !important;
+
+  right:
+
+    7px !important;
+
+  bottom:
+
+    8px !important;
+
+}
+
+
+.pos-card-name {
+
+  font-size:
+
+    clamp(
+
+      14px,
+
+      1.45vw,
+
+      18px
+
+    ) !important;
+
+  font-weight:
+
+    900 !important;
+
+  line-height:
+
+    1.12 !important;
+
+  text-shadow:
+
+    0 1px 2px
+
+      rgba(
+
+        0,
+
+        0,
+
+        0,
+
+        0.95
+
+      ),
+
+    0 0 8px
+
+      rgba(
+
+        0,
+
+        0,
+
+        0,
+
+        0.5
+
+      ) !important;
+
+}
+
+
+/* ราคาใหญ่ขึ้น */
+
+.pos-card-price {
+
+  margin-top:
+
+    3px !important;
+
+  font-size:
+
+    clamp(
+
+      16px,
+
+      1.65vw,
+
+      21px
+
+    ) !important;
+
+  font-weight:
+
+    900 !important;
+
+  line-height:
+
+    1 !important;
+
+  text-shadow:
+
+    0 1px 2px
+
+      rgba(
+
+        0,
+
+        0,
+
+        0,
+
+        0.95
+
+      ),
+
+    0 0 8px
+
+      rgba(
+
+        0,
+
+        0,
+
+        0,
+
+        0.5
+
+      ) !important;
+
+}
+
+
+/* เอาคงเหลือออก */
+
+.pos-card-stock {
+
+  display:
+
+    none !important;
+
+}
+
+
+.pos-card-pack-text {
+
+  margin-top:
+
+    3px !important;
+
+  font-size:
+
+    10px !important;
+
+}
+
+
+/* =========================================================
+
+   สินค้าปลิวเข้าตะกร้า
+
+========================================================= */
+
+.pos-fly-to-cart {
+
+  position:
+
+    fixed;
+
+  z-index:
+
+    99999;
+
+  width:
+
+    56px;
+
+  height:
+
+    56px;
+
+  display:
+
+    flex;
+
+  align-items:
+
+    center;
+
+  justify-content:
+
+    center;
+
+  pointer-events:
+
+    none;
+
+  overflow:
+
+    hidden;
+
+  border-radius:
+
+    15px;
+
+  background:
+
+    rgba(
+
+      255,
+
+      255,
+
+      255,
+
+      0.97
+
+    );
+
+  color:
+
+    #175cd3;
+
+  font-size:
+
+    18px;
+
+  font-weight:
+
+    900;
+
+  box-shadow:
+
+    0 8px 24px
+
+    rgba(
+
+      16,
+
+      24,
+
+      40,
+
+      0.30
+
+    );
+
+  opacity:
+
+    1;
+
+  transform:
+
+    translate(
+
+      0,
+
+      0
+
+    )
+
+    scale(1);
+
+  transition:
+
+    transform
+
+      0.52s
+
+      cubic-bezier(
+
+        0.2,
+
+        0.8,
+
+        0.2,
+
+        1
+
+      ),
+
+    opacity
+
+      0.48s ease;
+
+}
+
+
+.pos-fly-to-cart img {
+
+  width:
+
+    88%;
+
+  height:
+
+    88%;
+
+  object-fit:
+
+    contain;
+
+  filter:
+
+    drop-shadow(
+
+      0 3px 2px
+
+      rgba(
+
+        0,
+
+        0,
+
+        0,
+
+        0.2
+
+      )
+
+    );
+
+}
+
+
+/* =========================================================
+
+   จอคอม
+
+========================================================= */
+
+@media (min-width: 1000px) {
+
+  .product-grid.pos-modern-grid,
+
+  .pos-modern
+
+  .product-grid,
+
+  .pos-modern-grid {
+
+    grid-template-columns:
+
+      repeat(
+
+        5,
+
+        minmax(
+
+          0,
+
+          1fr
+
+        )
+
+      ) !important;
+
+    gap:
+
+      10px !important;
+
+  }
+
+
+  .product-card.pos-image-card,
+
+  .pos-modern-grid
+
+  .pos-image-card {
+
+    height:
+
+      172px !important;
+
+    min-height:
+
+      172px !important;
+
+    max-height:
+
+      172px !important;
+
+  }
+
+
+  .pos-card-image-area {
+
+    padding:
+
+      7px
+
+      10px
+
+      51px !important;
+
+  }
+
+}
+
+
+/* จอคอมใหญ่ */
+
+@media (min-width: 1350px) {
+
+  .product-grid.pos-modern-grid,
+
+  .pos-modern
+
+  .product-grid,
+
+  .pos-modern-grid {
+
+    grid-template-columns:
+
+      repeat(
+
+        6,
+
+        minmax(
+
+          0,
+
+          1fr
+
+        )
+
+      ) !important;
+
+  }
+
+
+  .product-card.pos-image-card,
+
+  .pos-modern-grid
+
+  .pos-image-card {
+
+    height:
+
+      184px !important;
+
+    min-height:
+
+      184px !important;
+
+    max-height:
+
+      184px !important;
+
+  }
+
+}
+
+
+/* =========================================================
+
+   มือถือ
+
+========================================================= */
+
+@media (max-width: 720px) {
+
+  .pos-title-row {
+
+    gap:
+
+      6px !important;
+
+  }
+
+
+  .pos-title-row h1 {
+
+    font-size:
+
+      27px !important;
+
+  }
+
+
+  .pos-product-count {
+
+    font-size:
+
+      13px !important;
+
+  }
+
+
+  .pos-header-total {
+
+    min-height:
+
+      28px;
+
+    padding:
+
+      4px 8px;
+
+    font-size:
+
+      13px;
+
+  }
+
+
+  .pos-card-name {
+
+    font-size:
+
+      14px !important;
+
+  }
+
+
+  .pos-card-price {
+
+    font-size:
+
+      16px !important;
+
+  }
+
+}
+

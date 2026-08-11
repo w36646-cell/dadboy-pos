@@ -27,6 +27,7 @@ import ProductOptionPopup from "../components/pos/ProductOptionPopup";
 import SyncStatus from "../components/pos/SyncStatus";
 
 import "../styles/POSModern.css";
+import "../styles/POSPolish.css";
 
 function POSPage({
 
@@ -122,6 +123,8 @@ function POSPage({
 
   ] = useState(1);
 
+  const [cartPulse, setCartPulse] = useState(false);
+
   const searchInputRef =
 
     useRef(null);
@@ -133,6 +136,8 @@ function POSPage({
   const longPressTriggeredRef =
 
     useRef(false);
+
+  const sourceRectRef = useRef(null);
 
   const LONG_PRESS_MS =
 
@@ -384,6 +389,143 @@ function POSPage({
 
   }
 
+
+  function rememberSource(event) {
+
+    const card = event?.currentTarget;
+
+    const image =
+
+      card?.querySelector?.(".pos-card-image");
+
+    sourceRectRef.current =
+
+      (image || card)?.getBoundingClientRect?.() || null;
+
+  }
+
+  function flyToCart(product) {
+
+    const start = sourceRectRef.current;
+
+    const target =
+
+      document.querySelector(".pos-header-total");
+
+    if (!start || !target) {
+
+      setCartPulse(true);
+
+      setTimeout(() => {
+
+        setCartPulse(false);
+
+      }, 420);
+
+      return;
+
+    }
+
+    const end =
+
+      target.getBoundingClientRect();
+
+    const flyer =
+
+      document.createElement("div");
+
+    flyer.className =
+
+      "pos-fly-to-cart";
+
+    if (product?.image) {
+
+      const img =
+
+        document.createElement("img");
+
+      img.src = product.image;
+
+      img.alt = "";
+
+      flyer.appendChild(img);
+
+    } else {
+
+      flyer.textContent = "+1";
+
+    }
+
+    const startCenterX =
+
+      start.left + start.width / 2;
+
+    const startCenterY =
+
+      start.top + start.height / 2;
+
+    const endCenterX =
+
+      end.left + end.width / 2;
+
+    const endCenterY =
+
+      end.top + end.height / 2;
+
+    flyer.style.left =
+
+      `${startCenterX - 28}px`;
+
+    flyer.style.top =
+
+      `${startCenterY - 28}px`;
+
+    document.body.appendChild(flyer);
+
+    requestAnimationFrame(() => {
+
+      const moveX =
+
+        endCenterX - startCenterX;
+
+      const moveY =
+
+        endCenterY - startCenterY;
+
+      flyer.style.transform =
+
+        `translate(${moveX}px, ${moveY}px) scale(0.12) rotate(10deg)`;
+
+      flyer.style.opacity = "0.08";
+
+    });
+
+    setCartPulse(true);
+
+    setTimeout(() => {
+
+      setCartPulse(false);
+
+    }, 420);
+
+    setTimeout(() => {
+
+      flyer.remove();
+
+    }, 580);
+
+  }
+
+  function addAndAnimate(product, option, qty) {
+
+    onAddToCart(product, option, qty);
+
+    flyToCart(product);
+
+  }
+
+
+
   function openProduct(
 
     product
@@ -408,7 +550,7 @@ function POSPage({
 
     ) {
 
-      onAddToCart(
+      addAndAnimate(
 
         product,
 
@@ -543,7 +685,7 @@ option.id ===
 
     }
 
-    onAddToCart(
+    addAndAnimate(
 
       selectedProduct,
 
@@ -593,7 +735,7 @@ option.id ===
 
       );
 
-    onAddToCart(
+    addAndAnimate(
 
       packProduct,
 
@@ -629,11 +771,9 @@ option.id ===
 
   }
 
-  function startLongPress(
+  function startLongPress(product, event) {
 
-    product
-
-  ) {
+    rememberSource(event);
 
     longPressTriggeredRef.current =
 
@@ -713,11 +853,9 @@ option.id ===
 
   }
 
-  function handleProductClick(
+  function handleProductClick(product, event) {
 
-    product
-
-  ) {
+    rememberSource(event);
 
     if (
 
@@ -898,7 +1036,7 @@ option.id ===
 
         )}
 <main className="product-panel">
-<header className="pos-modern-header">
+<header className="pos-modern-header pos-sticky-sales-header">
 <div className="pos-title-row">
 <h1>
 
@@ -1077,21 +1215,25 @@ product.id
 
                     }
 
-                    onClick={() =>
+                    onClick={(event) =>
 
                       handleProductClick(
 
-                        product
+                        product,
+
+                        event
 
                       )
 
                     }
 
-                    onLongPressStart={() =>
+                    onLongPressStart={(event) =>
 
                       startLongPress(
 
-                        product
+                        product,
+
+                        event
 
                       )
 

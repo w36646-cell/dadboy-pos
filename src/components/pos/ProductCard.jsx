@@ -1,36 +1,26 @@
-function getProductTheme(
-
-  index
-
-) {
+function getProductTheme(index) {
 
   const themes = [
 
-    "linear-gradient(160deg, #4f91dc 0%, #063064 100%)",
+    "linear-gradient(155deg, #dbeafe 0%, #1d4ed8 100%)",
 
-    "linear-gradient(160deg, #ef6f68 0%, #74110f 100%)",
+    "linear-gradient(155deg, #fee2e2 0%, #b91c1c 100%)",
 
-    "linear-gradient(160deg, #4fc56e 0%, #07572a 100%)",
+    "linear-gradient(155deg, #dcfce7 0%, #15803d 100%)",
 
-    "linear-gradient(160deg, #ffad22 0%, #8d4300 100%)",
+    "linear-gradient(155deg, #ffedd5 0%, #c2410c 100%)",
 
-    "linear-gradient(160deg, #70cdf7 0%, #13506e 100%)",
+    "linear-gradient(155deg, #e0f2fe 0%, #0369a1 100%)",
 
-    "linear-gradient(160deg, #ffd54a 0%, #9d5c00 100%)",
+    "linear-gradient(155deg, #fef3c7 0%, #a16207 100%)",
 
-    "linear-gradient(160deg, #b6df35 0%, #407400 100%)",
+    "linear-gradient(155deg, #ecfccb 0%, #4d7c0f 100%)",
 
-    "linear-gradient(160deg, #234d79 0%, #03192f 100%)",
-
-  ];
-
-  return themes[
-
-    index %
-
-      themes.length
+    "linear-gradient(155deg, #e2e8f0 0%, #334155 100%)",
 
   ];
+
+  return themes[index % themes.length];
 
 }
 
@@ -39,10 +29,6 @@ function ProductCard({
   index = 0,
 
   product,
-
-  stock,
-
-  lowStock,
 
   packEnabled,
 
@@ -65,67 +51,25 @@ function ProductCard({
 
       style={{
 
-        background:
-
-          getProductTheme(
-
-            index
-
-          ),
+        background: getProductTheme(index),
 
       }}
 
-      onClick={
+      onClick={onClick}
 
-        onClick
+      onMouseDown={onLongPressStart}
 
-      }
+      onMouseUp={onLongPressCancel}
 
-      onMouseDown={
+      onMouseLeave={onLongPressCancel}
 
-        onLongPressStart
+      onTouchStart={onLongPressStart}
 
-      }
+      onTouchEnd={onLongPressCancel}
 
-      onMouseUp={
+      onTouchCancel={onLongPressCancel}
 
-        onLongPressCancel
-
-      }
-
-      onMouseLeave={
-
-        onLongPressCancel
-
-      }
-
-      onTouchStart={
-
-        onLongPressStart
-
-      }
-
-      onTouchEnd={
-
-        onLongPressCancel
-
-      }
-
-      onTouchCancel={
-
-        onLongPressCancel
-
-      }
-
-      onContextMenu={(
-
-        event
-
-      ) =>
-
-        event.preventDefault()
-
-      }
+      onContextMenu={(event) => event.preventDefault()}
 >
 <div className="pos-card-image-area">
 
@@ -134,19 +78,11 @@ function ProductCard({
 
             className="pos-card-image"
 
-            src={
+            src={product.image}
 
-              product.image
+            alt={product.name || "สินค้า"}
 
-            }
-
-            alt={
-
-              product.name ||
-
-              "สินค้า"
-
-            }
+            decoding="async"
 
           />
 
@@ -170,38 +106,11 @@ function ProductCard({
 <div className="pos-card-info">
 <div className="pos-card-name">
 
-          {
-
-            product.name
-
-          }
+          {product.name}
 </div>
 <div className="pos-card-price">
 
-          {Number(
-
-            normalPrice || 0
-
-          ).toLocaleString()}{" "}
-
-          บาท
-</div>
-<div
-
-          className={
-
-            lowStock
-
-              ? "pos-card-stock low"
-
-              : "pos-card-stock"
-
-          }
->
-
-          คงเหลือ{" "}
-
-          {stock}
+          {Number(normalPrice || 0).toLocaleString()} บาท
 </div>
 
         {packEnabled && (
@@ -219,4 +128,4 @@ function ProductCard({
 }
 
 export default ProductCard;
- 
+
