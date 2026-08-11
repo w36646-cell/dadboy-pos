@@ -2131,3 +2131,167 @@
   cursor: pointer;
 
 }
+
+/* =========================================================
+
+   DADBOY IMAGE EDITOR V2
+
+   Preview same proportion as POS card
+
+========================================================= */
+
+.product-edit-panel {
+
+  scroll-margin-top: 16px;
+
+}
+
+/* กล่องจำลองการ์ด */
+
+.manager-image-editor-preview {
+
+  position: relative !important;
+
+  overflow: hidden !important;
+
+  width: 100% !important;
+
+  height: 176px !important;
+
+  min-height: 176px !important;
+
+  padding: 0 !important;
+
+  border-radius: 14px !important;
+
+  background:
+
+    #ffffff !important;
+
+  border:
+
+    1px solid
+
+    rgba(15,23,42,.12) !important;
+
+}
+
+/* รูปภายใน preview ใช้ logic เดียวกับ POS */
+
+.manager-image-editor-preview img {
+
+  position: absolute !important;
+
+  inset: 0 !important;
+
+  width: 100% !important;
+
+  height: 100% !important;
+
+  object-fit: contain !important;
+
+  transform-origin:
+
+    center center !important;
+
+  transition:
+
+    transform .08s ease !important;
+
+}
+
+
+/* จำลองแถบข้อความจริงด้านล่าง */
+
+.manager-image-editor-preview::after {
+
+  content: "พื้นที่ชื่อสินค้า / ราคา";
+
+  position: absolute;
+
+  left: 0;
+
+  right: 0;
+
+  bottom: 0;
+
+  height: 38%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  box-sizing: border-box;
+
+  padding: 4px;
+
+  color:
+
+    rgba(255,255,255,.9);
+
+  font-size: 11px;
+
+  font-weight: 800;
+
+  pointer-events: none;
+
+  background:
+
+    linear-gradient(
+
+      180deg,
+
+      rgba(20,20,20,.02) 0%,
+
+      rgba(20,20,20,.08) 40%,
+
+      rgba(20,20,20,.18) 100%
+
+    );
+
+}
+
+
+/* มือถือ = ขนาดเดียวกับ POS จริง */
+
+@media (max-width: 720px) {
+
+  .manager-image-editor-preview {
+
+    height: 124px !important;
+
+    min-height: 124px !important;
+
+    max-height: 124px !important;
+
+  }
+
+}
+
+
+/* จอเล็กมาก */
+
+@media (max-width: 390px) {
+
+  .manager-image-editor-preview {
+
+    height: 120px !important;
+
+    min-height: 120px !important;
+
+    max-height: 120px !important;
+
+  }
+
+}
+
+
+/* Controls ให้ติดกับ Preview มากขึ้น */
+
+.manager-image-controls {
+
+  margin-top: 8px !important;
+
+}

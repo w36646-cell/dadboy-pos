@@ -2,6 +2,8 @@ import {
 
   useMemo,
 
+  useRef,
+
   useState,
 
 } from "react";
@@ -215,6 +217,10 @@ function ProductManager({
 
   );
 
+  const editorRef =
+
+    useRef(null);
+
   const list =
 
     useMemo(() => {
@@ -261,6 +267,30 @@ function ProductManager({
 
     ]);
 
+  function scrollToEditor() {
+
+    window.setTimeout(
+
+      () => {
+
+        editorRef.current
+
+          ?.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "start",
+
+          });
+
+      },
+
+      60
+
+    );
+
+  }
+
   function openCreate() {
 
     /*
@@ -292,6 +322,8 @@ function ProductManager({
       createEmptyForm()
 
     );
+
+    scrollToEditor();
 
   }
 
@@ -501,6 +533,8 @@ option.id ===
         ),
 
     });
+
+    scrollToEditor();
 
   }
 
@@ -1688,7 +1722,12 @@ item.id
 </tbody>
 </table>
 </div>
-<aside className="product-edit-panel">
+<aside
+
+ref={editorRef}
+
+className="product-edit-panel"
+>
 
           {!editingProduct ? (
 <div className="product-edit-empty">
