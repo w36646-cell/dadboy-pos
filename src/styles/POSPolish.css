@@ -2295,3 +2295,1083 @@
   margin-top: 8px !important;
 
 }
+
+/* =========================================================
+
+   DADBOY IMAGE EDITOR V4
+
+   exact POS-card preview
+
+========================================================= */
+
+.product-edit-panel {
+
+  scroll-margin-top: 10px !important;
+
+}
+
+
+/* Desktop card preview */
+
+.manager-image-editor-preview {
+
+  position: relative !important;
+
+  width: 176px !important;
+
+  height: 176px !important;
+
+  min-width: 176px !important;
+
+  max-width: 176px !important;
+
+  min-height: 176px !important;
+
+  max-height: 176px !important;
+
+  margin:
+
+    12px auto 0 !important;
+
+  padding: 0 !important;
+
+  overflow: hidden !important;
+
+  box-sizing: border-box !important;
+
+  border-radius: 13px !important;
+
+  background: #ffffff !important;
+
+  border:
+
+    1px solid
+
+    rgba(15,23,42,.14) !important;
+
+  box-shadow:
+
+    0 3px 9px
+
+    rgba(16,24,40,.15) !important;
+
+}
+
+
+/* Image same logic as POS card */
+
+.manager-image-editor-preview img {
+
+  position: absolute !important;
+
+  inset: 0 !important;
+
+  display: block !important;
+
+  width: 100% !important;
+
+  height: 100% !important;
+
+  max-width: none !important;
+
+  max-height: none !important;
+
+  box-sizing: border-box !important;
+
+  padding:
+
+    2px
+
+    5px
+
+    44px !important;
+
+  object-fit: contain !important;
+
+  object-position: center !important;
+
+  transform-origin:
+
+    center center !important;
+
+  transform:
+
+    translate(
+
+      var(--editor-image-x, 0%),
+
+      var(--editor-image-y, 0%)
+
+    )
+
+    scale(
+
+      calc(
+
+        1.26 *
+
+        var(--editor-image-scale, 1)
+
+      )
+
+    ) !important;
+
+  transition:
+
+    transform .08s ease !important;
+
+}
+
+
+/* จำลองแถบชื่อ/ราคา */
+
+.manager-image-editor-preview::after {
+
+  content: "ชื่อสินค้า   ราคา";
+
+  position: absolute;
+
+  z-index: 10;
+
+  left: 0;
+
+  right: 0;
+
+  bottom: 0;
+
+  height: 38%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 4px;
+
+  box-sizing: border-box;
+
+  pointer-events: none;
+
+  color:
+
+    rgba(255,255,255,.95);
+
+  font-size: 12px;
+
+  font-weight: 900;
+
+  text-align: center;
+
+  text-shadow:
+
+    0 1px 2px
+
+    rgba(0,0,0,.65);
+
+  background:
+
+    linear-gradient(
+
+      180deg,
+
+      rgba(20,20,20,.02) 0%,
+
+      rgba(20,20,20,.08) 40%,
+
+      rgba(20,20,20,.18) 100%
+
+    );
+
+}
+
+
+/* Mobile POS card = 124px */
+
+@media (max-width: 720px) {
+
+  .manager-image-editor-preview {
+
+    width: 124px !important;
+
+    height: 124px !important;
+
+    min-width: 124px !important;
+
+    max-width: 124px !important;
+
+    min-height: 124px !important;
+
+    max-height: 124px !important;
+
+  }
+
+  .manager-image-editor-preview img {
+
+    padding:
+
+      1px
+
+      1px
+
+      32px !important;
+
+    transform:
+
+      translate(
+
+        var(--editor-image-x, 0%),
+
+        var(--editor-image-y, 0%)
+
+      )
+
+      scale(
+
+        calc(
+
+          1.27 *
+
+          var(--editor-image-scale, 1)
+
+        )
+
+      ) !important;
+
+  }
+
+}
+
+
+/* Small mobile = 120px */
+
+@media (max-width: 390px) {
+
+  .manager-image-editor-preview {
+
+    width: 120px !important;
+
+    height: 120px !important;
+
+    min-width: 120px !important;
+
+    max-width: 120px !important;
+
+    min-height: 120px !important;
+
+    max-height: 120px !important;
+
+  }
+
+}
+
+.manager-image-controls {
+
+  margin-top: 10px !important;
+
+}
+
+
+/* ===== DADBOY EXACT PREVIEW 1TO1 START ===== */
+
+/*
+
+  IMPORTANT
+
+  Preview นี้ใช้สูตรเดียวกับการ์ด POS จริง
+
+  Desktop:
+
+  - 5 cards
+
+  - gap 10px
+
+  - card height 176px
+
+  - image base scale 1.26
+
+  Mobile:
+
+  - 3 cards
+
+  - gap 5px
+
+  - card height 124px
+
+  - image base scale 1.27
+
+*/
+
+
+/* ----------------------------------------------------------
+
+   EDIT PANEL SCROLL
+
+---------------------------------------------------------- */
+
+.product-edit-panel {
+
+  scroll-margin-top: 12px !important;
+
+}
+
+
+/* ----------------------------------------------------------
+
+   PREVIEW CARD — DEFAULT
+
+---------------------------------------------------------- */
+
+.manager-preview.manager-image-editor-preview {
+
+  position: relative !important;
+
+  box-sizing: border-box !important;
+
+  /*
+
+    ความกว้างจำลองจาก POS grid จริง
+
+    default ช่วง tablet
+
+  */
+
+  width:
+
+    calc(
+
+      (100vw - 52px) / 4
+
+    ) !important;
+
+  min-width: 0 !important;
+
+  max-width:
+
+    240px !important;
+
+
+  height:
+
+    150px !important;
+
+  min-height:
+
+    150px !important;
+
+  max-height:
+
+    150px !important;
+
+
+  display: flex !important;
+
+  align-items: center !important;
+
+  justify-content: center !important;
+
+
+  overflow: hidden !important;
+
+
+  margin:
+
+    14px
+
+    auto
+
+    16px !important;
+
+
+  /*
+
+    POS default image area:
+
+    8px 5px 35px
+
+  */
+
+  padding:
+
+    8px
+
+    5px
+
+    35px !important;
+
+
+  border:
+
+    1px solid
+
+    rgba(
+
+      255,
+
+      255,
+
+      255,
+
+      0.92
+
+    ) !important;
+
+
+  border-radius:
+
+    14px !important;
+
+
+  /*
+
+    แค่พื้นช่วยมองภาพ
+
+    ไม่กระทบตัวรูป
+
+  */
+
+  background:
+
+    linear-gradient(
+
+      155deg,
+
+      #dbeafe 0%,
+
+      #1d4ed8 100%
+
+    ) !important;
+
+
+  box-shadow:
+
+    0 4px 12px
+
+    rgba(
+
+      16,
+
+      24,
+
+      40,
+
+      0.16
+
+    ) !important;
+
+}
+
+
+/* ----------------------------------------------------------
+
+   PREVIEW IMAGE
+
+   logic เดียวกับ POS V3.2
+
+---------------------------------------------------------- */
+
+.manager-preview.manager-image-editor-preview img {
+
+  display:
+
+    block !important;
+
+
+  width:
+
+    100% !important;
+
+  height:
+
+    100% !important;
+
+
+  min-width:
+
+    0 !important;
+
+  min-height:
+
+    0 !important;
+
+
+  max-width:
+
+    none !important;
+
+  max-height:
+
+    none !important;
+
+
+  object-fit:
+
+    contain !important;
+
+
+  object-position:
+
+    center center !important;
+
+
+  transform:
+
+    translate(
+
+      var(
+
+        --product-image-x,
+
+        0%
+
+      ),
+
+      var(
+
+        --product-image-y,
+
+        0%
+
+      )
+
+    )
+
+    scale(
+
+      calc(
+
+        1.24 *
+
+        var(
+
+          --product-image-scale,
+
+          1
+
+        )
+
+      )
+
+    ) !important;
+
+
+  transform-origin:
+
+    center center !important;
+
+
+  transition:
+
+    transform
+
+    .08s ease !important;
+
+
+  filter:
+
+    drop-shadow(
+
+      0
+
+      2px
+
+      2px
+
+      rgba(
+
+        0,
+
+        0,
+
+        0,
+
+        0.14
+
+      )
+
+    ) !important;
+
+}
+
+
+/* ----------------------------------------------------------
+
+   TEXT ZONE GUIDE
+
+   จำลองพื้นที่ข้อความ 38%
+
+   เหมือน POS จริง
+
+---------------------------------------------------------- */
+
+.manager-preview.manager-image-editor-preview::before {
+
+  content:
+
+    "";
+
+  position:
+
+    absolute !important;
+
+  z-index:
+
+    10 !important;
+
+
+  left:
+
+    0 !important;
+
+  right:
+
+    0 !important;
+
+  bottom:
+
+    0 !important;
+
+
+  height:
+
+    38% !important;
+
+
+  pointer-events:
+
+    none !important;
+
+
+  background:
+
+    linear-gradient(
+
+      180deg,
+
+      rgba(
+
+        20,
+
+        20,
+
+        20,
+
+        0.02
+
+      )
+
+      0%,
+
+      rgba(
+
+        20,
+
+        20,
+
+        20,
+
+        0.08
+
+      )
+
+      40%,
+
+      rgba(
+
+        20,
+
+        20,
+
+        20,
+
+        0.18
+
+      )
+
+      100%
+
+    ) !important;
+
+}
+
+
+/* เส้นขอบการ์ด */
+
+.manager-preview.manager-image-editor-preview::after {
+
+  content:
+
+    "";
+
+  position:
+
+    absolute !important;
+
+  z-index:
+
+    20 !important;
+
+
+  inset:
+
+    0 !important;
+
+
+  pointer-events:
+
+    none !important;
+
+
+  border:
+
+    1px solid
+
+    rgba(
+
+      15,
+
+      23,
+
+      42,
+
+      0.16
+
+    ) !important;
+
+
+  border-radius:
+
+    inherit !important;
+
+}
+
+
+/* ----------------------------------------------------------
+
+   DESKTOP
+
+   สูตรเดียวกับ POS:
+
+   5 columns / gap 10
+
+---------------------------------------------------------- */
+
+@media (min-width: 1000px) {
+
+  .manager-preview.manager-image-editor-preview {
+
+    /*
+
+      POS:
+
+      padding page ≈ 20px
+
+      4 gaps × 10 = 40px
+
+      เหลือ:
+
+      viewport - 60px
+
+      หาร 5 การ์ด
+
+    */
+
+    width:
+
+      calc(
+
+        (100vw - 60px) / 5
+
+      ) !important;
+
+
+    max-width:
+
+      260px !important;
+
+
+    height:
+
+      176px !important;
+
+    min-height:
+
+      176px !important;
+
+    max-height:
+
+      176px !important;
+
+
+    /*
+
+      POS desktop image area จริง
+
+    */
+
+    padding:
+
+      2px
+
+      5px
+
+      44px !important;
+
+  }
+
+
+  .manager-preview.manager-image-editor-preview img {
+
+    transform:
+
+      translate(
+
+        var(
+
+          --product-image-x,
+
+          0%
+
+        ),
+
+        var(
+
+          --product-image-y,
+
+          0%
+
+        )
+
+      )
+
+      scale(
+
+        calc(
+
+          1.26 *
+
+          var(
+
+            --product-image-scale,
+
+            1
+
+          )
+
+        )
+
+      ) !important;
+
+  }
+
+}
+
+
+/* ----------------------------------------------------------
+
+   DESKTOP LARGE
+
+   POS มี 6 columns ตั้งแต่ 1350px
+
+---------------------------------------------------------- */
+
+@media (min-width: 1350px) {
+
+  .manager-preview.manager-image-editor-preview {
+
+    /*
+
+      5 gaps × 10px
+
+      page padding 20px
+
+    */
+
+    width:
+
+      calc(
+
+        (100vw - 70px) / 6
+
+      ) !important;
+
+
+    max-width:
+
+      260px !important;
+
+  }
+
+}
+
+
+/* ----------------------------------------------------------
+
+   MOBILE
+
+   สูตรเดียวกับ POS:
+
+   3 columns / gap 5
+
+---------------------------------------------------------- */
+
+@media (max-width: 720px) {
+
+  .manager-preview.manager-image-editor-preview {
+
+    /*
+
+      page padding ≈ 20px
+
+      2 gaps × 5 = 10px
+
+      viewport - 30
+
+      หาร 3
+
+    */
+
+    width:
+
+      calc(
+
+        (100vw - 30px) / 3
+
+      ) !important;
+
+
+    max-width:
+
+      none !important;
+
+
+    height:
+
+      124px !important;
+
+    min-height:
+
+      124px !important;
+
+    max-height:
+
+      124px !important;
+
+
+    padding:
+
+      1px
+
+      1px
+
+      32px !important;
+
+
+    border-radius:
+
+      11px !important;
+
+  }
+
+
+  .manager-preview.manager-image-editor-preview img {
+
+    transform:
+
+      translate(
+
+        var(
+
+          --product-image-x,
+
+          0%
+
+        ),
+
+        var(
+
+          --product-image-y,
+
+          0%
+
+        )
+
+      )
+
+      scale(
+
+        calc(
+
+          1.27 *
+
+          var(
+
+            --product-image-scale,
+
+            1
+
+          )
+
+        )
+
+      ) !important;
+
+  }
+
+}
+
+
+/* ----------------------------------------------------------
+
+   SMALL PHONE
+
+---------------------------------------------------------- */
+
+@media (max-width: 390px) {
+
+  .manager-preview.manager-image-editor-preview {
+
+    height:
+
+      120px !important;
+
+    min-height:
+
+      120px !important;
+
+    max-height:
+
+      120px !important;
+
+  }
+
+}
+
+
+/* ----------------------------------------------------------
+
+   SLIDERS
+
+---------------------------------------------------------- */
+
+.manager-image-controls {
+
+  width:
+
+    100% !important;
+
+
+  box-sizing:
+
+    border-box !important;
+
+
+  margin-top:
+
+    12px !important;
+
+}
+
+
+/* ===== DADBOY EXACT PREVIEW 1TO1 END ===== */
+

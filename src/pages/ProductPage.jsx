@@ -1046,9 +1046,11 @@ option.id ===
 
                     style={{
 
-                      transform:
+                      "--product-image-scale": form.imageScale,
 
-                        `translate(${form.imageX}%, ${form.imageY}%) scale(${form.imageScale})`,
+                      "--product-image-x": `${form.imageX}%`,
+
+                      "--product-image-y": `${form.imageY}%`,
 
                     }}
 
