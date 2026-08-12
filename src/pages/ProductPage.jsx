@@ -1,5 +1,12 @@
 import { useMemo, useRef, useState } from "react";
 
+import ProductCard from "../components/pos/ProductCard";
+
+import "../styles/POSModern.css";
+
+import "../styles/POSPolish.css";
+ 
+
 
 
 function parseProductImageSettings(value) {
@@ -1035,35 +1042,68 @@ option.id ===
 
                 />
 </label>
-<div className="manager-preview manager-image-editor-preview">
+<div className="manager-live-pos-preview">
+<div className="manager-live-pos-preview-label">
 
-                {form.image ? (
-<img
-
-                    src={form.image}
-
-                    alt="ตัวอย่างสินค้า"
-
-                    style={{
-
-                      "--product-image-scale": form.imageScale,
-
-                      "--product-image-x": `${form.imageX}%`,
-
-                      "--product-image-y": `${form.imageY}%`,
-
-                    }}
-
-                  />
-
-                ) : (
-<span>
-
-                    ไม่มีรูป
-</span>
-
-                )}
+    ตัวอย่างการ์ดหน้าขายจริง
 </div>
+<div className="manager-live-pos-card-shell">
+<ProductCard
+
+      index={0}
+
+      product={{
+
+        ...editingProduct,
+
+        name:
+
+          form.name ||
+
+          editingProduct?.name ||
+
+          "สินค้า",
+
+        image: serializeProductImageSettings(
+
+          form.image,
+
+          form.imageScale,
+
+          form.imageX,
+
+          form.imageY
+
+        ),
+
+      }}
+
+      normalPrice={
+
+        Number(
+
+          form.hasOption
+
+            ? form.normalPrice
+
+            : form.price
+
+        ) || 0
+
+      }
+
+      packEnabled={false}
+
+      onClick={() => {}}
+
+      onLongPressStart={() => {}}
+
+      onLongPressCancel={() => {}}
+
+    />
+</div>
+</div>
+ 
 <div className="manager-image-controls">
 <label>
 <span>
