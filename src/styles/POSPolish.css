@@ -3375,3 +3375,178 @@
 
 /* ===== DADBOY EXACT PREVIEW 1TO1 END ===== */
 
+
+/* =========================================================
+
+   DADBOY LIVE POS CARD PREVIEW
+
+   ใช้ ProductCard ตัวจริงเป็น Preview
+
+========================================================= */
+
+.manager-live-pos-preview {
+
+  width: 100%;
+
+  box-sizing: border-box;
+
+  margin-top: 14px;
+
+  margin-bottom: 16px;
+
+  padding: 14px;
+
+  border: 1px solid #e4e7ec;
+
+  border-radius: 14px;
+
+  background: #f9fafb;
+
+}
+
+
+/* หัวข้อความ */
+
+.manager-live-pos-preview-label {
+
+  margin-bottom: 12px;
+
+  color: #475467;
+
+  font-size: 14px;
+
+  font-weight: 800;
+
+  text-align: center;
+
+}
+
+
+/* =========================================================
+
+   PRODUCT CARD SHELL
+
+   แค่กำหนดความกว้างของ 1 การ์ด
+
+   ตัวการ์ดข้างในใช้ ProductCard + POS CSS จริงทั้งหมด
+
+========================================================= */
+
+.manager-live-pos-card-shell {
+
+  width: calc((100vw - 60px) / 5);
+
+  min-width: 150px;
+
+  max-width: 260px;
+
+  margin-left: auto;
+
+  margin-right: auto;
+
+}
+
+
+/* ProductCard จริง */
+
+.manager-live-pos-card-shell
+
+.product-card.pos-image-card {
+
+  width: 100% !important;
+
+  margin: 0 !important;
+
+  cursor: default !important;
+
+  pointer-events: none !important;
+
+}
+
+
+/* ป้องกัน style ของ Product Manager เดิมมาทับ */
+
+.manager-live-pos-card-shell
+
+.pos-card-image-area {
+
+  box-sizing: border-box !important;
+
+}
+
+
+/* =========================================================
+
+   TABLET
+
+========================================================= */
+
+@media (min-width: 721px) and (max-width: 999px) {
+
+  .manager-live-pos-card-shell {
+
+    width: calc((100vw - 50px) / 4);
+
+    min-width: 140px;
+
+    max-width: 230px;
+
+  }
+
+}
+
+
+/* =========================================================
+
+   MOBILE
+
+   หน้าขายจริง = 3 การ์ดต่อแถว
+
+========================================================= */
+
+@media (max-width: 720px) {
+
+  .manager-live-pos-preview {
+
+    padding: 10px;
+
+  }
+
+  .manager-live-pos-preview-label {
+
+    font-size: 13px;
+
+  }
+
+  .manager-live-pos-card-shell {
+
+    width: calc((100vw - 30px) / 3);
+
+    min-width: 0;
+
+    max-width: none;
+
+  }
+
+}
+
+
+/* =========================================================
+
+   SMALL PHONE
+
+========================================================= */
+
+@media (max-width: 390px) {
+
+  .manager-live-pos-card-shell {
+
+    width: calc((100vw - 26px) / 3);
+
+  }
+
+}
+
+
+/* ===== END DADBOY LIVE POS CARD PREVIEW ===== */
+ 
