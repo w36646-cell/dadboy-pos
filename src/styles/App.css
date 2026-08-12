@@ -1596,15 +1596,15 @@ button {
 }
  
 
-/* =========================================================
 
-   DADBOY PRODUCT IMAGE EDITOR CARD PREVIEW
 
-   Preview นี้ใช้สัดส่วนเดียวกับการ์ดหน้าขาย POS
+/* ============================================================
 
-   เพื่อให้ปรับ Zoom / X / Y ได้ตรงกับของจริง
+   DADBOY PRODUCT EDITOR - POS CARD SHAPE
 
-========================================================= */
+   Preview สำหรับจัด Zoom / X / Y ให้เหมือนการ์ดหน้าขาย
+
+============================================================ */
 
 .product-edit-panel {
 
@@ -1613,43 +1613,81 @@ button {
 }
 
 
-/* ตัว Preview = การ์ดหน้าขาย */
+/*
+
+ * ตัวกรอบ Preview
+
+ *
+
+ * จากหน้าขายจริง การ์ดเป็นแนวตั้ง
+
+ * จึงไม่ให้ Preview กว้างเต็ม Product Manager อีกต่อไป
+
+ */
 
 .manager-preview.manager-image-editor-preview {
 
-  position: relative;
+  position: relative !important;
 
-  width: 100%;
+  width: 210px !important;
 
-  height: 150px;
+  min-width: 210px !important;
 
-  min-height: 150px;
+  max-width: 210px !important;
 
-  max-height: 150px;
+  /*
 
-  display: flex;
+   * ใช้ aspect-ratio แทนการกำหนดความสูงมั่ว ๆ
 
-  align-items: center;
+   * ทำให้กรอบรักษาทรงการ์ดตลอด
 
-  justify-content: center;
+   */
 
-  overflow: hidden;
+  aspect-ratio: 0.78 / 1 !important;
 
-  margin-top: 12px;
+  height: auto !important;
+
+  min-height: 0 !important;
+
+  max-height: none !important;
+
+  box-sizing: border-box !important;
+
+  display: flex !important;
+
+  align-items: center !important;
+
+  justify-content: center !important;
+
+  overflow: hidden !important;
+
+  margin:
+
+    16px
+
+    auto
+
+    16px !important;
+
+  /*
+
+   * พื้นที่ล่างเผื่อชื่อและราคา
+
+   * เหมือนโครงสร้างการ์ด POS
+
+   */
 
   padding:
 
     8px
 
-    5px
+    8px
 
-    35px;
+    58px !important;
 
-  box-sizing: border-box;
+  border: 0 !important;
 
-  border: 0;
-
-  border-radius: 13px;
+  border-radius: 14px !important;
 
   background:
 
@@ -1657,42 +1695,42 @@ button {
 
       145deg,
 
-      #667085,
+      #98a2b3 0%,
 
-      #344054
+      #667085 58%,
 
-    );
+      #344054 100%
+
+    ) !important;
 
   box-shadow:
 
-    0 3px 9px
+    0 3px 10px
 
-    rgba(
+    rgba(16, 24, 40, 0.20) !important;
 
-      16,
-
-      24,
-
-      40,
-
-      0.15
-
-    );
-
-  color: #ffffff;
+  isolation: isolate !important;
 
 }
 
 
-/* รูปใช้หลักเดียวกับการ์ด POS */
+/* ============================================================
+
+   พื้นที่รูป
+
+============================================================ */
 
 .manager-preview.manager-image-editor-preview img {
 
-  display: block;
+  display: block !important;
 
   width: 100% !important;
 
   height: 100% !important;
+
+  min-width: 0 !important;
+
+  min-height: 0 !important;
 
   max-width: none !important;
 
@@ -1702,257 +1740,237 @@ button {
 
   object-position:
 
+    center
+
     center !important;
 
   transform-origin:
 
-    center center;
+    center
+
+    center !important;
 
   will-change:
 
-    transform;
+    transform !important;
 
   filter:
 
     drop-shadow(
 
-      0 5px 4px
+      0 4px 3px
 
-      rgba(
+      rgba(0, 0, 0, 0.22)
 
-        0,
-
-        0,
-
-        0,
-
-        0.18
-
-      )
-
-    );
+    ) !important;
 
 }
 
 
-/* เส้นบอกขอบเขตการ์ด */
+/* ============================================================
+
+   เส้นขอบ Preview
+
+============================================================ */
 
 .manager-preview.manager-image-editor-preview::after {
 
   content: "";
 
-  position: absolute;
+  position: absolute !important;
 
-  inset: 0;
+  inset: 0 !important;
 
-  pointer-events: none;
+  z-index: 50 !important;
+
+  pointer-events: none !important;
+
+  box-sizing: border-box !important;
 
   border:
 
-    1px solid
+    2px solid
 
-    rgba(
-
-      255,
-
-      255,
-
-      255,
-
-      0.45
-
-    );
+    rgba(52, 64, 84, 0.30) !important;
 
   border-radius:
 
-    13px;
-
-  box-shadow:
-
-    inset 0 0 0 1px
-
-    rgba(
-
-      0,
-
-      0,
-
-      0,
-
-      0.05
-
-    );
+    14px !important;
 
 }
 
 
-/* Controls */
+/* ============================================================
+
+   ทำพื้นที่จำลองชื่อ + ราคา
+
+   เพื่อให้เห็นชัดว่ารูปควรหยุดตรงไหน
+
+============================================================ */
+
+.manager-preview.manager-image-editor-preview::before {
+
+  content: "พื้นที่ชื่อสินค้า / ราคา";
+
+  position: absolute !important;
+
+  left: 8px !important;
+
+  right: 8px !important;
+
+  bottom: 8px !important;
+
+  height: 42px !important;
+
+  z-index: 40 !important;
+
+  display: flex !important;
+
+  align-items: center !important;
+
+  justify-content: center !important;
+
+  box-sizing: border-box !important;
+
+  border-radius: 7px !important;
+
+  background:
+
+    rgba(0, 0, 0, 0.28) !important;
+
+  color:
+
+    rgba(255, 255, 255, 0.90) !important;
+
+  font-size: 11px !important;
+
+  font-weight: 700 !important;
+
+  pointer-events: none !important;
+
+}
+
+
+/* ============================================================
+
+   Slider controls ต้องกว้างเต็มพื้นที่แก้ไข
+
+============================================================ */
 
 .manager-image-controls {
 
-  display: grid;
+  width: 100% !important;
 
-  gap: 12px;
+  box-sizing: border-box !important;
 
-  margin-top: 14px;
+  margin-top: 14px !important;
 
-  padding: 14px;
+  padding: 14px !important;
 
-  border-radius: 10px;
+  border-radius: 10px !important;
 
-  background: #f5f7fa;
+  background: #f5f7fa !important;
 
 }
 
 
 .manager-image-controls label {
 
-  display: grid;
+  display: grid !important;
 
-  gap: 6px;
+  gap: 6px !important;
 
 }
 
 
 .manager-image-controls label > span {
 
-  display: flex;
+  display: flex !important;
 
-  justify-content: space-between;
+  justify-content:
 
-  align-items: center;
+    space-between !important;
 
-  gap: 10px;
+  align-items:
 
-  color: #344054;
+    center !important;
 
-  font-size: 13px;
+  gap: 10px !important;
 
-  font-weight: 700;
+  font-weight: 700 !important;
 
 }
 
 
 .manager-image-controls input[type="range"] {
 
-  width: 100%;
+  width: 100% !important;
 
 }
 
 
-.manager-image-reset {
+/* ============================================================
 
-  width: 100%;
+   MOBILE
 
-  padding: 10px 12px;
+   ยังคงทรงเดียวกัน แต่ย่อทั้งการ์ด
 
-  border: 0;
+============================================================ */
 
-  border-radius: 8px;
-
-  background: #667085;
-
-  color: #ffffff;
-
-  font-weight: 700;
-
-}
-
-
-/* มือถือ:
-
-   ให้แผงแก้ไขที่เลื่อนมาหยุดเกือบชิดบนจอ */
-
-@media (max-width: 900px) {
-
-  .product-edit-panel {
-
-    scroll-margin-top: 8px;
-
-  }
-
+@media (max-width: 600px) {
 
   .manager-preview.manager-image-editor-preview {
 
-    height: 150px;
+    width: 190px !important;
 
-    min-height: 150px;
+    min-width: 190px !important;
 
-    max-height: 150px;
+    max-width: 190px !important;
+
+    aspect-ratio:
+
+      0.78 / 1 !important;
+
+    height: auto !important;
+
+    padding:
+
+      7px
+
+      7px
+
+      53px !important;
 
   }
 
 }
 
-/* ===== Match image editor preview to POS card size ===== */
 
-.manager-preview.manager-image-editor-preview {
+/* ============================================================
 
-  width: 118px !important;
+   จอเล็กมาก
 
-  min-width: 118px !important;
+============================================================ */
 
-  max-width: 118px !important;
-
-  height: 150px !important;
-
-  min-height: 150px !important;
-
-  max-height: 150px !important;
-
-  margin-left: auto !important;
-
-  margin-right: auto !important;
-
-  padding: 8px 5px 35px !important;
-
-  border-radius: 13px !important;
-
-}
-
-
-/* จอใหญ่ ให้ใกล้การ์ด POS บนคอม */
-
-@media (min-width: 1000px) {
+@media (max-width: 390px) {
 
   .manager-preview.manager-image-editor-preview {
 
-    width: 180px !important;
+    width: 175px !important;
 
-    min-width: 180px !important;
+    min-width: 175px !important;
 
-    max-width: 180px !important;
+    max-width: 175px !important;
 
-    height: 172px !important;
+    aspect-ratio:
 
-    min-height: 172px !important;
+      0.78 / 1 !important;
 
-    max-height: 172px !important;
-
-  }
-
-}
-
-
-/* จอใหญ่กว่า 1350px */
-
-@media (min-width: 1350px) {
-
-  .manager-preview.manager-image-editor-preview {
-
-    width: 210px !important;
-
-    min-width: 210px !important;
-
-    max-width: 210px !important;
-
-    height: 184px !important;
-
-    min-height: 184px !important;
-
-    max-height: 184px !important;
+    height: auto !important;
 
   }
 
 }
- 
+
+/* ===== END DADBOY PRODUCT EDITOR - POS CARD SHAPE ===== */
+
