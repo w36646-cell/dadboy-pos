@@ -1020,6 +1020,31 @@
 
     center !important;
 
+   transform:
+
+  translate(
+
+    var(--product-image-x, 0%),
+
+    var(--product-image-y, 0%)
+
+  )
+
+  scale(
+
+    var(--product-image-scale, 1)
+
+  ) !important;
+
+transform-origin:
+
+  center center !important;
+
+transition:
+
+  transform 0.08s ease !important;
+ 
+
   filter:
 
     drop-shadow(
