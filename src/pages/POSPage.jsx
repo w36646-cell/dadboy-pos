@@ -161,20 +161,20 @@ function POSPage({
 
     function findTarget() {
 
-      const target =
+     const target =
 
-        document.querySelector(
+  document.querySelector(
 
-          ".employee-pos-topbar > div"
+    "#owner-sidebar-search-slot"
 
-        );
+  ) ||
 
-      setSearchPortalTarget(
+  document.querySelector(
 
-        target
+    ".employee-pos-topbar > div"
 
-      );
-
+  );
+ 
     }
 
     findTarget();
