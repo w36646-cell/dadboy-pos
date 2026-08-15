@@ -72,6 +72,11 @@ const PRODUCTS_KEY =
 
   "dadboy_products_v1";
 
+const CART_KEY =
+
+  "dadboy_active_cart_v1";
+ 
+
 const PENDING_STOCK_KEY =
 
   "dadboy_pending_stock_sync_v2";
@@ -624,14 +629,32 @@ function App() {
 
   );
 
-  const [
+const [
 
-    cart,
+  cart,
 
-    setCart,
+  setCart,
 
-  ] = useState([]);
+] = useState(() => {
 
+  const savedCart =
+
+    readStorage(
+
+      CART_KEY,
+
+      []
+
+    );
+
+  return Array.isArray(savedCart)
+
+    ? savedCart
+
+    : [];
+
+});
+ 
   const [
 
     page,
@@ -697,6 +720,19 @@ function App() {
       : navigator.onLine
 
   );
+
+  useEffect(() => {
+
+  localStorage.setItem(
+
+    CART_KEY,
+
+    JSON.stringify(cart)
+
+  );
+
+}, [cart]);
+ 
 
   function notifySyncStateChanged() {
 
@@ -3345,6 +3381,67 @@ item.id,
 
   }
 
+  const todayDate =
+
+  new Date().toLocaleDateString(
+
+    "en-CA"
+
+  );
+
+const todaySales =
+
+  readStorage(
+
+    SALES_KEY,
+
+    []
+
+  ).filter(
+
+    (sale) =>
+
+      sale.soldDate === todayDate
+
+  );
+
+const todaySoldQty =
+
+  todaySales.reduce(
+
+    (sum, sale) =>
+
+      sum +
+
+      Number(
+
+        sale.totalQty || 0
+
+      ),
+
+    0
+
+  );
+
+const todaySalesAmount =
+
+  todaySales.reduce(
+
+    (sum, sale) =>
+
+      sum +
+
+      Number(
+
+        sale.totalAmount || 0
+
+      ),
+
+    0
+
+  );
+ 
+
   const pendingSaleCount =
 
     getPendingSales()
@@ -3450,6 +3547,18 @@ item.id,
 
         }
 
+       todaySoldQty={
+
+         todaySoldQty
+
+        }
+
+       todaySalesAmount={
+
+   todaySalesAmount
+
+}
+ 
       />
 
     );
