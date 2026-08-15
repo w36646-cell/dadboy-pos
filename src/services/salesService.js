@@ -801,3 +801,176 @@ export async function deleteCloudSale(
   return true;
 
 }
+
+export async function updateCloudSaleAfterItemDelete(
+
+  sale,
+
+  itemToDelete
+
+) {
+
+  if (!sale?.id) {
+
+    throw new Error("Cloud sale id is required");
+
+  }
+
+  if (!itemToDelete?.id) {
+
+    throw new Error("Cloud sale item id is required");
+
+  }
+
+  const remainingItems =
+
+    (sale.items || []).filter(
+
+      (item) =>
+
+        String(item.id) !==
+
+        String(itemToDelete.id)
+
+    );
+
+  const totalQty =
+
+    remainingItems.reduce(
+
+      (sum, item) =>
+
+        sum +
+
+        Number(
+
+          item.stockQuantity ??
+
+            item.quantity ??
+
+            0
+
+        ),
+
+      0
+
+    );
+
+  const totalAmount =
+
+    remainingItems.reduce(
+
+      (sum, item) =>
+
+        sum +
+
+        Number(
+
+          item.lineTotal || 0
+
+        ),
+
+      0
+
+    );
+
+  const totalCost =
+
+    remainingItems.reduce(
+
+      (sum, item) =>
+
+        sum +
+
+        Number(
+
+          item.lineCost || 0
+
+        ),
+
+      0
+
+    );
+
+  const totalProfit =
+
+    totalAmount - totalCost;
+
+  const {
+
+    error: itemError,
+
+  } =
+
+    await supabase
+
+      .from("sale_items")
+
+      .delete()
+
+      .eq(
+
+        "id",
+itemToDelete.id
+
+      );
+
+  if (itemError) {
+
+    throw itemError;
+
+  }
+
+  const {
+
+    error: saleError,
+
+  } =
+
+    await supabase
+
+      .from("sales")
+
+      .update({
+
+        total_qty: totalQty,
+
+        total_amount: totalAmount,
+
+        total_cost: totalCost,
+
+        total_profit: totalProfit,
+
+      })
+
+      .eq(
+
+        "id",
+sale.id
+
+      );
+
+  if (saleError) {
+
+    throw saleError;
+
+  }
+
+  return {
+
+    ...sale,
+
+    items: remainingItems,
+
+    totalQty,
+
+    totalAmount,
+
+    totalCost,
+
+    totalProfit,
+
+  };
+
+}
+ 
