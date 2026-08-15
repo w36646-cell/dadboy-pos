@@ -47,6 +47,12 @@ function OwnerSidebar({
     },
 
     {
+  id: "search",
+  icon: "🔍",
+  label: "ค้นหาสินค้า",
+},
+
+    {
 
       id: "products",
 
