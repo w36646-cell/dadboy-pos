@@ -83,19 +83,18 @@ function SyncStatus({
   }
 
   return (
-<div
+<span
 
-      className={`pos-sync-pill ${statusClass}`}
->
-<span className="pos-sync-dot" />
-<span>
+    className={`pos-sync-dot ${statusClass}`}
 
-        {syncText}
-</span>
-</div>
+    title={syncText}
 
-  );
+    aria-label={syncText}
 
+  />
+
+);
+ 
 }
 
 export default SyncStatus;
