@@ -1968,33 +1968,85 @@ sale.id
 <div className="bill-item-right">
 <span>
 
-                            {
-
-                              item.quantity
-
-                            }{" "}
-
-                            ×{" "}
-
-                            {
-
-                              item.unitPrice
-
-                            }
+    {item.quantity} × {item.unitPrice}
 </span>
 <strong>
 
-                            {Number(
+    {Number(
 
-                              item.lineTotal ||
+      item.lineTotal || 0
 
-                                0
+    ).toLocaleString()}{" "}
 
-                            ).toLocaleString()}{" "}
-
-                            บาท
+    บาท
 </strong>
+<button
+
+    type="button"
+
+    onClick={() =>
+
+      deleteBillItem(
+
+        selectedBill,
+
+        item
+
+      )
+
+    }
+
+    disabled={
+
+      cancelling ||
+
+      !isOnline
+
+    }
+
+    style={{
+
+      marginTop: "6px",
+
+      padding: "6px 10px",
+
+      borderRadius: "8px",
+
+      border: "1px solid #fca5a5",
+
+      background: "#fff1f2",
+
+      color: "#b42318",
+
+      fontWeight: 700,
+
+      cursor:
+
+        cancelling ||
+
+        !isOnline
+
+          ? "not-allowed"
+
+          : "pointer",
+
+      opacity:
+
+        cancelling ||
+
+        !isOnline
+
+          ? 0.5
+
+          : 1,
+
+    }}
+>
+
+    ลบรายการ
+</button>
 </div>
+ 
 </div>
 
                     )
