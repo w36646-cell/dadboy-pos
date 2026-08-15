@@ -174,6 +174,9 @@ function POSPage({
     ".employee-pos-topbar > div"
 
   );
+
+      setSearchPortalTarget(target);
+ 
  
     }
 
