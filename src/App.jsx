@@ -22,6 +22,8 @@ import PaymentPopup from "./components/PaymentPopup";
 
 import POSPage from "./pages/POSPage";
 
+import SyncStatus from "./components/pos/SyncStatus";
+ 
 import DashboardPage from "./pages/DashboardPage";
 
 import ReportPage from "./pages/ReportPage";
@@ -3964,30 +3966,45 @@ const todaySalesAmount =
       ) : (
 <>
 <div className="employee-pos-topbar">
-<strong>
+<div className="pos-brand-status">
+<strong>Dadboy POS</strong>
+<SyncStatus
 
-              Dadboy POS
-</strong>
-<div>
-<button
+    isOnline={isOnline}
 
-                className="stock-menu-button"
+    cloudReady={cloudReady}
 
-                type="button"
+    pendingSaleCount={pendingSaleCount}
 
-                onClick={() =>
+    pendingStockCount={pendingStockCount}
 
-                  setPage(
+  />
+</div>
+<div className="pos-topbar-actions">
+ <button
 
-                    "stock"
+  className="top-checkout-button"
 
-                  )
+  type="button"
 
-                }
+  onClick={openPayment}
+
+  disabled={cart.length === 0}
 >
+<span className="top-checkout-icon">
 
-                รับสินค้าเข้า
+    ▣
+</span>
+<span className="top-checkout-text">
+<small>ยอดตะกร้า</small>
+<strong>คิดเงิน</strong>
+</span>
+<span className="top-checkout-arrow">
+
+    ›
+</span>
 </button>
+ 
 <button
 
                 className="product-menu-button"
