@@ -2005,11 +2005,11 @@
 
   .product-card.pos-image-card {
 
-    height: 120px !important;
+    height: 110px !important;
 
-    min-height: 120px !important;
+    min-height: 110px !important;
 
-    max-height: 120px !important;
+    max-height: 110px !important;
 
   }
 
