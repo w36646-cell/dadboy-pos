@@ -10,8 +10,6 @@ import {
 
 import {
 
-import {
-
   deleteCloudSale,
 
   getCloudSales,
