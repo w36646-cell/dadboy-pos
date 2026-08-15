@@ -10,12 +10,16 @@ import {
 
 import {
 
+import {
+
   deleteCloudSale,
 
   getCloudSales,
 
-} from "../services/salesService";
+  updateCloudSaleAfterItemDelete,
 
+} from "../services/salesService";
+ 
 import {
 
   restoreCloudStocksFromItems,
@@ -859,6 +863,219 @@ function BillsPage({
       searchText,
 
     ]);
+
+  async function deleteBillItem(
+
+  sale,
+
+  item
+
+) {
+
+  if (
+
+    !sale ||
+
+    !item ||
+
+    cancelling
+
+  ) {
+
+    return;
+
+  }
+
+  if (!isOnline) {
+
+    window.alert(
+
+      "ไม่สามารถลบรายการในบิลขณะ Offline ได้\nกรุณาเชื่อมต่ออินเทอร์เน็ตก่อน"
+
+    );
+
+    return;
+
+  }
+
+  if (
+
+    !Array.isArray(sale.items) ||
+
+    sale.items.length <= 1
+
+  ) {
+
+    const confirmed =
+
+      window.confirm(
+
+        "นี่คือรายการสุดท้ายของบิล\nต้องการยกเลิกบิลนี้ทั้งหมดหรือไม่?"
+
+      );
+
+    if (confirmed) {
+
+      await cancelBill(sale);
+
+    }
+
+    return;
+
+  }
+
+  const confirmed =
+
+    window.confirm(
+
+      `ลบ ${item.productName} ออกจากบิล ${sale.billId} ใช่หรือไม่?\nสต๊อกสินค้านี้จะถูกคืนกลับ`
+
+    );
+
+  if (!confirmed) {
+
+    return;
+
+  }
+
+  setCancelling(true);
+
+  try {
+
+    const restoredStocks =
+
+      await restoreCloudStocksFromItems(
+
+        [item]
+
+      );
+
+    const localInventory =
+
+      readStorage(
+
+        STOCK_KEY,
+
+        {}
+
+      );
+
+    const updatedInventory = {
+
+      ...localInventory,
+
+      ...restoredStocks,
+
+    };
+
+    writeStorage(
+
+      STOCK_KEY,
+
+      updatedInventory
+
+    );
+
+    updateAppInventory(
+
+      updatedInventory
+
+    );
+
+    Object.keys(
+
+      restoredStocks || {}
+
+    ).forEach(
+
+      (productId) => {
+
+        removePendingStock(
+
+          productId
+
+        );
+
+      }
+
+    );
+
+    const updatedSale =
+
+      await updateCloudSaleAfterItemDelete(
+
+        sale,
+
+        item
+
+      );
+
+    const updatedSales =
+
+      sales.map(
+
+        (currentSale) =>
+
+          currentSale.billId ===
+
+          sale.billId
+
+            ? updatedSale
+
+            : currentSale
+
+      );
+
+    writeStorage(
+
+      SALES_KEY,
+
+      updatedSales
+
+    );
+
+    setSales(
+
+      updatedSales
+
+    );
+
+    setSelectedBill(
+
+      updatedSale
+
+    );
+
+    window.alert(
+
+      "ลบรายการออกจากบิลเรียบร้อย\nคืนสต๊อกและปรับยอดบิลแล้ว"
+
+    );
+
+  } catch (error) {
+
+    console.error(
+
+      "Delete bill item error:",
+
+      error
+
+    );
+
+    window.alert(
+
+      "ลบรายการไม่สำเร็จ\nกรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่"
+
+    );
+
+  } finally {
+
+    setCancelling(false);
+
+  }
+
+}
+ 
 
   async function cancelBill(
 
