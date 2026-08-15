@@ -221,59 +221,35 @@ function OwnerSidebar({
 </div>
 <nav className="owner-sidebar-menu">
 
-          {menuItems.map(
+          {menuItems.map((item) => (
+  <div key={item.id}>
+    <button
+      type="button"
+      className={
+        currentPage === item.id
+          ? "owner-sidebar-item active"
+          : "owner-sidebar-item"
+      }
+      onClick={() => selectPage(item.id)}
+    >
+      <span className="owner-sidebar-icon">
+        {item.icon}
+      </span>
 
-            (item) => (
-<button
+      <span>
+        {item.label}
+      </span>
+    </button>
 
-                type="button"
-
-                key={
-item.id
-
-                }
-
-                className={
-
-                  currentPage ===
-item.id
-
-                    ? "owner-sidebar-item active"
-
-                    : "owner-sidebar-item"
-
-                }
-
-                onClick={() =>
-
-                  selectPage(
-item.id
-
-                  )
-
-                }
->
-<span className="owner-sidebar-icon">
-
-                  {
-
-                    item.icon
-
-                  }
-</span>
-<span>
-
-                  {
-
-                    item.label
-
-                  }
-</span>
-</button>
-
-            )
-
-          )}
+    {item.id === "pos" && (
+      <div
+        className="owner-sidebar-search-slot"
+        id="owner-sidebar-search-slot"
+      />
+    )}
+  </div>
+))}
+  
 </nav>
 <div className="owner-sidebar-bottom">
 <button
