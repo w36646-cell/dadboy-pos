@@ -37,6 +37,10 @@ function POSPage({
 
   cart,
 
+  todaySoldQty,
+
+  todaySalesAmount,
+ 
   onAddToCart,
 
   onChangeCartQty,
@@ -1048,14 +1052,11 @@ option.id ===
 </h1>
 <span className="pos-product-count">
 
-              {
+  {Number(todaySoldQty || 0).toLocaleString()}{" "}
 
-                filteredProducts.length
-
-              }{" "}
-
-              สินค้า
+  ชิ้นวันนี้
 </span>
+ 
 <span
 
               className={
@@ -1072,7 +1073,7 @@ option.id ===
 >
 
               รวม{" "}
-<b>{Number(total || 0).toLocaleString()}</b>{" "}
+<b>{Number(todaySalesAmount || 0).toLocaleString()}</b>{" "}
 
               บาท
 </span>
