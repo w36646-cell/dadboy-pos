@@ -508,19 +508,19 @@ function POSPage({
 
       setCartPulse(true);
 
-    }, 300);
+    }, 620);
 
     setTimeout(() => {
 
       setCartPulse(false);
 
-    }, 720);
+    }, 1050);
 
     setTimeout(() => {
 
       flyer.remove();
 
-    }, 580);
+    }, 900);
 
   }
 
