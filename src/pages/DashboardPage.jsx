@@ -1752,27 +1752,43 @@ const max14DayProfit =
 
           ) : (
 
-            <button
+           <div
 
-  type="button"
-
-  className="db-low-stock-compact"
+  className="db-low-stock-list"
 
   onClick={goToStock}
 >
 
-  {lowStockProducts
+  {lowStockProducts.map((product) => (
+<div
 
-    .map(
+      className="db-low-stock-row"
 
-      (product) =>
+      key={product.id}
+>
+<span className="db-low-stock-name">
 
-        `${product.name} (${product.stock})`
+        {product.name}
+</span>
+<strong
 
-    )
+        className={
 
-    .join(" • ")}
-</button>
+          product.stock <= 0
+
+            ? "db-low-stock-danger"
+
+            : "db-low-stock-warning"
+
+        }
+>
+
+        {product.stock} ชิ้น
+</strong>
+</div>
+
+  ))}
+</div>
  
           )}
 </section>
