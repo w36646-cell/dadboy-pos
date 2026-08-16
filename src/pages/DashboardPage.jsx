@@ -14,6 +14,13 @@ import {
 
 } from "../services/salesService";
 
+import {
+
+  getCloudProducts,
+
+} from "../services/productService";
+ 
+
 import "./DashboardPage.css";
 
 const SALES_KEY =
@@ -216,7 +223,80 @@ function DashboardPage({
 
   ] = useState(true);
 
-  function reloadLocalStockData() {
+ async function reloadStockData() {
+
+  try {
+
+    const cloudProducts =
+
+      await getCloudProducts();
+
+    const cloudInventory = {};
+
+    cloudProducts.forEach(
+
+      (product) => {
+
+        cloudInventory[
+product.id
+
+        ] =
+
+          Number(
+
+            product.stock ?? 0
+
+          );
+
+      }
+
+    );
+
+    setProducts(
+
+      cloudProducts
+
+    );
+
+    setInventory(
+
+      cloudInventory
+
+    );
+
+    localStorage.setItem(
+
+      PRODUCTS_KEY,
+
+      JSON.stringify(
+
+        cloudProducts
+
+      )
+
+    );
+
+    localStorage.setItem(
+
+      STOCK_KEY,
+
+      JSON.stringify(
+
+        cloudInventory
+
+      )
+
+    );
+
+  } catch (error) {
+
+    console.error(
+
+      "Dashboard Cloud stock error:",
+
+      error
+
+    );
 
     setInventory(
 
@@ -243,6 +323,8 @@ function DashboardPage({
     );
 
   }
+
+}
 
   async function reloadSales() {
 
@@ -350,35 +432,59 @@ function DashboardPage({
 
   useEffect(() => {
 
-    reloadLocalStockData();
+  reloadStockData();
 
-    reloadSales();
+  reloadSales();
 
-    const timer =
+  const timer =
 
-      setInterval(() => {
+    setInterval(() => {
 
-        reloadLocalStockData();
-
-        reloadSales();
-
-      }, 5000);
-
-    function handleFocus() {
-
-      reloadLocalStockData();
+      reloadStockData();
 
       reloadSales();
 
-    }
+    }, 600000);
 
-    function handleStorage() {
+  function handleFocus() {
 
-      reloadLocalStockData();
+    reloadStockData();
 
-    }
+    reloadSales();
 
-    window.addEventListener(
+  }
+
+  function handleStorage() {
+
+    reloadStockData();
+
+  }
+
+  window.addEventListener(
+
+    "focus",
+
+    handleFocus
+
+  );
+
+  window.addEventListener(
+
+    "storage",
+
+    handleStorage
+
+  );
+
+  return () => {
+
+    clearInterval(
+
+      timer
+
+    );
+
+    window.removeEventListener(
 
       "focus",
 
@@ -386,7 +492,7 @@ function DashboardPage({
 
     );
 
-    window.addEventListener(
+    window.removeEventListener(
 
       "storage",
 
@@ -394,34 +500,10 @@ function DashboardPage({
 
     );
 
-    return () => {
+  };
 
-      clearInterval(
-
-        timer
-
-      );
-
-      window.removeEventListener(
-
-        "focus",
-
-        handleFocus
-
-      );
-
-      window.removeEventListener(
-
-        "storage",
-
-        handleStorage
-
-      );
-
-    };
-
-  }, []);
-
+}, []);
+ 
   const now =
 
     new Date();
