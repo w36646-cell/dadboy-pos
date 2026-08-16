@@ -749,9 +749,9 @@ product.id
 
             const trackStock =
 
-              product.trackStock !==
+              product.trackStock ===
 
-              false;
+              true;
 
             return {
 
