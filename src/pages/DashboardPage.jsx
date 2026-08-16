@@ -2033,7 +2033,5 @@ product.id
     font-size: 12px;
 
   }
-
-}
  
 export default DashboardPage;
