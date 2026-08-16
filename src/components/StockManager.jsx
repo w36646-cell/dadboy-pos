@@ -1089,7 +1089,6 @@ product.id
           )}
 </aside>
 </div>
-</div>
 
   );
 
