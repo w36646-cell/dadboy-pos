@@ -6,6 +6,94 @@ import {
 
 } from "react";
 
+
+function parseProductImageSettings(value) {
+
+  const defaults = {
+
+    src: "",
+
+    scale: 1,
+
+    x: 0,
+
+    y: 0,
+
+  };
+
+  if (!value) {
+
+    return defaults;
+
+  }
+
+  if (
+
+    typeof value !== "string" ||
+
+    !value.trim().startsWith("{")
+
+  ) {
+
+    return {
+
+      ...defaults,
+
+      src: String(value || ""),
+
+    };
+
+  }
+
+  try {
+
+    const parsed =
+
+      JSON.parse(value);
+
+    return {
+
+      src: String(
+
+        parsed.src || ""
+
+      ),
+
+      scale: Number(
+
+        parsed.scale || 1
+
+      ),
+
+      x: Number(
+
+        parsed.x || 0
+
+      ),
+
+      y: Number(
+
+        parsed.y || 0
+
+      ),
+
+    };
+
+  } catch {
+
+    return {
+
+      ...defaults,
+
+      src: String(value || ""),
+
+    };
+
+  }
+
+}
+
+
 function StockAdjustment({
 
   products,
@@ -62,6 +150,7 @@ function StockAdjustment({
 
   ] = useState("");
 
+
   const filteredProducts =
 
     useMemo(() => {
@@ -103,6 +192,7 @@ function StockAdjustment({
       searchText,
 
     ]);
+
 
   function selectProduct(
 
@@ -147,6 +237,7 @@ product.id
 
   }
 
+
   const currentStock =
 
     selectedProduct
@@ -162,6 +253,7 @@ selectedProduct.id
 
       : 0;
 
+
   const actualNumber =
 
     Number(
@@ -169,6 +261,7 @@ selectedProduct.id
       actualStock
 
     );
+
 
   const validActualStock =
 
@@ -182,6 +275,7 @@ selectedProduct.id
 
     actualNumber >= 0;
 
+
   const difference =
 
     validActualStock
@@ -191,6 +285,7 @@ selectedProduct.id
         currentStock
 
       : 0;
+
 
   function getDifferenceText() {
 
@@ -221,6 +316,7 @@ selectedProduct.id
     );
 
   }
+
 
   function confirmAdjustment() {
 
@@ -332,24 +428,6 @@ selectedProduct.id
 
     }
 
-    /*
-
-      ส่งข้อมูลทั้งหมดกลับ App
-
-      ขั้นต่อไปเราจะเชื่อม
-
-      onAdjustStock ใน App.jsx
-
-      ให้:
-
-      1. ตั้ง Stock เป็น actualStock
-
-      2. Sync Supabase
-
-      3. เก็บประวัติการปรับ
-
-    */
-
     onAdjustStock({
 
       productId:
@@ -401,6 +479,7 @@ selectedProduct.id,
 
   }
 
+
   function handleKeyDown(
 
     event
@@ -423,6 +502,7 @@ selectedProduct.id,
 
   }
 
+
   return (
 <div className="stock-page">
 <div className="stock-page-header">
@@ -440,6 +520,7 @@ selectedProduct.id,
             ตรงกับของจริง
 </p>
 </div>
+
 <button
 
           className="stock-close-button"
@@ -456,6 +537,7 @@ selectedProduct.id,
           กลับหน้าขาย
 </button>
 </div>
+
 <div
 
         style={{
@@ -493,6 +575,7 @@ selectedProduct.id,
 
         กรุณาตรวจนับสินค้าก่อนยืนยัน
 </div>
+
 <input
 
         className="search-input"
@@ -515,136 +598,236 @@ selectedProduct.id,
 
           setSearchText(
 
-            event.target
-
-              .value
+            event.target.value
 
           )
 
         }
 
       />
+
 <div className="stock-layout">
-<div className="stock-product-grid">
 
-          {filteredProducts.map(
+<div className="product-table-wrap">
+<table className="product-table">
+<thead>
+<tr>
+<th>
 
-            (product) => {
+                  รูป
+</th>
+<th>
 
-              const stock =
+                  ชื่อสินค้า
+</th>
+<th>
 
-                Number(
+                  คงเหลือ
+</th>
+<th>
 
-                  inventory[
+                  Min
+</th>
+<th>
+
+                  บรรจุ / แพ็ก
+</th>
+</tr>
+</thead>
+
+<tbody>
+
+              {filteredProducts.map(
+
+                (product) => {
+
+                  const stock =
+
+                    Number(
+
+                      inventory[
 product.id
 
-                  ] ?? 0
+                      ] ?? 0
 
-                );
+                    );
 
-              return (
-<button
+                  const minStock =
 
-                  type="button"
+                    Number(
 
-                  className={
+                      product.minStock ??
+
+                        5
+
+                    );
+
+                  const packQty =
+
+                    Math.max(
+
+                      1,
+
+                      Number(
+
+                        product.packQty ??
+
+                          1
+
+                      ) || 1
+
+                    );
+
+                  const imageSettings =
+
+                    parseProductImageSettings(
+
+                      product.image
+
+                    );
+
+                  const selected =
 
                     selectedProduct?.id ===
+product.id;
+
+                  const isLow =
+
+                    product.trackStock !==
+
+                      false &&
+
+                    stock <=
+
+                      minStock;
+
+                  return (
+<tr
+
+                      key={
 product.id
 
-                      ? "stock-product-card selected"
+                      }
 
-                      : "stock-product-card"
+                      onClick={() =>
 
-                  }
+                        selectProduct(
 
-                  key={
-product.id
+                          product
 
-                  }
+                        )
 
-                  onClick={() =>
+                      }
 
-                    selectProduct(
+                      style={{
 
-                      product
+                        cursor:
 
-                    )
+                          "pointer",
 
-                  }
+                        background:
+
+                          selected
+
+                            ? "#e3f2fd"
+
+                            : undefined,
+
+                      }}
 >
-<div className="stock-product-image">
+<td>
+<div className="manager-image-box">
 
-                    {product.image ? (
+                          {imageSettings.src ? (
 <img
 
-                        src={
+                              src={
 
-                          product.image
+                                imageSettings.src
 
-                        }
+                              }
 
-                        alt={
+                              alt={
 
-                          product.name
+                                product.name
 
-                        }
+                              }
 
-                        onError={(
+                            />
 
-                          event
-
-                        ) => {
-
-                          event.currentTarget.style.display =
-
-                            "none";
-
-                        }}
-
-                      />
-
-                    ) : (
+                          ) : (
 <span>
 
-                        ไม่มีรูป
+                              ไม่มีรูป
 </span>
 
-                    )}
+                          )}
 </div>
+</td>
+
+<td>
 <strong>
 
-                    {
+                          {
 
-                      product.name
+                            product.name
 
-                    }
+                          }
 </strong>
-<div
+</td>
 
-                    className={
+<td>
+<strong
 
-                      stock < 0
+                          className={
 
-                        ? "stock-current negative"
+                            isLow
 
-                        : "stock-current"
+                              ? "stock-negative"
 
-                    }
+                              : ""
+
+                          }
 >
 
-                    ในระบบ{" "}
+                          {
 
-                    {stock}
+                            stock
+
+                          }
+</strong>
+
+                        {" "}ชิ้น
+</td>
+
+<td>
+
+                        {
+
+                          minStock
+
+                        }
+</td>
+
+<td>
+
+                        {packQty >= 2
+
+                          ? `${packQty} ชิ้น`
+
+                          : "-"}
+</td>
+</tr>
+
+                  );
+
+                }
+
+              )}
+</tbody>
+</table>
 </div>
-</button>
 
-              );
-
-            }
-
-          )}
-</div>
 <aside className="stock-form-panel">
 
           {!selectedProduct ? (
@@ -655,6 +838,74 @@ product.id
 
           ) : (
 <>
+
+<div
+
+                className="manager-image-box"
+
+                style={{
+
+                  width:
+
+                    "110px",
+
+                  height:
+
+                    "110px",
+
+                  margin:
+
+                    "0 auto 14px",
+
+                }}
+>
+
+                {parseProductImageSettings(
+
+                  selectedProduct.image
+
+                ).src ? (
+<img
+
+                    src={
+
+                      parseProductImageSettings(
+
+                        selectedProduct.image
+
+                      ).src
+
+                    }
+
+                    alt={
+
+                      selectedProduct.name
+
+                    }
+
+                    style={{
+
+                      maxWidth:
+
+                        "95px",
+
+                      maxHeight:
+
+                        "95px",
+
+                    }}
+
+                  />
+
+                ) : (
+<span>
+
+                    ไม่มีรูป
+</span>
+
+                )}
+</div>
+
 <h2>
 
                 {
@@ -663,6 +914,7 @@ product.id
 
                 }
 </h2>
+
 <div className="stock-old-value">
 
                 ยอดในระบบ{" "}
@@ -675,10 +927,12 @@ product.id
                   }
 </strong>
 </div>
+
 <label className="stock-label">
 
                 ยอดที่นับได้จริง
 </label>
+
 <input
 
                 className="manager-input"
@@ -703,9 +957,7 @@ product.id
 
                   setActualStock(
 
-                    event.target
-
-                      .value
+                    event.target.value
 
                   )
 
@@ -720,6 +972,7 @@ product.id
                 autoFocus
 
               />
+
 <div
 
                 style={{
@@ -771,6 +1024,7 @@ product.id
 
                   ส่วนต่าง
 </div>
+
 <strong
 
                   style={{
@@ -796,6 +1050,7 @@ product.id
 
                   }
 </strong>
+
 
                 {validActualStock &&
 
@@ -832,10 +1087,12 @@ product.id
 
                   )}
 </div>
+
 <label className="stock-label">
 
                 เหตุผล
 </label>
+
 <select
 
                 className="manager-input"
@@ -854,9 +1111,7 @@ product.id
 
                   setReason(
 
-                    event.target
-
-                      .value
+                    event.target.value
 
                   )
 
@@ -887,10 +1142,12 @@ product.id
                   อื่นๆ
 </option>
 </select>
+
 <label className="stock-label">
 
                 หมายเหตุ
 </label>
+
 <textarea
 
                 className="manager-input"
@@ -913,15 +1170,14 @@ product.id
 
                   setNote(
 
-                    event.target
-
-                      .value
+                    event.target.value
 
                   )
 
                 }
 
               />
+
 <div className="stock-new-value">
 
                 หลังปรับ จะเหลือ{" "}
@@ -934,6 +1190,7 @@ product.id
                     : "-"}
 </strong>
 </div>
+
 <button
 
                 className="stock-confirm-button"
@@ -950,9 +1207,7 @@ product.id
 
                   !validActualStock ||
 
-                  difference ===
-
-                    0
+                  difference === 0
 
                 }
 >
@@ -969,5 +1224,6 @@ product.id
   );
 
 }
+
 
 export default StockAdjustment;
