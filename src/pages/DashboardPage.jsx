@@ -1307,6 +1307,7 @@ product.id
         ? "LOCAL"
 
         : "CLOUD"}
+  </div>
 </div>
 </div>
  
