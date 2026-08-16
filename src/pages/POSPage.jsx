@@ -24,8 +24,6 @@ import PackPopup from "../components/pos/PackPopup";
 
 import ProductOptionPopup from "../components/pos/ProductOptionPopup";
 
-import SyncStatus from "../components/pos/SyncStatus";
-
 import "../styles/POSModern.css";
 import "../styles/POSPolish.css";
 
@@ -1080,35 +1078,6 @@ option.id ===
 
               บาท
 </span>
-</div>
-<div className="pos-sync-corner">
-<SyncStatus
-
-              isOnline={
-
-                isOnline
-
-              }
-
-              cloudReady={
-
-                cloudReady
-
-              }
-
-              pendingSaleCount={
-
-                pendingSaleCount
-
-              }
-
-              pendingStockCount={
-
-                pendingStockCount
-
-              }
-
-            />
 </div>
 </header>
 
