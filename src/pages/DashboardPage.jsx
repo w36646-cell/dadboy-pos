@@ -2016,22 +2016,4 @@ product.id
 
   }
 
-  .db-date-picker {
-
-    max-width: 145px;
-
-    padding: 7px 8px;
-
-    font-size: 12px;
-
-  }
-
-  .db-low-stock-compact {
-
-    padding: 10px 11px;
-
-    font-size: 12px;
-
-  }
- 
-export default DashboardPage;
+  export default DashboardPage;
