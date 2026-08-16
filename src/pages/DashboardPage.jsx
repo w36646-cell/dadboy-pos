@@ -223,6 +223,22 @@ function DashboardPage({
 
   ] = useState(true);
 
+  const [
+
+  selectedDate,
+
+  setSelectedDate,
+
+] = useState(
+
+  formatDateKey(
+
+    new Date()
+
+  )
+
+);
+ 
  async function reloadStockData() {
 
   try {
@@ -504,65 +520,53 @@ product.id
 
 }, []);
  
-  const now =
+ const selectedSales =
 
-    new Date();
+  useMemo(() => {
 
-  const today =
+    return sales.filter(
 
-    formatDateKey(
+      (sale) =>
 
-      now
+        sale.soldDate ===
+
+        selectedDate
 
     );
 
-  const todaySales =
+  }, [
 
-    useMemo(() => {
+    sales,
 
-      return sales.filter(
+    selectedDate,
 
-        (sale) =>
-
-          sale.soldDate ===
-
-          today
-
-      );
-
-    }, [
-
-      sales,
-
-      today,
-
-    ]);
-
+  ]);
+ 
   const summary =
 
     useMemo(() => {
 
       return summarize(
 
-        todaySales
+        selectedSales
 
       );
 
     }, [
 
-      todaySales,
+      selectedSales,
 
     ]);
 
   const averageBill =
 
-    todaySales.length >
+    selectedSales.length >
 
     0
 
       ? summary.totalAmount /
 
-        todaySales.length
+        selectedSales.length
 
       : 0;
 
@@ -590,7 +594,7 @@ product.id
 
         {};
 
-      todaySales.forEach(
+      selectedSales.forEach(
 
         (sale) => {
 
@@ -700,7 +704,7 @@ product.id
 
     }, [
 
-      todaySales,
+      selectedSales,
 
     ]);
 
@@ -930,7 +934,7 @@ product.id
 
         );
 
-      todaySales.forEach(
+      selectedSales.forEach(
 
         (sale) => {
 
@@ -1074,7 +1078,7 @@ product.id
 
     }, [
 
-      todaySales,
+      selectedSales,
 
     ]);
 
@@ -1268,24 +1272,44 @@ product.id
 </h1>
 <p>
 
-            ภาพรวมร้านวันนี้
+            ภาพรวมร้านตามวันที่เลือก
 </p>
 </div>
+<div className="db-header-right">
+<input
+
+    className="db-date-picker"
+
+    type="date"
+
+    value={selectedDate}
+
+    onChange={(event) =>
+
+      setSelectedDate(
+
+        event.target.value
+
+      )
+
+    }
+
+  />
 <div className="db-live">
 <span />
 
-          {loading
+    {loading
 
-            ? "LOADING"
+      ? "LOADING"
 
-            : cloudError
+      : cloudError
 
-              ? "LOCAL"
+        ? "LOCAL"
 
-              : "CLOUD"}
+        : "CLOUD"}
 </div>
 </div>
-
+ 
       {cloudError && (
 <div
 
@@ -1413,7 +1437,7 @@ product.id
 <div className="db-card">
 <span>
 
-            ยอดขายวันนี้
+            ยอดขายวันที่เลือก
 </span>
 <strong>
 
@@ -1425,7 +1449,7 @@ product.id
 <div className="db-card">
 <span>
 
-            กำไรวันนี้
+            กำไรวันที่เลือก
 </span>
 <strong>
 
@@ -1443,7 +1467,7 @@ product.id
 
             {
 
-              todaySales.length
+              selectedSales.length
 
             }{" "}
 
@@ -1564,7 +1588,7 @@ product.id
 <div className="db-box-title">
 <h2>
 
-              สินค้าขายดีวันนี้
+              สินค้าขายดีวันที่เลือก
 </h2>
 </div>
 
@@ -1647,7 +1671,7 @@ product.id
 <div className="db-box-title">
 <h2>
 
-              สินค้าใกล้หมด
+              สินค้าใกล้หมดปัจจุบัน
 </h2>
 </div>
 
@@ -1661,65 +1685,28 @@ product.id
 
           ) : (
 
-            lowStockProducts.map(
+            <button
 
-              (
+  type="button"
 
-                product
+  className="db-low-stock-compact"
 
-              ) => (
-<button
-
-                  type="button"
-
-                  className="db-low-stock db-low-stock-button"
-
-                  key={
-product.id
-
-                  }
-
-                  onClick={
-
-                    goToStock
-
-                  }
->
-<strong>
-
-                    {
-
-                      product.name
-
-                    }
-</strong>
-<span
-
-                    className={
-
-                      product.stock <=
-
-                      0
-
-                        ? "negative"
-
-                        : ""
-
-                    }
+  onClick={goToStock}
 >
 
-                    {
+  {lowStockProducts
 
-                      product.stock
+    .map(
 
-                    }
-</span>
+      (product) =>
+
+        `${product.name} (${product.stock})`
+
+    )
+
+    .join(" • ")}
 </button>
-
-              )
-
-            )
-
+ 
           )}
 </section>
 </div>
@@ -1969,4 +1956,84 @@ product.id
 
 }
 
+.db-date-picker {
+
+  padding: 8px 10px;
+
+  border: 1px solid #d0d5dd;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  font-size: 13px;
+
+}
+
+.db-low-stock-compact {
+
+  width: 100%;
+
+  padding: 12px 14px;
+
+  border: 0;
+
+  border-radius: 10px;
+
+  background: #fff7df;
+
+  color: #7a5a14;
+
+  text-align: left;
+
+  line-height: 1.7;
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+}
+
+.db-low-stock-compact:hover {
+
+  background: #fff1c7;
+
+}
+
+@media (max-width: 520px) {
+
+  .db-header-right {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-end;
+
+    gap: 6px;
+
+  }
+
+  .db-date-picker {
+
+    max-width: 145px;
+
+    padding: 7px 8px;
+
+    font-size: 12px;
+
+  }
+
+  .db-low-stock-compact {
+
+    padding: 10px 11px;
+
+    font-size: 12px;
+
+  }
+
+}
+ 
 export default DashboardPage;
