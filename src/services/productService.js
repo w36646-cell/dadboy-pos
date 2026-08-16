@@ -68,7 +68,7 @@ function fromDatabase(row) {
 
     trackStock:
 
-      row.track_stock !== false,
+      row.track_stock === true,
 
     hasOption:
 
@@ -199,9 +199,9 @@ product.id
 
     track_stock:
 
-      product.trackStock !==
+      product.trackStock ===
 
-      false,
+      true,
 
     has_option:
 
