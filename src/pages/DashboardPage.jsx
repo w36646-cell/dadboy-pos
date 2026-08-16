@@ -1098,154 +1098,220 @@ product.id
 
     );
 
-  const last7Days =
+ const last14Days =
 
-    useMemo(() => {
+  useMemo(() => {
 
-      const result =
+    const today =
 
-        [];
+      new Date();
 
-      for (
+    today.setHours(
 
-        let index =
+      0,
 
-          6;
+      0,
 
-        index >= 0;
+      0,
 
-        index -= 1
+      0
+
+    );
+
+    const dayOfWeek =
+
+      today.getDay();
+
+    const daysFromMonday =
+
+      dayOfWeek === 0
+
+        ? 6
+
+        : dayOfWeek - 1;
+
+    const thisMonday =
+
+      new Date(
+
+        today
+
+      );
+
+    thisMonday.setDate(
+
+      today.getDate() -
+
+        daysFromMonday
+
+    );
+
+    const lastMonday =
+
+      new Date(
+
+        thisMonday
+
+      );
+
+    lastMonday.setDate(
+
+      thisMonday.getDate() -
+
+        7
+
+    );
+
+    const result = [];
+
+    for (
+
+      let index = 0;
+
+      index < 14;
+
+      index += 1
+
+    ) {
+
+      const date =
+
+        new Date(
+
+          lastMonday
+
+        );
+
+      date.setDate(
+
+        lastMonday.getDate() +
+
+          index
+
+      );
+
+      if (
+
+        date >
+
+        today
 
       ) {
 
-        const date =
-
-          new Date();
-
-        date.setHours(
-
-          0,
-
-          0,
-
-          0,
-
-          0
-
-        );
-
-        date.setDate(
-
-          date.getDate() -
-
-            index
-
-        );
-
-        const key =
-
-          formatDateKey(
-
-            date
-
-          );
-
-        const daySales =
-
-          sales.filter(
-
-            (
-
-              sale
-
-            ) =>
-
-              sale.soldDate ===
-
-              key
-
-          );
-
-        const daySummary =
-
-          summarize(
-
-            daySales
-
-          );
-
-        result.push({
-
-          key,
-
-          label:
-
-            date.toLocaleDateString(
-
-              "th-TH",
-
-              {
-
-                weekday:
-
-                  "short",
-
-              }
-
-            ),
-
-          amount:
-
-            daySummary.totalAmount,
-
-          profit:
-
-            daySummary.totalProfit,
-
-        });
+        break;
 
       }
 
-      return result;
+      const key =
 
-    }, [
+        formatDateKey(
 
-      sales,
+          date
 
-    ]);
+        );
 
-  const max7DayAmount =
+      const daySales =
 
-    Math.max(
+        sales.filter(
 
-      1,
+          (sale) =>
 
-      ...last7Days.map(
+            sale.soldDate ===
 
-        (day) =>
+            key
 
-          day.amount
+        );
 
-      )
+      const daySummary =
 
-    );
+        summarize(
 
-  const max7DayProfit =
+          daySales
 
-    Math.max(
+        );
 
-      1,
+      result.push({
 
-      ...last7Days.map(
+        key,
 
-        (day) =>
+        label:
 
-          day.profit
+          date.toLocaleDateString(
 
-      )
+            "th-TH",
 
-    );
+            {
 
+              weekday:
+
+                "short",
+
+            }
+
+          ),
+
+        week:
+
+          index < 7
+
+            ? "อาทิตย์ที่แล้ว"
+
+            : "อาทิตย์นี้",
+
+        amount:
+
+          daySummary.totalAmount,
+
+        profit:
+
+          daySummary.totalProfit,
+
+      });
+
+    }
+
+    return result;
+
+  }, [
+
+    sales,
+
+  ]);
+
+
+const max14DayAmount =
+
+  Math.max(
+
+    1,
+
+    ...last14Days.map(
+
+      (day) =>
+
+        day.amount
+
+    )
+
+  );
+
+
+const max14DayProfit =
+
+  Math.max(
+
+    1,
+
+    ...last14Days.map(
+
+      (day) =>
+
+        day.profit
+
+    )
+
+  );
+ 
   function goToStock() {
 
     if (
@@ -1798,12 +1864,12 @@ product.id
 <div className="db-box-title">
 <h2>
 
-              ยอดขาย 7 วัน
+              ยอดขาย 14 วัน
 </h2>
 </div>
 <div className="db-seven-chart">
 
-            {last7Days.map(
+            {last14Days.map(
 
               (
 
@@ -1839,7 +1905,7 @@ product.id
 
                                 (day.amount /
 
-                                  max7DayAmount) *
+                                  max14DayAmount) *
 
                                   100
 
@@ -1859,12 +1925,30 @@ product.id
 </strong>
 <span>
 
-                    {
+  {day.label}
+<small
 
-                      day.label
+    style={{
 
-                    }
+      display:
+
+        "block",
+
+      fontSize:
+
+        "8px",
+
+      color:
+
+        "#999",
+
+    }}
+>
+
+    {day.week}
+</small>
 </span>
+ 
 </div>
 
               )
@@ -1876,12 +1960,12 @@ product.id
 <div className="db-box-title">
 <h2>
 
-              กำไร 7 วัน
+              กำไร 14 วัน
 </h2>
 </div>
 <div className="db-seven-chart">
 
-            {last7Days.map(
+            {last14Days.map(
 
               (
 
@@ -1917,7 +2001,7 @@ product.id
 
                                 (day.profit /
 
-                                  max7DayProfit) *
+                                  max14DayProfit) *
 
                                   100
 
