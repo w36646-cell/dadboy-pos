@@ -42,11 +42,15 @@ function startOfThisWeek(date = new Date()) {
 
   const day = result.getDay();
 
-  const diff = day === 0 ? 6 : day - 1;
-
-  result.setDate(result.getDate() - diff);
+  result.setDate(result.getDate() - (day === 0 ? 6 : day - 1));
 
   return result;
+
+}
+
+function money(value) {
+
+  return Number(value || 0).toLocaleString("th-TH", { maximumFractionDigits: 0 });
 
 }
 
@@ -102,11 +106,7 @@ function ReportPage() {
 
     loadSales();
 
-    function handleFocus() {
-
-      loadSales();
-
-    }
+    function handleFocus() { loadSales(); }
 
     window.addEventListener("focus", handleFocus);
 
@@ -132,25 +132,19 @@ function ReportPage() {
 
   const summary = useMemo(() => {
 
-    return filteredSales.reduce(
+    return filteredSales.reduce((result, sale) => {
 
-      (result, sale) => {
+      result.amount += Number(sale.totalAmount || 0);
 
-        result.amount += Number(sale.totalAmount || 0);
+      result.cost += Number(sale.totalCost || 0);
 
-        result.cost += Number(sale.totalCost || 0);
+      result.profit += Number(sale.totalProfit || 0);
 
-        result.profit += Number(sale.totalProfit || 0);
+      result.qty += Number(sale.totalQty || 0);
 
-        result.qty += Number(sale.totalQty || 0);
+      return result;
 
-        return result;
-
-      },
-
-      { amount: 0, cost: 0, profit: 0, qty: 0 }
-
-    );
+    }, { amount: 0, cost: 0, profit: 0, qty: 0 });
 
   }, [filteredSales]);
 
@@ -196,7 +190,7 @@ function ReportPage() {
 
   }, [filteredSales]);
 
-  const averageBill = filteredSales.length > 0 ? summary.amount / filteredSales.length : 0;
+  const averageBill = filteredSales.length ? summary.amount / filteredSales.length : 0;
 
   const chartData = useMemo(() => {
 
@@ -214,11 +208,11 @@ function ReportPage() {
 
       const key = dateKey(cursor);
 
-      const daySales = sales.filter((sale) => String(sale.soldDate || "").slice(0, 10) === key);
+      const daySales = sales.filter(
 
-      const amount = daySales.reduce((sum, sale) => sum + Number(sale.totalAmount || 0), 0);
+        (sale) => String(sale.soldDate || "").slice(0, 10) === key
 
-      const profit = daySales.reduce((sum, sale) => sum + Number(sale.totalProfit || 0), 0);
+      );
 
       result.push({
 
@@ -228,9 +222,9 @@ function ReportPage() {
 
         dateLabel: cursor.toLocaleDateString("th-TH", { day: "numeric", month: "short" }),
 
-        amount,
+        amount: daySales.reduce((sum, sale) => sum + Number(sale.totalAmount || 0), 0),
 
-        profit,
+        profit: daySales.reduce((sum, sale) => sum + Number(sale.totalProfit || 0), 0),
 
       });
 
@@ -242,9 +236,55 @@ function ReportPage() {
 
   }, [sales, startDate, endDate]);
 
-  const maxChartAmount = Math.max(1, ...chartData.map((item) => item.amount));
+  const chartMax = Math.max(
 
-  const maxChartProfit = Math.max(1, ...chartData.map((item) => item.profit));
+    1,
+
+    ...chartData.map((item) => Math.max(item.amount, item.profit))
+
+  );
+
+  const chartTicks = useMemo(() => {
+
+    return [chartMax, chartMax * 0.75, chartMax * 0.5, chartMax * 0.25, 0];
+
+  }, [chartMax]);
+
+  const chartWidth = Math.max(440, chartData.length * 72);
+
+  const chartHeight = 280;
+
+  const topPad = 18;
+
+  const bottomPad = 24;
+
+  const usableHeight = chartHeight - topPad - bottomPad;
+
+  function xFor(index) {
+
+    if (chartData.length <= 1) return chartWidth / 2;
+
+    return 16 + (index / (chartData.length - 1)) * (chartWidth - 32);
+
+  }
+
+  function yFor(value) {
+
+    return topPad + usableHeight - (Number(value || 0) / chartMax) * usableHeight;
+
+  }
+
+  const salesPath = chartData
+
+    .map((item, index) => `${index === 0 ? "M" : "L"} ${xFor(index)} ${yFor(item.amount)}`)
+
+    .join(" ");
+
+  const profitPath = chartData
+
+    .map((item, index) => `${index === 0 ? "M" : "L"} ${xFor(index)} ${yFor(item.profit)}`)
+
+    .join(" ");
 
   function setToday() {
 
@@ -284,9 +324,7 @@ function ReportPage() {
 
     const now = new Date();
 
-    const start = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    setStartDate(dateKey(start));
+    setStartDate(dateKey(new Date(now.getFullYear(), now.getMonth(), 1)));
 
     setEndDate(dateKey(now));
 
@@ -295,10 +333,8 @@ function ReportPage() {
   return (
 <div className="report-page">
 <header className="report-header">
-<div>
 <h1>รายงานการขาย</h1>
 <p>เลือกช่วงวันที่ที่ต้องการดู</p>
-</div>
 </header>
 
       {cloudError && (
@@ -311,11 +347,11 @@ function ReportPage() {
 <section className="report-filter">
 <div className="report-date-box">
 <label>วันที่เริ่ม</label>
-<input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
+<input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
 </div>
 <div className="report-date-box">
 <label>วันที่สิ้นสุด</label>
-<input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
+<input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
 </div>
 <div className="report-quick-buttons">
 <button type="button" onClick={setToday}>วันนี้</button>
@@ -331,46 +367,22 @@ function ReportPage() {
       ) : (
 <>
 <section className="report-summary-grid">
-<article className="report-summary-card">
-<span>ยอดขาย</span>
-<strong>{summary.amount.toLocaleString()} บาท</strong>
-</article>
-<article className="report-summary-card">
-<span>ต้นทุน</span>
-<strong>{summary.cost.toLocaleString()} บาท</strong>
-</article>
-<article className="report-summary-card">
-<span>กำไร</span>
-<strong>{summary.profit.toLocaleString()} บาท</strong>
-</article>
-<article className="report-summary-card">
-<span>จำนวนบิล</span>
-<strong>{filteredSales.length} บิล</strong>
-</article>
-<article className="report-summary-card">
-<span>จำนวนสินค้า</span>
-<strong>{summary.qty} ชิ้น</strong>
-</article>
-<article className="report-summary-card">
-<span>เฉลี่ยต่อบิล</span>
-<strong>
-
-                {averageBill.toLocaleString(undefined, { maximumFractionDigits: 0 })} บาท
-</strong>
-</article>
+<article className="report-summary-card"><span>ยอดขาย</span><strong>{summary.amount.toLocaleString()} บาท</strong></article>
+<article className="report-summary-card"><span>ต้นทุน</span><strong>{summary.cost.toLocaleString()} บาท</strong></article>
+<article className="report-summary-card"><span>กำไร</span><strong>{summary.profit.toLocaleString()} บาท</strong></article>
+<article className="report-summary-card"><span>จำนวนบิล</span><strong>{filteredSales.length} บิล</strong></article>
+<article className="report-summary-card"><span>จำนวนสินค้า</span><strong>{summary.qty} ชิ้น</strong></article>
+<article className="report-summary-card"><span>เฉลี่ยต่อบิล</span><strong>{money(averageBill)} บาท</strong></article>
 </section>
 <section className="report-box report-chart-box">
 <div className="report-chart-title">
 <div>
-<h2>กราฟยอดขาย</h2>
-<p>
-
-                  {startDate} ถึง {endDate}
-</p>
+<h2>ยอดขายและกำไรรายวัน</h2>
+<p>{startDate} ถึง {endDate}</p>
 </div>
 <div className="report-chart-legend">
-<span className="sales-dot" /> ยอดขาย
-<span className="profit-dot" /> กำไร
+<span><i className="sales-dot" />ยอดขาย</span>
+<span><i className="profit-dot" />กำไร</span>
 </div>
 </div>
 
@@ -378,121 +390,133 @@ function ReportPage() {
 <div className="report-empty">ไม่มีข้อมูลกราฟ</div>
 
             ) : (
-<div className="report-line-chart">
-<div className="report-chart-y-lines">
-<span>100%</span>
-<span>75%</span>
-<span>50%</span>
-<span>25%</span>
-<span>0%</span>
+<div className="report-chart-shell">
+<div className="report-chart-y">
+
+                  {chartTicks.map((value, index) => (
+<span key={index}>{money(value)} บ.</span>
+
+                  ))}
 </div>
-<div className="report-chart-area">
-<svg
-
-                    className="report-chart-svg"
-
-                    viewBox={`0 0 ${Math.max(700, chartData.length * 90)} 300`}
-
-                    preserveAspectRatio="none"
->
-<polyline
-
-                      className="report-sales-line"
-
-                      fill="none"
-
-                      points={chartData
-
-                        .map((item, index) => {
-
-                          const x =
-
-                            chartData.length === 1
-
-                              ? 350
-
-                              : (index / (chartData.length - 1)) * Math.max(700, chartData.length * 90);
-
-                          const y = 270 - (item.amount / maxChartAmount) * 240;
-
-                          return `${x},${y}`;
-
-                        })
-
-                        .join(" ")}
-
-                    />
-<polyline
-
-                      className="report-profit-line"
-
-                      fill="none"
-
-                      points={chartData
-
-                        .map((item, index) => {
-
-                          const x =
-
-                            chartData.length === 1
-
-                              ? 350
-
-                              : (index / (chartData.length - 1)) * Math.max(700, chartData.length * 90);
-
-                          const y = 270 - (item.profit / maxChartProfit) * 240;
-
-                          return `${x},${y}`;
-
-                        })
-
-                        .join(" ")}
-
-                    />
-
-                    {chartData.map((item, index) => {
-
-                      const width = Math.max(700, chartData.length * 90);
-
-                      const x =
-
-                        chartData.length === 1 ? width / 2 : (index / (chartData.length - 1)) * width;
-
-                      const salesY = 270 - (item.amount / maxChartAmount) * 240;
-
-                      const profitY = 270 - (item.profit / maxChartProfit) * 240;
-
-                      return (
-<g key={item.key}>
-<circle className="report-sales-point" cx={x} cy={salesY} r="5" />
-<circle className="report-profit-point" cx={x} cy={profitY} r="5" />
-</g>
-
-                      );
-
-                    })}
-</svg>
+<div className="report-chart-scroll">
 <div
 
-                    className="report-chart-labels"
+                    className="report-chart-canvas"
 
                     style={{
 
-                      gridTemplateColumns: `repeat(${chartData.length}, minmax(70px, 1fr))`,
-
-                      minWidth: `${Math.max(700, chartData.length * 90)}px`,
+                      minWidth: chartData.length <= 7 ? "100%" : `${chartWidth}px`,
 
                     }}
 >
+<svg
 
-                    {chartData.map((item) => (
+                      className="report-chart-svg"
+
+                      viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+
+                      preserveAspectRatio="none"
+>
+
+                      {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+
+                        const y = topPad + usableHeight * ratio;
+
+                        return (
+<line
+
+                            key={ratio}
+
+                            className="report-grid-line"
+
+                            x1="0"
+
+                            x2={chartWidth}
+
+                            y1={y}
+
+                            y2={y}
+
+                          />
+
+                        );
+
+                      })}
+<path
+
+                        className="report-sales-line"
+
+                        d={salesPath}
+
+                        fill="none"
+
+                        vectorEffect="non-scaling-stroke"
+
+                      />
+<path
+
+                        className="report-profit-line"
+
+                        d={profitPath}
+
+                        fill="none"
+
+                        vectorEffect="non-scaling-stroke"
+
+                      />
+
+                      {chartData.map((item, index) => (
+<g key={item.key}>
+<circle
+
+                            className="report-sales-point"
+
+                            cx={xFor(index)}
+
+                            cy={yFor(item.amount)}
+
+                            r="5"
+
+                            vectorEffect="non-scaling-stroke"
+
+                          />
+<circle
+
+                            className="report-profit-point"
+
+                            cx={xFor(index)}
+
+                            cy={yFor(item.profit)}
+
+                            r="5"
+
+                            vectorEffect="non-scaling-stroke"
+
+                          />
+</g>
+
+                      ))}
+</svg>
+<div
+
+                      className="report-chart-labels"
+
+                      style={{
+
+                        gridTemplateColumns: `repeat(${chartData.length}, minmax(0, 1fr))`,
+
+                      }}
+>
+
+                      {chartData.map((item) => (
 <div className="report-chart-label" key={item.key}>
 <strong>{item.label}</strong>
 <span>{item.dateLabel}</span>
-<small>{item.amount.toLocaleString()} บ.</small>
+<small>{money(item.amount)} บ.</small>
 </div>
 
-                    ))}
+                      ))}
+</div>
 </div>
 </div>
 </div>
@@ -523,10 +547,7 @@ function ReportPage() {
                       {topProducts.map((item, index) => (
 <tr key={`${item.name}-${item.option}`}>
 <td>{index + 1}</td>
-<td>
-<strong>{item.name}</strong>
-<small>{item.option}</small>
-</td>
+<td><strong>{item.name}</strong><small>{item.option}</small></td>
 <td>{item.quantity}</td>
 <td>{item.amount.toLocaleString()}</td>
 <td>{item.profit.toLocaleString()}</td>
