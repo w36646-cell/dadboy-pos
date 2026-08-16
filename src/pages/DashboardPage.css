@@ -870,3 +870,55 @@
 
 }
  
+.db-low-stock-list {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+}
+
+.db-low-stock-row {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding: 9px 0;
+
+  border-bottom: 1px solid #eee;
+
+}
+
+.db-low-stock-row:last-child {
+
+  border-bottom: 0;
+
+}
+
+.db-low-stock-name {
+
+  min-width: 0;
+
+}
+
+.db-low-stock-danger {
+
+  color: #c62828;
+
+  white-space: nowrap;
+
+}
+
+.db-low-stock-warning {
+
+  color: #a66a00;
+
+  white-space: nowrap;
+
+}
+ 
