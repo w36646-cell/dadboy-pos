@@ -6,6 +6,44 @@ import {
 
 } from "react";
 
+function getProductImage(value) {
+
+  if (!value) {
+
+    return "";
+
+  }
+
+  if (
+
+    typeof value !== "string" ||
+
+    !value.trim().startsWith("{")
+
+  ) {
+
+    return String(value || "");
+
+  }
+
+  try {
+
+    const parsed = JSON.parse(value);
+
+    return String(
+
+      parsed.src || ""
+
+    );
+
+  } catch {
+
+    return String(value || "");
+
+  }
+
+}
+ 
 function StockManager({
 
   products,
@@ -496,168 +534,118 @@ selectedProduct.id
         }
 
       />
-<div className="stock-layout">
-<div className="stock-product-grid">
 
-          {filteredProducts.map(
+<div className="stock-product-list">
 
-            (product) => {
+  {filteredProducts.map(
 
-              const stock =
+    (product) => {
 
-                Number(
+      const stock =
 
-                  inventory[
+        Number(
+
+          inventory[
 product.id
 
-                  ] ?? 0
+          ] ?? 0
 
-                );
+        );
 
-              const packQty =
+      const packQty =
 
-                getPackQty(
+        getPackQty(
 
-                  product
+          product
 
-                );
+        );
 
-              return (
+      const imageSrc =
+
+        getProductImage(
+
+          product.image
+
+        );
+
+      return (
 <button
 
-                  type="button"
+          type="button"
 
-                  className={
+          className={
 
-                    selectedProduct?.id ===
+            selectedProduct?.id ===
 product.id
 
-                      ? "stock-product-card selected"
+              ? "stock-list-item selected"
 
-                      : "stock-product-card"
+              : "stock-list-item"
 
-                  }
+          }
 
-                  key={
-product.id
+          key={product.id}
 
-                  }
+          onClick={() =>
 
-                  onClick={() =>
+            selectProduct(
 
-                    selectProduct(
+              product
 
-                      product
+            )
 
-                    )
-
-                  }
+          }
 >
-<div className="stock-product-image">
+<div className="stock-list-image">
 
-                    {product.image ? (
+            {imageSrc ? (
 <img
 
-                        src={
+                src={imageSrc}
 
-                          product.image
+                alt={product.name}
 
-                        }
+              />
 
-                        alt={
-
-                          product.name
-
-                        }
-
-                        onError={(
-
-                          event
-
-                        ) => {
-
-                          event.currentTarget.style.display =
-
-                            "none";
-
-                        }}
-
-                      />
-
-                    ) : (
+            ) : (
 <span>
 
-                        ไม่มีรูป
+                ไม่มีรูป
 </span>
 
-                    )}
+            )}
 </div>
+<div className="stock-list-info">
 <strong>
 
-                    {
-
-                      product.name
-
-                    }
+              {product.name}
 </strong>
-<div
+<span>
 
-                    className={
+              คงเหลือ {stock} ชิ้น
+</span>
 
-                      stock < 0
+            {hasPack(product) && (
+<small>
 
-                        ? "stock-current negative"
+                1 แพ็ก = {packQty} ชิ้น
+</small>
 
-                        : "stock-current"
-
-                    }
->
-
-                    คงเหลือ{" "}
-
-                    {stock}
+            )}
 </div>
+<div className="stock-list-arrow">
 
-                  {hasPack(
-
-                    product
-
-                  ) && (
-<div
-
-                      style={{
-
-                        marginTop:
-
-                          "6px",
-
-                        fontSize:
-
-                          "12px",
-
-                        color:
-
-                          "#667085",
-
-                      }}
->
-
-                      1 แพ็ก ={" "}
-
-                      {packQty}{" "}
-
-                      ชิ้น
+            ›
 </div>
-
-                  )}
 </button>
 
-              );
+      );
 
-            }
+    }
 
-          )}
+  )}
 </div>
+  
 <aside className="stock-form-panel">
 
           {!selectedProduct ? (
