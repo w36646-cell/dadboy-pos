@@ -1,42 +1,18 @@
-import {
+import { useEffect, useMemo, useState } from "react";
 
-  useEffect,
-
-  useMemo,
-
-  useState,
-
-} from "react";
-
-import {
-
-  getCloudSales,
-
-} from "../services/salesService";
+import { getCloudSales } from "../services/salesService";
 
 import "./ReportPage.css";
 
-const SALES_KEY =
-
-  "dadboy_sales_v1";
+const SALES_KEY = "dadboy_sales_v1";
 
 function readSales() {
 
   try {
 
-    const saved =
+    const saved = localStorage.getItem(SALES_KEY);
 
-      localStorage.getItem(
-
-        SALES_KEY
-
-      );
-
-    return saved
-
-      ? JSON.parse(saved)
-
-      : [];
+    return saved ? JSON.parse(saved) : [];
 
   } catch {
 
@@ -46,191 +22,77 @@ function readSales() {
 
 }
 
-function dateKey(
+function dateKey(date) {
 
-  date
+  const y = date.getFullYear();
 
-) {
+  const m = String(date.getMonth() + 1).padStart(2, "0");
 
-  return date.toLocaleDateString(
+  const d = String(date.getDate()).padStart(2, "0");
 
-    "en-CA"
+  return `${y}-${m}-${d}`;
 
-  );
+}
+
+function startOfThisWeek(date = new Date()) {
+
+  const result = new Date(date);
+
+  result.setHours(0, 0, 0, 0);
+
+  const day = result.getDay();
+
+  const diff = day === 0 ? 6 : day - 1;
+
+  result.setDate(result.getDate() - diff);
+
+  return result;
 
 }
 
 function ReportPage() {
 
-  const [
+  const [sales, setSales] = useState([]);
 
-    sales,
+  const [loading, setLoading] = useState(true);
 
-    setSales,
+  const [cloudError, setCloudError] = useState(false);
 
-  ] = useState([]);
+  const today = new Date();
 
-  const [
+  const firstDay = new Date();
 
-    loading,
+  firstDay.setDate(firstDay.getDate() - 6);
 
-    setLoading,
+  const [startDate, setStartDate] = useState(dateKey(firstDay));
 
-  ] = useState(true);
-
-  const [
-
-    cloudError,
-
-    setCloudError,
-
-  ] = useState(false);
-
-  const today =
-
-    new Date();
-
-  const firstDay =
-
-    new Date();
-
-  firstDay.setDate(
-
-    firstDay.getDate() -
-
-      6
-
-  );
-
-  const [
-
-    startDate,
-
-    setStartDate,
-
-  ] = useState(
-
-    dateKey(
-
-      firstDay
-
-    )
-
-  );
-
-  const [
-
-    endDate,
-
-    setEndDate,
-
-  ] = useState(
-
-    dateKey(
-
-      today
-
-    )
-
-  );
+  const [endDate, setEndDate] = useState(dateKey(today));
 
   async function loadSales() {
 
-    setLoading(
-
-      true
-
-    );
+    setLoading(true);
 
     try {
 
-      const cloudSales =
+      const cloudSales = await getCloudSales();
 
-        await getCloudSales();
+      setSales(Array.isArray(cloudSales) ? cloudSales : []);
 
-      /*
-
-        ใช้ Cloud อย่างเดียว
-
-        เมื่อโหลดสำเร็จ
-
-      */
-
-      setSales(
-
-        Array.isArray(
-
-          cloudSales
-
-        )
-
-          ? cloudSales
-
-          : []
-
-      );
-
-      setCloudError(
-
-        false
-
-      );
-
-      console.log(
-
-        "Report: ใช้ยอดขายจาก Supabase",
-
-        cloudSales.length
-
-      );
+      setCloudError(false);
 
     } catch (error) {
 
-      console.error(
+      console.error("Report Cloud error:", error);
 
-        "Report Cloud error:",
+      const localSales = readSales();
 
-        error
+      setSales(Array.isArray(localSales) ? localSales : []);
 
-      );
-
-      /*
-
-        fallback เฉพาะตอน Cloud ใช้ไม่ได้
-
-      */
-
-      const localSales =
-
-        readSales();
-
-      setSales(
-
-        Array.isArray(
-
-          localSales
-
-        )
-
-          ? localSales
-
-          : []
-
-      );
-
-      setCloudError(
-
-        true
-
-      );
+      setCloudError(true);
 
     } finally {
 
-      setLoading(
-
-        false
-
-      );
+      setLoading(false);
 
     }
 
@@ -246,449 +108,187 @@ function ReportPage() {
 
     }
 
-    window.addEventListener(
+    window.addEventListener("focus", handleFocus);
 
-      "focus",
-
-      handleFocus
-
-    );
-
-    return () => {
-
-      window.removeEventListener(
-
-        "focus",
-
-        handleFocus
-
-      );
-
-    };
+    return () => window.removeEventListener("focus", handleFocus);
 
   }, []);
 
-  const filteredSales =
+  const filteredSales = useMemo(() => {
 
-    useMemo(() => {
+    return sales
 
-      return sales
+      .filter((sale) => {
 
-        .filter(
+        const soldDate = String(sale.soldDate || "").slice(0, 10);
 
-          (sale) => {
+        return soldDate && soldDate >= startDate && soldDate <= endDate;
 
-            if (
+      })
 
-              !sale.soldDate
+      .sort((a, b) => String(b.soldAt || "").localeCompare(String(a.soldAt || "")));
 
-            ) {
+  }, [sales, startDate, endDate]);
 
-              return false;
+  const summary = useMemo(() => {
 
-            }
+    return filteredSales.reduce(
 
-            return (
+      (result, sale) => {
 
-              sale.soldDate >=
+        result.amount += Number(sale.totalAmount || 0);
 
-                startDate &&
+        result.cost += Number(sale.totalCost || 0);
 
-              sale.soldDate <=
+        result.profit += Number(sale.totalProfit || 0);
 
-                endDate
+        result.qty += Number(sale.totalQty || 0);
 
-            );
+        return result;
 
-          }
+      },
 
-        )
+      { amount: 0, cost: 0, profit: 0, qty: 0 }
 
-        .sort(
+    );
 
-          (
+  }, [filteredSales]);
 
-            a,
+  const topProducts = useMemo(() => {
 
-            b
+    const result = {};
 
-          ) =>
+    filteredSales.forEach((sale) => {
 
-            String(
+      sale.items?.forEach((item) => {
 
-              b.soldAt ||
+        const key = `${item.productId}-${item.option || ""}`;
 
-                ""
+        if (!result[key]) {
 
-            ).localeCompare(
+          result[key] = {
 
-              String(
+            name: item.productName || "-",
 
-                a.soldAt ||
+            option: item.option || "",
 
-                  ""
+            quantity: 0,
 
-              )
+            amount: 0,
 
-            )
+            profit: 0,
 
-        );
-
-    }, [
-
-      sales,
-
-      startDate,
-
-      endDate,
-
-    ]);
-
-  const summary =
-
-    useMemo(() => {
-
-      return filteredSales.reduce(
-
-        (
-
-          result,
-
-          sale
-
-        ) => {
-
-          result.amount +=
-
-            Number(
-
-              sale.totalAmount ||
-
-                0
-
-            );
-
-          result.cost +=
-
-            Number(
-
-              sale.totalCost ||
-
-                0
-
-            );
-
-          result.profit +=
-
-            Number(
-
-              sale.totalProfit ||
-
-                0
-
-            );
-
-          result.qty +=
-
-            Number(
-
-              sale.totalQty ||
-
-                0
-
-            );
-
-          return result;
-
-        },
-
-        {
-
-          amount:
-
-            0,
-
-          cost:
-
-            0,
-
-          profit:
-
-            0,
-
-          qty:
-
-            0,
+          };
 
         }
 
-      );
+        result[key].quantity += Number(item.quantity || 0);
 
-    }, [
+        result[key].amount += Number(item.lineTotal || 0);
 
-      filteredSales,
+        result[key].profit += Number(item.lineProfit || 0);
 
-    ]);
+      });
 
-  const topProducts =
+    });
 
-    useMemo(() => {
+    return Object.values(result).sort((a, b) => b.quantity - a.quantity).slice(0, 10);
 
-      const result =
+  }, [filteredSales]);
 
-        {};
+  const averageBill = filteredSales.length > 0 ? summary.amount / filteredSales.length : 0;
 
-      filteredSales.forEach(
+  const chartData = useMemo(() => {
 
-        (sale) => {
+    const start = new Date(`${startDate}T00:00:00`);
 
-          sale.items?.forEach(
+    const end = new Date(`${endDate}T00:00:00`);
 
-            (item) => {
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return [];
 
-              const key =
+    const result = [];
 
-                `${item.productId}-${item.option}`;
+    const cursor = new Date(start);
 
-              if (
+    while (cursor <= end) {
 
-                !result[
+      const key = dateKey(cursor);
 
-                  key
+      const daySales = sales.filter((sale) => String(sale.soldDate || "").slice(0, 10) === key);
 
-                ]
+      const amount = daySales.reduce((sum, sale) => sum + Number(sale.totalAmount || 0), 0);
 
-              ) {
+      const profit = daySales.reduce((sum, sale) => sum + Number(sale.totalProfit || 0), 0);
 
-                result[
+      result.push({
 
-                  key
+        key,
 
-                ] = {
+        label: cursor.toLocaleDateString("th-TH", { weekday: "short" }),
 
-                  name:
+        dateLabel: cursor.toLocaleDateString("th-TH", { day: "numeric", month: "short" }),
 
-                    item.productName,
+        amount,
 
-                  option:
+        profit,
 
-                    item.option,
+      });
 
-                  quantity:
+      cursor.setDate(cursor.getDate() + 1);
 
-                    0,
+    }
 
-                  amount:
+    return result;
 
-                    0,
+  }, [sales, startDate, endDate]);
 
-                  profit:
+  const maxChartAmount = Math.max(1, ...chartData.map((item) => item.amount));
 
-                    0,
-
-                };
-
-              }
-
-              result[
-
-                key
-
-              ].quantity +=
-
-                Number(
-
-                  item.quantity ||
-
-                    0
-
-                );
-
-              result[
-
-                key
-
-              ].amount +=
-
-                Number(
-
-                  item.lineTotal ||
-
-                    0
-
-                );
-
-              result[
-
-                key
-
-              ].profit +=
-
-                Number(
-
-                  item.lineProfit ||
-
-                    0
-
-                );
-
-            }
-
-          );
-
-        }
-
-      );
-
-      return Object.values(
-
-        result
-
-      )
-
-        .sort(
-
-          (
-
-            a,
-
-            b
-
-          ) =>
-
-            b.quantity -
-
-            a.quantity
-
-        )
-
-        .slice(
-
-          0,
-
-          10
-
-        );
-
-    }, [
-
-      filteredSales,
-
-    ]);
-
-  const averageBill =
-
-    filteredSales.length >
-
-    0
-
-      ? summary.amount /
-
-        filteredSales.length
-
-      : 0;
+  const maxChartProfit = Math.max(1, ...chartData.map((item) => item.profit));
 
   function setToday() {
 
-    const value =
+    const value = dateKey(new Date());
 
-      dateKey(
+    setStartDate(value);
 
-        new Date()
+    setEndDate(value);
 
-      );
+  }
 
-    setStartDate(
+  function setThisWeek() {
 
-      value
+    const now = new Date();
 
-    );
+    setStartDate(dateKey(startOfThisWeek(now)));
 
-    setEndDate(
-
-      value
-
-    );
+    setEndDate(dateKey(now));
 
   }
 
   function setLast7Days() {
 
-    const end =
+    const end = new Date();
 
-      new Date();
+    const start = new Date();
 
-    const start =
+    start.setDate(start.getDate() - 6);
 
-      new Date();
+    setStartDate(dateKey(start));
 
-    start.setDate(
-
-      start.getDate() -
-
-        6
-
-    );
-
-    setStartDate(
-
-      dateKey(
-
-        start
-
-      )
-
-    );
-
-    setEndDate(
-
-      dateKey(
-
-        end
-
-      )
-
-    );
+    setEndDate(dateKey(end));
 
   }
 
   function setThisMonth() {
 
-    const now =
+    const now = new Date();
 
-      new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const start =
+    setStartDate(dateKey(start));
 
-      new Date(
-
-        now.getFullYear(),
-
-        now.getMonth(),
-
-        1
-
-      );
-
-    setStartDate(
-
-      dateKey(
-
-        start
-
-      )
-
-    );
-
-    setEndDate(
-
-      dateKey(
-
-        now
-
-      )
-
-    );
+    setEndDate(dateKey(now));
 
   }
 
@@ -696,369 +296,243 @@ function ReportPage() {
 <div className="report-page">
 <header className="report-header">
 <div>
-<h1>
-
-            รายงานการขาย
-</h1>
-<p>
-
-            เลือกช่วงวันที่ที่ต้องการดู
-</p>
+<h1>รายงานการขาย</h1>
+<p>เลือกช่วงวันที่ที่ต้องการดู</p>
 </div>
 </header>
 
       {cloudError && (
-<div
+<div className="report-cloud-warning">
 
-          style={{
-
-            marginBottom:
-
-              "12px",
-
-            padding:
-
-              "10px 14px",
-
-            borderRadius:
-
-              "10px",
-
-            background:
-
-              "#fff3cd",
-
-            color:
-
-              "#664d03",
-
-            fontSize:
-
-              "13px",
-
-          }}
->
-
-          Cloud เชื่อมต่อไม่สำเร็จ
-
-          รายงานกำลังใช้ข้อมูลสำรองจากเครื่อง
+          Cloud เชื่อมต่อไม่สำเร็จ รายงานกำลังใช้ข้อมูลสำรองจากเครื่อง
 </div>
 
       )}
 <section className="report-filter">
 <div className="report-date-box">
-<label>
-
-            วันที่เริ่ม
-</label>
-<input
-
-            type="date"
-
-            value={
-
-              startDate
-
-            }
-
-            onChange={(
-
-              event
-
-            ) =>
-
-              setStartDate(
-
-                event.target
-
-                  .value
-
-              )
-
-            }
-
-          />
+<label>วันที่เริ่ม</label>
+<input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
 </div>
 <div className="report-date-box">
-<label>
-
-            วันที่สิ้นสุด
-</label>
-<input
-
-            type="date"
-
-            value={
-
-              endDate
-
-            }
-
-            onChange={(
-
-              event
-
-            ) =>
-
-              setEndDate(
-
-                event.target
-
-                  .value
-
-              )
-
-            }
-
-          />
+<label>วันที่สิ้นสุด</label>
+<input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
 </div>
 <div className="report-quick-buttons">
-<button
-
-            type="button"
-
-            onClick={
-
-              setToday
-
-            }
->
-
-            วันนี้
-</button>
-<button
-
-            type="button"
-
-            onClick={
-
-              setLast7Days
-
-            }
->
-
-            7 วัน
-</button>
-<button
-
-            type="button"
-
-            onClick={
-
-              setThisMonth
-
-            }
->
-
-            เดือนนี้
-</button>
+<button type="button" onClick={setToday}>วันนี้</button>
+<button type="button" onClick={setThisWeek}>อาทิตย์นี้</button>
+<button type="button" onClick={setLast7Days}>7 วัน</button>
+<button type="button" onClick={setThisMonth}>เดือนนี้</button>
 </div>
 </section>
 
       {loading ? (
-<div className="report-empty">
-
-          กำลังโหลดข้อมูลจาก Cloud...
-</div>
+<div className="report-empty">กำลังโหลดข้อมูลจาก Cloud...</div>
 
       ) : (
 <>
 <section className="report-summary-grid">
 <article className="report-summary-card">
-<span>
-
-                ยอดขาย
-</span>
-<strong>
-
-                {summary.amount.toLocaleString()}{" "}
-
-                บาท
-</strong>
+<span>ยอดขาย</span>
+<strong>{summary.amount.toLocaleString()} บาท</strong>
 </article>
 <article className="report-summary-card">
-<span>
-
-                ต้นทุน
-</span>
-<strong>
-
-                {summary.cost.toLocaleString()}{" "}
-
-                บาท
-</strong>
+<span>ต้นทุน</span>
+<strong>{summary.cost.toLocaleString()} บาท</strong>
 </article>
 <article className="report-summary-card">
-<span>
-
-                กำไร
-</span>
-<strong>
-
-                {summary.profit.toLocaleString()}{" "}
-
-                บาท
-</strong>
+<span>กำไร</span>
+<strong>{summary.profit.toLocaleString()} บาท</strong>
 </article>
 <article className="report-summary-card">
-<span>
-
-                จำนวนบิล
-</span>
-<strong>
-
-                {
-
-                  filteredSales.length
-
-                }{" "}
-
-                บิล
-</strong>
+<span>จำนวนบิล</span>
+<strong>{filteredSales.length} บิล</strong>
 </article>
 <article className="report-summary-card">
-<span>
-
-                จำนวนสินค้า
-</span>
-<strong>
-
-                {
-
-                  summary.qty
-
-                }{" "}
-
-                ชิ้น
-</strong>
+<span>จำนวนสินค้า</span>
+<strong>{summary.qty} ชิ้น</strong>
 </article>
 <article className="report-summary-card">
-<span>
-
-                เฉลี่ยต่อบิล
-</span>
+<span>เฉลี่ยต่อบิล</span>
 <strong>
 
-                {averageBill.toLocaleString(
-
-                  undefined,
-
-                  {
-
-                    maximumFractionDigits:
-
-                      0,
-
-                  }
-
-                )}{" "}
-
-                บาท
+                {averageBill.toLocaleString(undefined, { maximumFractionDigits: 0 })} บาท
 </strong>
 </article>
 </section>
+<section className="report-box report-chart-box">
+<div className="report-chart-title">
+<div>
+<h2>กราฟยอดขาย</h2>
+<p>
+
+                  {startDate} ถึง {endDate}
+</p>
+</div>
+<div className="report-chart-legend">
+<span className="sales-dot" /> ยอดขาย
+<span className="profit-dot" /> กำไร
+</div>
+</div>
+
+            {chartData.length === 0 ? (
+<div className="report-empty">ไม่มีข้อมูลกราฟ</div>
+
+            ) : (
+<div className="report-line-chart">
+<div className="report-chart-y-lines">
+<span>100%</span>
+<span>75%</span>
+<span>50%</span>
+<span>25%</span>
+<span>0%</span>
+</div>
+<div className="report-chart-area">
+<svg
+
+                    className="report-chart-svg"
+
+                    viewBox={`0 0 ${Math.max(700, chartData.length * 90)} 300`}
+
+                    preserveAspectRatio="none"
+>
+<polyline
+
+                      className="report-sales-line"
+
+                      fill="none"
+
+                      points={chartData
+
+                        .map((item, index) => {
+
+                          const x =
+
+                            chartData.length === 1
+
+                              ? 350
+
+                              : (index / (chartData.length - 1)) * Math.max(700, chartData.length * 90);
+
+                          const y = 270 - (item.amount / maxChartAmount) * 240;
+
+                          return `${x},${y}`;
+
+                        })
+
+                        .join(" ")}
+
+                    />
+<polyline
+
+                      className="report-profit-line"
+
+                      fill="none"
+
+                      points={chartData
+
+                        .map((item, index) => {
+
+                          const x =
+
+                            chartData.length === 1
+
+                              ? 350
+
+                              : (index / (chartData.length - 1)) * Math.max(700, chartData.length * 90);
+
+                          const y = 270 - (item.profit / maxChartProfit) * 240;
+
+                          return `${x},${y}`;
+
+                        })
+
+                        .join(" ")}
+
+                    />
+
+                    {chartData.map((item, index) => {
+
+                      const width = Math.max(700, chartData.length * 90);
+
+                      const x =
+
+                        chartData.length === 1 ? width / 2 : (index / (chartData.length - 1)) * width;
+
+                      const salesY = 270 - (item.amount / maxChartAmount) * 240;
+
+                      const profitY = 270 - (item.profit / maxChartProfit) * 240;
+
+                      return (
+<g key={item.key}>
+<circle className="report-sales-point" cx={x} cy={salesY} r="5" />
+<circle className="report-profit-point" cx={x} cy={profitY} r="5" />
+</g>
+
+                      );
+
+                    })}
+</svg>
+<div
+
+                    className="report-chart-labels"
+
+                    style={{
+
+                      gridTemplateColumns: `repeat(${chartData.length}, minmax(70px, 1fr))`,
+
+                      minWidth: `${Math.max(700, chartData.length * 90)}px`,
+
+                    }}
+>
+
+                    {chartData.map((item) => (
+<div className="report-chart-label" key={item.key}>
+<strong>{item.label}</strong>
+<span>{item.dateLabel}</span>
+<small>{item.amount.toLocaleString()} บ.</small>
+</div>
+
+                    ))}
+</div>
+</div>
+</div>
+
+            )}
+</section>
 <div className="report-layout">
 <section className="report-box">
-<h2>
+<h2>สินค้าขายดี</h2>
 
-                สินค้าขายดี
-</h2>
-
-              {topProducts.length ===
-
-              0 ? (
-<div className="report-empty">
-
-                  ไม่มีข้อมูล
-</div>
+              {topProducts.length === 0 ? (
+<div className="report-empty">ไม่มีข้อมูล</div>
 
               ) : (
 <div className="report-table-wrap">
 <table className="report-table">
 <thead>
 <tr>
-<th>
-
-                          อันดับ
-</th>
-<th>
-
-                          สินค้า
-</th>
-<th>
-
-                          จำนวน
-</th>
-<th>
-
-                          ยอดขาย
-</th>
-<th>
-
-                          กำไร
-</th>
+<th>อันดับ</th>
+<th>สินค้า</th>
+<th>จำนวน</th>
+<th>ยอดขาย</th>
+<th>กำไร</th>
 </tr>
 </thead>
 <tbody>
 
-                      {topProducts.map(
-
-                        (
-
-                          item,
-
-                          index
-
-                        ) => (
-<tr
-
-                            key={`${item.name}-${item.option}`}
->
+                      {topProducts.map((item, index) => (
+<tr key={`${item.name}-${item.option}`}>
+<td>{index + 1}</td>
 <td>
-
-                              {index +
-
-                                1}
+<strong>{item.name}</strong>
+<small>{item.option}</small>
 </td>
-<td>
-<strong>
-
-                                {
-
-                                  item.name
-
-                                }
-</strong>
-<small>
-
-                                {
-
-                                  item.option
-
-                                }
-</small>
-</td>
-<td>
-
-                              {
-
-                                item.quantity
-
-                              }
-</td>
-<td>
-
-                              {item.amount.toLocaleString()}
-</td>
-<td>
-
-                              {item.profit.toLocaleString()}
-</td>
+<td>{item.quantity}</td>
+<td>{item.amount.toLocaleString()}</td>
+<td>{item.profit.toLocaleString()}</td>
 </tr>
 
-                        )
-
-                      )}
+                      ))}
 </tbody>
 </table>
 </div>
@@ -1066,124 +540,37 @@ function ReportPage() {
               )}
 </section>
 <section className="report-box">
-<h2>
+<h2>บิลขาย</h2>
 
-                บิลขาย
-</h2>
-
-              {filteredSales.length ===
-
-              0 ? (
-<div className="report-empty">
-
-                  ไม่มีบิลในช่วงวันที่นี้
-</div>
+              {filteredSales.length === 0 ? (
+<div className="report-empty">ไม่มีบิลในช่วงวันที่นี้</div>
 
               ) : (
 <div className="report-table-wrap">
 <table className="report-table">
 <thead>
 <tr>
-<th>
-
-                          เลขบิล
-</th>
-<th>
-
-                          วันที่
-</th>
-<th>
-
-                          เวลา
-</th>
-<th>
-
-                          สินค้า
-</th>
-<th>
-
-                          ยอดขาย
-</th>
-<th>
-
-                          กำไร
-</th>
+<th>เลขบิล</th>
+<th>วันที่</th>
+<th>เวลา</th>
+<th>สินค้า</th>
+<th>ยอดขาย</th>
+<th>กำไร</th>
 </tr>
 </thead>
 <tbody>
 
-                      {filteredSales.map(
-
-                        (
-
-                          sale
-
-                        ) => (
-<tr
-
-                            key={
-
-                              sale.billId
-
-                            }
->
-<td>
-
-                              {
-
-                                sale.billId
-
-                              }
-</td>
-<td>
-
-                              {
-
-                                sale.soldDate
-
-                              }
-</td>
-<td>
-
-                              {
-
-                                sale.soldTime
-
-                              }
-</td>
-<td>
-
-                              {
-
-                                sale.totalQty
-
-                              }
-</td>
-<td>
-
-                              {Number(
-
-                                sale.totalAmount ||
-
-                                  0
-
-                              ).toLocaleString()}
-</td>
-<td>
-
-                              {Number(
-
-                                sale.totalProfit ||
-
-                                  0
-
-                              ).toLocaleString()}
-</td>
+                      {filteredSales.map((sale) => (
+<tr key={sale.billId}>
+<td>{sale.billId}</td>
+<td>{sale.soldDate}</td>
+<td>{sale.soldTime}</td>
+<td>{sale.totalQty}</td>
+<td>{Number(sale.totalAmount || 0).toLocaleString()}</td>
+<td>{Number(sale.totalProfit || 0).toLocaleString()}</td>
 </tr>
 
-                        )
-
-                      )}
+                      ))}
 </tbody>
 </table>
 </div>
