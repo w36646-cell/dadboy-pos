@@ -1,58 +1,20 @@
-import {
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-  useCallback,
+import { getCloudSales } from "../services/salesService";
 
-  useEffect,
-
-  useMemo,
-
-  useState,
-
-} from "react";
-
-import {
-
-  getCloudSales,
-
-} from "../services/salesService";
-
-import {
-
-  getCloudProducts,
-
-} from "../services/productService";
+import { getCloudProducts } from "../services/productService";
 
 import "./DashboardPage.css";
 
+const SALES_KEY = "dadboy_sales_v1";
 
-const SALES_KEY =
-
-  "dadboy_sales_v1";
-
-
-function readStorage(
-
-  key,
-
-  fallback
-
-) {
+function readStorage(key, fallback) {
 
   try {
 
-    const saved =
+    const saved = localStorage.getItem(key);
 
-      localStorage.getItem(
-
-        key
-
-      );
-
-    return saved
-
-      ? JSON.parse(saved)
-
-      : fallback;
+    return saved ? JSON.parse(saved) : fallback;
 
   } catch {
 
@@ -62,69 +24,49 @@ function readStorage(
 
 }
 
+function writeStorage(key, value) {
 
-function formatDateKey(
+  try {
 
-  date
+    localStorage.setItem(key, JSON.stringify(value));
 
-) {
+    return true;
 
-  return date.toLocaleDateString(
+  } catch (error) {
 
-    "en-CA"
+    console.warn("Dashboard cache write skipped:", error);
 
-  );
+    return false;
+
+  }
 
 }
 
+function formatDateKey(date) {
 
-function summarize(
+  const year = date.getFullYear();
 
-  saleList
+  const month = String(date.getMonth() + 1).padStart(2, "0");
 
-) {
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+
+}
+
+function summarize(saleList) {
 
   return saleList.reduce(
 
-    (
+    (result, sale) => {
 
-      result,
+      result.totalAmount += Number(sale.totalAmount || 0);
 
-      sale
+      result.totalCost += Number(sale.totalCost || 0);
 
-    ) => {
+      result.totalProfit += Number(sale.totalProfit || 0);
 
-      result.totalAmount +=
-
-        Number(
-
-          sale.totalAmount || 0
-
-        );
-
-      result.totalCost +=
-
-        Number(
-
-          sale.totalCost || 0
-
-        );
-
-      result.totalProfit +=
-
-        Number(
-
-          sale.totalProfit || 0
-
-        );
-
-      result.totalQty +=
-
-        Number(
-
-          sale.totalQty || 0
-
-        );
+      result.totalQty += Number(sale.totalQty || 0);
 
       return result;
 
@@ -146,324 +88,161 @@ function summarize(
 
 }
 
+function DashboardPage({ onOpenStock }) {
 
-function DashboardPage({
+  const [sales, setSales] = useState([]);
 
-  onOpenStock,
+  const [products, setProducts] = useState([]);
 
-}) {
+  const [inventory, setInventory] = useState({});
 
-  const [
+  const [selectedDate, setSelectedDate] = useState(() =>
 
-    sales,
-
-    setSales,
-
-  ] = useState([]);
-
-  const [
-
-    products,
-
-    setProducts,
-
-  ] = useState([]);
-
-  const [
-
-    inventory,
-
-    setInventory,
-
-  ] = useState({});
-
-  const [
-
-    selectedDate,
-
-    setSelectedDate,
-
-  ] = useState(
-
-    formatDateKey(
-
-      new Date()
-
-    )
+    formatDateKey(new Date())
 
   );
 
-  const [
+  const [loading, setLoading] = useState(true);
 
-    loading,
+  const [salesCloudError, setSalesCloudError] = useState(false);
 
-    setLoading,
-
-  ] = useState(true);
-
-  const [
-
-    salesCloudError,
-
-    setSalesCloudError,
-
-  ] = useState(false);
-
-  const [
-
-    stockCloudError,
-
-    setStockCloudError,
-
-  ] = useState(false);
-
+  const [stockCloudError, setStockCloudError] = useState(false);
 
   /*
 
-    =========================
+    STOCK:
 
-    โหลด STOCK จาก Cloud เท่านั้น
+    ใช้ Cloud เป็นข้อมูลจริงเท่านั้น
 
-    =========================
+    ไม่ fallback stock จาก localStorage
 
-    Dashboard จะไม่เอา localStorage
-
-    ของแต่ละเครื่องมาใช้เป็น Stock
-
-    มือถือกับคอมจึงใช้ข้อมูลชุดเดียวกัน
+    เพื่อป้องกันมือถือ/คอมแสดงยอดคนละชุด
 
   */
 
-  const reloadStockData =
+  const reloadStockData = useCallback(async () => {
 
-    useCallback(
+    try {
 
-      async () => {
+      const cloudProducts = await getCloudProducts();
 
-        try {
+      const safeProducts = Array.isArray(cloudProducts)
 
-          const cloudProducts =
+        ? cloudProducts
 
-            await getCloudProducts();
+        : [];
 
-          const safeProducts =
+      const cloudInventory = {};
 
-            Array.isArray(
+      safeProducts.forEach((product) => {
 
-              cloudProducts
+        cloudInventory[product.id] = Number(product.stock ?? 0);
 
-            )
+      });
 
-              ? cloudProducts
+      setProducts(safeProducts);
 
-              : [];
+      setInventory(cloudInventory);
 
-          const cloudInventory =
+      setStockCloudError(false);
 
-            {};
+      return true;
 
-          safeProducts.forEach(
+    } catch (error) {
 
-            (product) => {
+      console.error("Dashboard Cloud stock error:", error);
 
-              cloudInventory[
-product.id
+      setStockCloudError(true);
 
-              ] =
+      return false;
 
-                Number(
+    }
 
-                  product.stock ?? 0
-
-                );
-
-            }
-
-          );
-
-          setProducts(
-
-            safeProducts
-
-          );
-
-          setInventory(
-
-            cloudInventory
-
-          );
-
-          setStockCloudError(
-
-            false
-
-          );
-
-        } catch (error) {
-
-          console.error(
-
-            "Dashboard Cloud stock error:",
-
-            error
-
-          );
-
-          /*
-
-            ไม่ fallback ไป localStorage
-
-            เพราะจะทำให้คอมและมือถือ
-
-            แสดง Stock คนละค่า
-
-          */
-
-          setStockCloudError(
-
-            true
-
-          );
-
-        }
-
-      },
-
-      []
-
-    );
-
+  }, []);
 
   /*
 
-    =========================
+    SALES:
 
-    โหลด SALES
+    Cloud สำเร็จ = ถือว่าสำเร็จทันที
 
-    =========================
+    การเขียน localStorage เป็นเพียง cache
 
-    Sales ยัง fallback Local ได้
+    ต่อให้ Safari เขียน cache ไม่ได้
 
-    เพราะไม่ได้ใช้เป็น Stock ปัจจุบัน
+    ก็ห้ามเปลี่ยนสถานะ Cloud เป็น ERROR
 
   */
 
-  const reloadSales =
+  const reloadSales = useCallback(async () => {
 
-    useCallback(
+    try {
 
-      async () => {
+      const cloudSales = await getCloudSales();
 
-        try {
+      const safeSales = Array.isArray(cloudSales)
 
-          const cloudSales =
+        ? cloudSales
 
-            await getCloudSales();
+        : [];
 
-          const safeSales =
+      setSales(safeSales);
 
-            Array.isArray(
+      setSalesCloudError(false);
 
-              cloudSales
+      /*
 
-            )
+        Cache แยก try ออกมาต่างหาก
 
-              ? cloudSales
+        ห้าม cache error ทำให้ Cloud error
 
-              : [];
+      */
 
-          setSales(
+      writeStorage(SALES_KEY, safeSales);
 
-            safeSales
+      return true;
 
-          );
+    } catch (error) {
 
-          localStorage.setItem(
+      console.error("Dashboard Cloud sales error:", error);
 
-            SALES_KEY,
+      const localSales = readStorage(SALES_KEY, []);
 
-            JSON.stringify(
+      setSales(
 
-              safeSales
+        Array.isArray(localSales)
 
-            )
+          ? localSales
 
-          );
+          : []
 
-          setSalesCloudError(
+      );
 
-            false
+      setSalesCloudError(true);
 
-          );
+      return false;
 
-        } catch (error) {
+    }
 
-          console.error(
-
-            "Dashboard Cloud sales error:",
-
-            error
-
-          );
-
-          const localSales =
-
-            readStorage(
-
-              SALES_KEY,
-
-              []
-
-            );
-
-          setSales(
-
-            Array.isArray(
-
-              localSales
-
-            )
-
-              ? localSales
-
-              : []
-
-          );
-
-          setSalesCloudError(
-
-            true
-
-          );
-
-        }
-
-      },
-
-      []
-
-    );
-
+  }, []);
 
   /*
 
-    =========================
+    โหลด:
 
-    โหลดครั้งแรก
+    - เปิด Dashboard
 
-    + ทุก 10 นาที
+    - ทุก 10 นาที
 
-    + ทุกครั้งกลับเข้าหน้า
+    - กลับเข้า tab/app
 
-    =========================
+    - focus หน้าต่าง
 
   */
 
   useEffect(() => {
 
-    let active =
-
-      true;
+    let active = true;
 
     async function firstLoad() {
 
@@ -487,21 +266,13 @@ product.id
 
     firstLoad();
 
-    const timer =
+    const timer = window.setInterval(() => {
 
-      window.setInterval(
+      reloadStockData();
 
-        () => {
+      reloadSales();
 
-          reloadStockData();
-
-          reloadSales();
-
-        },
-
-        600000
-
-      );
+    }, 600000);
 
     function handleFocus() {
 
@@ -513,13 +284,7 @@ product.id
 
     function handleVisibility() {
 
-      if (
-
-        document.visibilityState ===
-
-        "visible"
-
-      ) {
+      if (document.visibilityState === "visible") {
 
         reloadStockData();
 
@@ -529,13 +294,7 @@ product.id
 
     }
 
-    window.addEventListener(
-
-      "focus",
-
-      handleFocus
-
-    );
+    window.addEventListener("focus", handleFocus);
 
     document.addEventListener(
 
@@ -547,15 +306,9 @@ product.id
 
     return () => {
 
-      active =
+      active = false;
 
-        false;
-
-      window.clearInterval(
-
-        timer
-
-      );
+      window.clearInterval(timer);
 
       window.removeEventListener(
 
@@ -575,852 +328,491 @@ product.id
 
     };
 
-  }, [
-
-    reloadSales,
-
-    reloadStockData,
-
-  ]);
-
+  }, [reloadSales, reloadStockData]);
 
   /*
 
-    =========================
-
-    SALES ตามวันที่เลือก
-
-    =========================
+    ยอดขายตามวันที่ที่ผู้ใช้เลือก
 
   */
 
-  const selectedSales =
+  const selectedSales = useMemo(() => {
 
-    useMemo(
+    return sales.filter(
 
-      () =>
+      (sale) =>
 
-        sales.filter(
+        String(sale.soldDate || "").slice(0, 10) ===
 
-          (sale) =>
-
-            sale.soldDate ===
-
-            selectedDate
-
-        ),
-
-      [
-
-        sales,
-
-        selectedDate,
-
-      ]
+        selectedDate
 
     );
 
+  }, [sales, selectedDate]);
 
-  const summary =
+  const summary = useMemo(() => {
 
-    useMemo(
+    return summarize(selectedSales);
 
-      () =>
-
-        summarize(
-
-          selectedSales
-
-        ),
-
-      [
-
-        selectedSales,
-
-      ]
-
-    );
-
+  }, [selectedSales]);
 
   const averageBill =
 
     selectedSales.length > 0
 
-      ? summary.totalAmount /
-
-        selectedSales.length
+      ? summary.totalAmount / selectedSales.length
 
       : 0;
-
 
   const margin =
 
     summary.totalAmount > 0
 
-      ? (
-
-          summary.totalProfit /
-
-          summary.totalAmount
-
-        ) * 100
+      ? (summary.totalProfit / summary.totalAmount) * 100
 
       : 0;
 
-
   /*
 
-    =========================
-
-    สินค้าขายดี
-
-    ตามวันที่เลือก
-
-    =========================
+    สินค้าขายดีของวันที่เลือก
 
   */
 
-  const topProducts =
+  const topProducts = useMemo(() => {
 
-    useMemo(() => {
+    const result = {};
 
-      const result =
+    selectedSales.forEach((sale) => {
 
-        {};
+      sale.items?.forEach((item) => {
 
-      selectedSales.forEach(
+        const key =
 
-        (sale) => {
+          `${item.productId}-${item.option || ""}`;
 
-          sale.items?.forEach(
+        if (!result[key]) {
 
-            (item) => {
+          result[key] = {
 
-              const key =
+            name: item.productName || "-",
 
-                `${
+            option: item.option || "",
 
-                  item.productId
+            quantity: 0,
 
-                }-${
+            amount: 0,
 
-                  item.option || ""
-
-                }`;
-
-              if (!result[key]) {
-
-                result[key] = {
-
-                  name:
-
-                    item.productName ||
-
-                    "-",
-
-                  option:
-
-                    item.option ||
-
-                    "",
-
-                  quantity:
-
-                    0,
-
-                  amount:
-
-                    0,
-
-                };
-
-              }
-
-              result[
-
-                key
-
-              ].quantity +=
-
-                Number(
-
-                  item.quantity || 0
-
-                );
-
-              result[
-
-                key
-
-              ].amount +=
-
-                Number(
-
-                  item.lineTotal || 0
-
-                );
-
-            }
-
-          );
+          };
 
         }
 
-      );
+        result[key].quantity += Number(
 
-      return Object.values(
+          item.quantity || 0
 
-        result
+        );
+
+        result[key].amount += Number(
+
+          item.lineTotal || 0
+
+        );
+
+      });
+
+    });
+
+    return Object.values(result)
+
+      .sort((a, b) => b.quantity - a.quantity)
+
+      .slice(0, 5);
+
+  }, [selectedSales]);
+
+  /*
+
+    สินค้าใกล้หมด:
+
+    - ใช้ stock Cloud ปัจจุบัน
+
+    - ไม่เกี่ยวกับ selectedDate
+
+    - แสดงเฉพาะ trackStock === true
+
+    - stock <= minStock เท่านั้น
+
+  */
+
+  const lowStockProducts = useMemo(() => {
+
+    return products
+
+      .map((product) => {
+
+        const stock = Number(
+
+          inventory[product.id] ??
+
+          product.stock ??
+
+          0
+
+        );
+
+        const minStock = Number(
+
+          product.minStock ?? 5
+
+        );
+
+        return {
+
+          ...product,
+
+          stock,
+
+          minStock,
+
+        };
+
+      })
+
+      .filter(
+
+        (product) =>
+
+          product.trackStock === true &&
+
+          product.stock <= product.minStock
 
       )
 
-        .sort(
+      .sort((a, b) => {
 
-          (
+        if (a.stock !== b.stock) {
 
-            a,
+          return a.stock - b.stock;
 
-            b
+        }
 
-          ) =>
+        return String(a.name || "").localeCompare(
 
-            b.quantity -
+          String(b.name || ""),
 
-            a.quantity
-
-        )
-
-        .slice(
-
-          0,
-
-          5
+          "th"
 
         );
 
-    }, [
+      });
 
-      selectedSales,
-
-    ]);
-
+  }, [products, inventory]);
 
   /*
 
-    =========================
-
-    สินค้าใกล้หมดปัจจุบัน
-
-    =========================
-
-    สำคัญ:
-
-    - ใช้ Stock Cloud ปัจจุบัน
-
-    - ไม่ตามวันที่เลือก
-
-    - เอาเฉพาะ trackStock === true
+    มูลค่า stock ปัจจุบัน
 
   */
 
-  const lowStockProducts =
+  const stockValue = useMemo(() => {
 
-    useMemo(() => {
+    return products.reduce((total, product) => {
 
-      return products
+      const stock = Number(
 
-        .map(
+        inventory[product.id] ??
 
-          (product) => {
-
-            const stock =
-
-              Number(
-
-                inventory[
-product.id
-
-                ] ??
-
-                  product.stock ??
-
-                  0
-
-              );
-
-            const minStock =
-
-              Number(
-
-                product.minStock ??
-
-                  5
-
-              );
-
-            return {
-
-              ...product,
-
-              stock,
-
-              minStock,
-
-            };
-
-          }
-
-        )
-
-        .filter(
-
-          (product) =>
-
-            product.trackStock ===
-
-              true &&
-
-            product.stock <=
-
-              product.minStock
-
-        )
-
-        .sort(
-
-          (
-
-            a,
-
-            b
-
-          ) => {
-
-            if (
-
-              a.stock !==
-
-              b.stock
-
-            ) {
-
-              return (
-
-                a.stock -
-
-                b.stock
-
-              );
-
-            }
-
-            return String(
-
-              a.name || ""
-
-            ).localeCompare(
-
-              String(
-
-                b.name || ""
-
-              ),
-
-              "th"
-
-            );
-
-          }
-
-        );
-
-    }, [
-
-      products,
-
-      inventory,
-
-    ]);
-
-
-  /*
-
-    =========================
-
-    มูลค่า Stock ปัจจุบัน
-
-    =========================
-
-  */
-
-  const stockValue =
-
-    useMemo(() => {
-
-      return products.reduce(
-
-        (
-
-          total,
-
-          product
-
-        ) => {
-
-          const stock =
-
-            Number(
-
-              inventory[
-product.id
-
-              ] ??
-
-                product.stock ??
-
-                0
-
-            );
-
-          const cost =
-
-            Number(
-
-              product.cost || 0
-
-            );
-
-          return (
-
-            total +
-
-            Math.max(
-
-              stock,
-
-              0
-
-            ) *
-
-              cost
-
-          );
-
-        },
+        product.stock ??
 
         0
 
       );
 
-    }, [
+      const cost = Number(product.cost || 0);
 
-      products,
+      return (
 
-      inventory,
+        total +
 
-    ]);
+        Math.max(stock, 0) * cost
 
+      );
+
+    }, 0);
+
+  }, [products, inventory]);
 
   /*
-
-    =========================
 
     ยอดขายรายชั่วโมง
 
-    =========================
-
   */
 
-  const hourlySales =
+  const hourlySales = useMemo(() => {
 
-    useMemo(() => {
+    const hours = Array.from(
 
-      const hours =
+      { length: 16 },
 
-        Array.from(
+      (_, index) => ({
 
-          {
+        hour: index + 7,
 
-            length: 16,
+        amount: 0,
 
-          },
-
-          (
-
-            _,
-
-            index
-
-          ) => ({
-
-            hour:
-
-              index + 7,
-
-            amount:
-
-              0,
-
-          })
-
-        );
-
-      selectedSales.forEach(
-
-        (sale) => {
-
-          let hour =
-
-            null;
-
-          if (
-
-            sale.soldTime
-
-          ) {
-
-            const match =
-
-              String(
-
-                sale.soldTime
-
-              ).match(
-
-                /(\d{1,2})[:.]/
-
-              );
-
-            if (match) {
-
-              hour =
-
-                Number(
-
-                  match[1]
-
-                );
-
-            }
-
-          }
-
-          if (
-
-            hour === null &&
-
-            sale.soldAt
-
-          ) {
-
-            const saleDate =
-
-              new Date(
-
-                sale.soldAt
-
-              );
-
-            if (
-
-              !Number.isNaN(
-
-                saleDate.getTime()
-
-              )
-
-            ) {
-
-              hour =
-
-                saleDate.getHours();
-
-            }
-
-          }
-
-          if (
-
-            hour === null
-
-          ) {
-
-            return;
-
-          }
-
-          const target =
-
-            hours.find(
-
-              (item) =>
-
-                item.hour ===
-
-                hour
-
-            );
-
-          if (target) {
-
-            target.amount +=
-
-              Number(
-
-                sale.totalAmount ||
-
-                  0
-
-              );
-
-          }
-
-        }
-
-      );
-
-      return hours;
-
-    }, [
-
-      selectedSales,
-
-    ]);
-
-
-  const maxHourlyAmount =
-
-    Math.max(
-
-      1,
-
-      ...hourlySales.map(
-
-        (item) =>
-
-          item.amount
-
-      )
+      })
 
     );
 
+    selectedSales.forEach((sale) => {
 
-  /*
+      let hour = null;
 
-    =========================
+      if (sale.soldTime) {
 
-    กราฟเปรียบเทียบ
+        const match = String(
 
-    อาทิตย์ที่แล้ว + อาทิตย์นี้
+          sale.soldTime
 
-    เริ่มวันจันทร์
+        ).match(/(\d{1,2})[:.]/);
 
-    ไม่สร้างวันอนาคต
+        if (match) {
 
-    =========================
+          hour = Number(match[1]);
 
-  */
+        }
 
-  const last14Days =
+      }
 
-    useMemo(() => {
+      if (
 
-      const today =
+        hour === null &&
 
-        new Date();
-
-      today.setHours(
-
-        0,
-
-        0,
-
-        0,
-
-        0
-
-      );
-
-      const dayOfWeek =
-
-        today.getDay();
-
-      const daysFromMonday =
-
-        dayOfWeek === 0
-
-          ? 6
-
-          : dayOfWeek - 1;
-
-      const thisMonday =
-
-        new Date(
-
-          today
-
-        );
-
-      thisMonday.setDate(
-
-        today.getDate() -
-
-          daysFromMonday
-
-      );
-
-      const lastMonday =
-
-        new Date(
-
-          thisMonday
-
-        );
-
-      lastMonday.setDate(
-
-        thisMonday.getDate() -
-
-          7
-
-      );
-
-      const result =
-
-        [];
-
-      for (
-
-        let index = 0;
-
-        index < 14;
-
-        index += 1
+        sale.soldAt
 
       ) {
 
-        const date =
+        const saleDate = new Date(
 
-          new Date(
-
-            lastMonday
-
-          );
-
-        date.setDate(
-
-          lastMonday.getDate() +
-
-            index
+          sale.soldAt
 
         );
 
         if (
 
-          date > today
+          !Number.isNaN(
+
+            saleDate.getTime()
+
+          )
 
         ) {
 
-          break;
+          hour = saleDate.getHours();
 
         }
 
-        const key =
+      }
 
-          formatDateKey(
+      if (hour === null) {
 
-            date
-
-          );
-
-        const daySales =
-
-          sales.filter(
-
-            (sale) =>
-
-              sale.soldDate ===
-
-              key
-
-          );
-
-        const daySummary =
-
-          summarize(
-
-            daySales
-
-          );
-
-        result.push({
-
-          key,
-
-          label:
-
-            date.toLocaleDateString(
-
-              "th-TH",
-
-              {
-
-                weekday:
-
-                  "short",
-
-              }
-
-            ),
-
-          dateLabel:
-
-            date.toLocaleDateString(
-
-              "th-TH",
-
-              {
-
-                day:
-
-                  "numeric",
-
-                month:
-
-                  "short",
-
-              }
-
-            ),
-
-          week:
-
-            index < 7
-
-              ? "อาทิตย์ที่แล้ว"
-
-              : "อาทิตย์นี้",
-
-          amount:
-
-            daySummary.totalAmount,
-
-          profit:
-
-            daySummary.totalProfit,
-
-        });
+        return;
 
       }
 
-      return result;
+      const target = hours.find(
 
-    }, [
+        (item) =>
 
-      sales,
+          item.hour === hour
 
-    ]);
+      );
 
+      if (target) {
+
+        target.amount += Number(
+
+          sale.totalAmount || 0
+
+        );
+
+      }
+
+    });
+
+    return hours;
+
+  }, [selectedSales]);
+
+  const maxHourlyAmount = Math.max(
+
+    1,
+
+    ...hourlySales.map(
+
+      (item) => item.amount
+
+    )
+
+  );
+
+  /*
+
+    กราฟ:
+
+    จันทร์อาทิตย์ที่แล้ว
+
+    ถึงวันนี้ของอาทิตย์นี้
+
+    ไม่สร้างวันที่อนาคต
+
+  */
+
+  const last14Days = useMemo(() => {
+
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+
+    const dayOfWeek = today.getDay();
+
+    const daysFromMonday =
+
+      dayOfWeek === 0
+
+        ? 6
+
+        : dayOfWeek - 1;
+
+    const thisMonday = new Date(today);
+
+    thisMonday.setDate(
+
+      today.getDate() -
+
+      daysFromMonday
+
+    );
+
+    const lastMonday =
+
+      new Date(thisMonday);
+
+    lastMonday.setDate(
+
+      thisMonday.getDate() - 7
+
+    );
+
+    const result = [];
+
+    for (
+
+      let index = 0;
+
+      index < 14;
+
+      index += 1
+
+    ) {
+
+      const date =
+
+        new Date(lastMonday);
+
+      date.setDate(
+
+        lastMonday.getDate() +
+
+        index
+
+      );
+
+      if (date > today) {
+
+        break;
+
+      }
+
+      const key =
+
+        formatDateKey(date);
+
+      const daySales =
+
+        sales.filter(
+
+          (sale) =>
+
+            String(
+
+              sale.soldDate || ""
+
+            ).slice(0, 10) === key
+
+        );
+
+      const daySummary =
+
+        summarize(daySales);
+
+      result.push({
+
+        key,
+
+        label:
+
+          date.toLocaleDateString(
+
+            "th-TH",
+
+            {
+
+              weekday: "short",
+
+            }
+
+          ),
+
+        dateLabel:
+
+          date.toLocaleDateString(
+
+            "th-TH",
+
+            {
+
+              day: "numeric",
+
+              month: "short",
+
+            }
+
+          ),
+
+        week:
+
+          index < 7
+
+            ? "อาทิตย์ที่แล้ว"
+
+            : "อาทิตย์นี้",
+
+        amount:
+
+          daySummary.totalAmount,
+
+        profit:
+
+          daySummary.totalProfit,
+
+      });
+
+    }
+
+    return result;
+
+  }, [sales]);
 
   const max14DayAmount =
 
@@ -1438,7 +830,6 @@ product.id
 
     );
 
-
   const max14DayProfit =
 
     Math.max(
@@ -1454,7 +845,6 @@ product.id
       )
 
     );
-
 
   function goToStock() {
 
@@ -1472,13 +862,11 @@ product.id
 
   }
 
-
   const allCloudReady =
 
     !salesCloudError &&
 
     !stockCloudError;
-
 
   return (
 <div className="db-page">
@@ -1493,7 +881,6 @@ product.id
             ภาพรวมร้านตามวันที่เลือก
 </p>
 </div>
-
 <div className="db-header-right">
 <input
 
@@ -1501,17 +888,9 @@ product.id
 
             type="date"
 
-            value={
+            value={selectedDate}
 
-              selectedDate
-
-            }
-
-            onChange={(
-
-              event
-
-            ) =>
+            onChange={(event) =>
 
               setSelectedDate(
 
@@ -1522,7 +901,6 @@ product.id
             }
 
           />
-
 <div className="db-live">
 <span />
 
@@ -1539,144 +917,89 @@ product.id
 </div>
 </div>
 
-
       {stockCloudError && (
 <div
 
           style={{
 
-            marginBottom:
+            marginBottom: "12px",
 
-              "12px",
+            padding: "10px 14px",
 
-            padding:
+            borderRadius: "10px",
 
-              "10px 14px",
+            background: "#fef2f2",
 
-            borderRadius:
+            color: "#b42318",
 
-              "10px",
+            fontSize: "13px",
 
-            background:
-
-              "#fef2f2",
-
-            color:
-
-              "#b42318",
-
-            fontSize:
-
-              "13px",
-
-            fontWeight:
-
-              "700",
+            fontWeight: "700",
 
           }}
 >
 
-          โหลด Stock จาก Cloud
+          โหลด Stock จาก Cloud ไม่สำเร็จ
 
-          ไม่สำเร็จ
-
-          กรุณาลอง Refresh
-
-          อีกครั้ง
+          กรุณาลอง Refresh อีกครั้ง
 </div>
 
       )}
-
 
       {salesCloudError && (
 <div
 
           style={{
 
-            marginBottom:
+            marginBottom: "12px",
 
-              "12px",
+            padding: "10px 14px",
 
-            padding:
+            borderRadius: "10px",
 
-              "10px 14px",
+            background: "#fff3cd",
 
-            borderRadius:
+            color: "#664d03",
 
-              "10px",
-
-            background:
-
-              "#fff3cd",
-
-            color:
-
-              "#664d03",
-
-            fontSize:
-
-              "13px",
+            fontSize: "13px",
 
           }}
 >
 
-          โหลดยอดขายจาก Cloud
+          โหลดยอดขายจาก Cloud ไม่สำเร็จ
 
-          ไม่สำเร็จ
-
-          กำลังใช้ข้อมูลยอดขายสำรอง
-
-          จากเครื่อง
+          กำลังใช้ข้อมูลยอดขายสำรองจากเครื่อง
 </div>
 
       )}
 
-
-      {lowStockProducts.length >
-
-        0 && (
+      {lowStockProducts.length > 0 && (
 <button
 
           type="button"
 
           className="db-stock-alert"
 
-          onClick={
-
-            goToStock
-
-          }
+          onClick={goToStock}
 >
 <div className="db-stock-alert-icon">
 
             ⚠️
 </div>
-
 <div className="db-stock-alert-content">
 <strong>
 
               สินค้าใกล้หมด{" "}
 
-              {
-
-                lowStockProducts.length
-
-              }{" "}
+              {lowStockProducts.length}{" "}
 
               รายการ
 </strong>
-
 <span>
 
               {lowStockProducts
 
-                .slice(
-
-                  0,
-
-                  3
-
-                )
+                .slice(0, 3)
 
                 .map(
 
@@ -1686,15 +1009,9 @@ product.id
 
                 )
 
-                .join(
+                .join(" • ")}
 
-                  " • "
-
-                )}
-
-              {lowStockProducts.length >
-
-              3
+              {lowStockProducts.length > 3
 
                 ? ` • +${
 
@@ -1707,7 +1024,6 @@ product.id
                 : ""}
 </span>
 </div>
-
 <div className="db-stock-alert-arrow">
 
             ›
@@ -1715,7 +1031,6 @@ product.id
 </button>
 
       )}
-
 <div className="db-summary-grid">
 <div className="db-card">
 <span>
@@ -1729,7 +1044,6 @@ product.id
             บาท
 </strong>
 </div>
-
 <div className="db-card">
 <span>
 
@@ -1742,7 +1056,6 @@ product.id
             บาท
 </strong>
 </div>
-
 <div className="db-card">
 <span>
 
@@ -1750,11 +1063,7 @@ product.id
 </span>
 <strong>
 
-            {
-
-              selectedSales.length
-
-            }{" "}
+            {selectedSales.length}{" "}
 
             บิล
 </strong>
@@ -1768,9 +1077,7 @@ product.id
 
               {
 
-                maximumFractionDigits:
-
-                  0,
+                maximumFractionDigits: 0,
 
               }
 
@@ -1779,7 +1086,6 @@ product.id
             บาท/บิล
 </small>
 </div>
-
 <div className="db-card">
 <span>
 
@@ -1787,11 +1093,7 @@ product.id
 </span>
 <strong>
 
-            {
-
-              summary.totalQty
-
-            }{" "}
+            {summary.totalQty}{" "}
 
             ชิ้น
 </strong>
@@ -1799,17 +1101,12 @@ product.id
 
             Margin{" "}
 
-            {margin.toFixed(
-
-              1
-
-            )}
+            {margin.toFixed(1)}
 
             %
 </small>
 </div>
 </div>
-
 <div className="db-kpi-grid">
 <div className="db-kpi">
 <span>
@@ -1824,9 +1121,7 @@ product.id
 
               {
 
-                maximumFractionDigits:
-
-                  2,
+                maximumFractionDigits: 2,
 
               }
 
@@ -1835,7 +1130,6 @@ product.id
             บาท
 </strong>
 </div>
-
 <div className="db-kpi">
 <span>
 
@@ -1843,12 +1137,9 @@ product.id
 </span>
 <strong>
 
-            {topProducts[0]
-
-              ?.name || "-"}
+            {topProducts[0]?.name || "-"}
 </strong>
 </div>
-
 <div className="db-kpi">
 <span>
 
@@ -1856,16 +1147,11 @@ product.id
 </span>
 <strong>
 
-            {
-
-              lowStockProducts.length
-
-            }{" "}
+            {lowStockProducts.length}{" "}
 
             รายการ
 </strong>
 </div>
-
 <div className="db-kpi">
 <span>
 
@@ -1873,17 +1159,12 @@ product.id
 </span>
 <strong>
 
-            {
-
-              products.length
-
-            }{" "}
+            {products.length}{" "}
 
             รายการ
 </strong>
 </div>
 </div>
-
 <div className="db-main-grid">
 <section className="db-box">
 <div className="db-box-title">
@@ -1893,10 +1174,7 @@ product.id
 </h2>
 </div>
 
-
-          {topProducts.length ===
-
-          0 ? (
+          {topProducts.length === 0 ? (
 <div className="db-empty">
 
               ยังไม่มีข้อมูลการขาย
@@ -1906,13 +1184,7 @@ product.id
 
             topProducts.map(
 
-              (
-
-                item,
-
-                index
-
-              ) => (
+              (item, index) => (
 <div
 
                   className="db-ranking"
@@ -1923,42 +1195,24 @@ product.id
 
                     {index + 1}
 </div>
-
 <div className="db-product">
 <strong>
 
-                      {
-
-                        item.name
-
-                      }
+                      {item.name}
 </strong>
 <span>
 
-                      {
-
-                        item.option
-
-                      }
+                      {item.option}
 </span>
 </div>
-
 <div className="db-product-value">
 <strong>
 
-                      {
-
-                        item.quantity
-
-                      }{" "}
-
-                      ชิ้น
+                      {item.quantity} ชิ้น
 </strong>
 <span>
 
-                      {item.amount.toLocaleString()}{" "}
-
-                      บาท
+                      {item.amount.toLocaleString()} บาท
 </span>
 </div>
 </div>
@@ -1969,7 +1223,6 @@ product.id
 
           )}
 </section>
-
 <section className="db-box">
 <div className="db-box-title">
 <h2>
@@ -1977,7 +1230,6 @@ product.id
               สินค้าใกล้หมดปัจจุบัน
 </h2>
 </div>
-
 
           {stockCloudError ? (
 <div className="db-empty">
@@ -1987,9 +1239,7 @@ product.id
               ปัจจุบันจาก Cloud ได้
 </div>
 
-          ) : lowStockProducts.length ===
-
-            0 ? (
+          ) : lowStockProducts.length === 0 ? (
 <div className="db-empty">
 
               ไม่มีสินค้าใกล้หมด
@@ -2000,11 +1250,7 @@ product.id
 
               className="db-low-stock-list"
 
-              onClick={
-
-                goToStock
-
-              }
+              onClick={goToStock}
 
               role="button"
 
@@ -2018,27 +1264,17 @@ product.id
 
                     className="db-low-stock-row"
 
-                    key={
-product.id
-
-                    }
+                    key={product.id}
 >
 <span className="db-low-stock-name">
 
-                      {
-
-                        product.name
-
-                      }
+                      {product.name}
 </span>
-
 <strong
 
                       className={
 
-                        product.stock <=
-
-                        0
+                        product.stock <= 0
 
                           ? "db-low-stock-danger"
 
@@ -2047,13 +1283,7 @@ product.id
                       }
 >
 
-                      {
-
-                        product.stock
-
-                      }{" "}
-
-                      ชิ้น
+                      {product.stock} ชิ้น
 </strong>
 </div>
 
@@ -2065,7 +1295,6 @@ product.id
           )}
 </section>
 </div>
-
 <section className="db-box db-hourly">
 <div className="db-box-title">
 <h2>
@@ -2073,7 +1302,6 @@ product.id
             ยอดขายรายชั่วโมง
 </h2>
 </div>
-
 <div className="db-hourly-list">
 
           {hourlySales.map(
@@ -2083,11 +1311,7 @@ product.id
 
                 className="db-hour-row"
 
-                key={
-
-                  item.hour
-
-                }
+                key={item.hour}
 >
 <span>
 
@@ -2105,7 +1329,6 @@ product.id
 
                   :00
 </span>
-
 <div className="db-hour-track">
 <div
 
@@ -2115,9 +1338,7 @@ product.id
 
                       width: `${
 
-                        item.amount >
-
-                        0
+                        item.amount > 0
 
                           ? Math.max(
 
@@ -2129,9 +1350,7 @@ product.id
 
                                 maxHourlyAmount
 
-                              ) *
-
-                                100
+                              ) * 100
 
                             )
 
@@ -2143,7 +1362,6 @@ product.id
 
                   />
 </div>
-
 <strong>
 
                   {item.amount.toLocaleString()}
@@ -2155,7 +1373,6 @@ product.id
           )}
 </div>
 </section>
-
 <div className="db-chart-grid">
 <section className="db-box">
 <div className="db-box-title">
@@ -2166,13 +1383,10 @@ product.id
 </h2>
 <p>
 
-                อาทิตย์ที่แล้ว
-
-                เทียบอาทิตย์นี้
+                อาทิตย์ที่แล้ว เทียบอาทิตย์นี้
 </p>
 </div>
 </div>
-
 <div className="db-seven-chart">
 
             {last14Days.map(
@@ -2182,11 +1396,7 @@ product.id
 
                   className="db-day"
 
-                  key={
-
-                    day.key
-
-                  }
+                  key={day.key}
 >
 <div className="db-day-area">
 <div
@@ -2197,9 +1407,7 @@ product.id
 
                         height: `${
 
-                          day.amount >
-
-                          0
+                          day.amount > 0
 
                             ? Math.max(
 
@@ -2211,9 +1419,7 @@ product.id
 
                                   max14DayAmount
 
-                                ) *
-
-                                  100
+                                ) * 100
 
                               )
 
@@ -2225,43 +1431,27 @@ product.id
 
                     />
 </div>
-
 <strong>
 
                     {day.amount.toLocaleString()}
 </strong>
-
 <span>
 
-                    {
-
-                      day.label
-
-                    }
+                    {day.label}
 <small
 
                       style={{
 
-                        display:
+                        display: "block",
 
-                          "block",
+                        fontSize: "8px",
 
-                        fontSize:
-
-                          "8px",
-
-                        color:
-
-                          "#999",
+                        color: "#999",
 
                       }}
 >
 
-                      {
-
-                        day.week
-
-                      }
+                      {day.week}
 </small>
 </span>
 </div>
@@ -2271,7 +1461,6 @@ product.id
             )}
 </div>
 </section>
-
 <section className="db-box">
 <div className="db-box-title">
 <div>
@@ -2281,13 +1470,10 @@ product.id
 </h2>
 <p>
 
-                อาทิตย์ที่แล้ว
-
-                เทียบอาทิตย์นี้
+                อาทิตย์ที่แล้ว เทียบอาทิตย์นี้
 </p>
 </div>
 </div>
-
 <div className="db-seven-chart">
 
             {last14Days.map(
@@ -2297,11 +1483,7 @@ product.id
 
                   className="db-day"
 
-                  key={
-
-                    day.key
-
-                  }
+                  key={day.key}
 >
 <div className="db-day-area">
 <div
@@ -2312,9 +1494,7 @@ product.id
 
                         height: `${
 
-                          day.profit >
-
-                          0
+                          day.profit > 0
 
                             ? Math.max(
 
@@ -2326,9 +1506,7 @@ product.id
 
                                   max14DayProfit
 
-                                ) *
-
-                                  100
+                                ) * 100
 
                               )
 
@@ -2340,43 +1518,27 @@ product.id
 
                     />
 </div>
-
 <strong>
 
                     {day.profit.toLocaleString()}
 </strong>
-
 <span>
 
-                    {
-
-                      day.label
-
-                    }
+                    {day.label}
 <small
 
                       style={{
 
-                        display:
+                        display: "block",
 
-                          "block",
+                        fontSize: "8px",
 
-                        fontSize:
-
-                          "8px",
-
-                        color:
-
-                          "#999",
+                        color: "#999",
 
                       }}
 >
 
-                      {
-
-                        day.week
-
-                      }
+                      {day.week}
 </small>
 </span>
 </div>
@@ -2392,6 +1554,5 @@ product.id
   );
 
 }
-
 
 export default DashboardPage;
