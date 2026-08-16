@@ -834,4 +834,84 @@
   }
 
 }
+
+.db-date-picker {
+
+  padding: 8px 10px;
+
+  border: 1px solid #d0d5dd;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  font-size: 13px;
+
+}
+
+.db-low-stock-compact {
+
+  width: 100%;
+
+  padding: 12px 14px;
+
+  border: 0;
+
+  border-radius: 10px;
+
+  background: #fff7df;
+
+  color: #7a5a14;
+
+  text-align: left;
+
+  line-height: 1.7;
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+}
+
+.db-low-stock-compact:hover {
+
+  background: #fff1c7;
+
+}
+
+@media (max-width: 520px) {
+
+  .db-header-right {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-end;
+
+    gap: 6px;
+
+  }
+
+  .db-date-picker {
+
+    max-width: 145px;
+
+    padding: 7px 8px;
+
+    font-size: 12px;
+
+  }
+
+  .db-low-stock-compact {
+
+    padding: 10px 11px;
+
+    font-size: 12px;
+
+  }
+
+}
  
