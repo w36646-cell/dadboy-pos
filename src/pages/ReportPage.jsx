@@ -48,7 +48,7 @@ function startOfThisWeek(date = new Date()) {
 
 }
 
-function money(value) {
+function numberText(value) {
 
   return Number(value || 0).toLocaleString("th-TH", { maximumFractionDigits: 0 });
 
@@ -116,17 +116,13 @@ function ReportPage() {
 
   const filteredSales = useMemo(() => {
 
-    return sales
+    return sales.filter((sale) => {
 
-      .filter((sale) => {
+      const soldDate = String(sale.soldDate || "").slice(0, 10);
 
-        const soldDate = String(sale.soldDate || "").slice(0, 10);
+      return soldDate && soldDate >= startDate && soldDate <= endDate;
 
-        return soldDate && soldDate >= startDate && soldDate <= endDate;
-
-      })
-
-      .sort((a, b) => String(b.soldAt || "").localeCompare(String(a.soldAt || "")));
+    }).sort((a, b) => String(b.soldAt || "").localeCompare(String(a.soldAt || "")));
 
   }, [sales, startDate, endDate]);
 
@@ -160,19 +156,7 @@ function ReportPage() {
 
         if (!result[key]) {
 
-          result[key] = {
-
-            name: item.productName || "-",
-
-            option: item.option || "",
-
-            quantity: 0,
-
-            amount: 0,
-
-            profit: 0,
-
-          };
+          result[key] = { name: item.productName || "-", option: item.option || "", quantity: 0, amount: 0, profit: 0 };
 
         }
 
@@ -208,11 +192,7 @@ function ReportPage() {
 
       const key = dateKey(cursor);
 
-      const daySales = sales.filter(
-
-        (sale) => String(sale.soldDate || "").slice(0, 10) === key
-
-      );
+      const daySales = sales.filter((sale) => String(sale.soldDate || "").slice(0, 10) === key);
 
       result.push({
 
@@ -236,19 +216,9 @@ function ReportPage() {
 
   }, [sales, startDate, endDate]);
 
-  const chartMax = Math.max(
+  const chartMax = Math.max(1, ...chartData.map((item) => Math.max(item.amount, item.profit)));
 
-    1,
-
-    ...chartData.map((item) => Math.max(item.amount, item.profit))
-
-  );
-
-  const chartTicks = useMemo(() => {
-
-    return [chartMax, chartMax * 0.75, chartMax * 0.5, chartMax * 0.25, 0];
-
-  }, [chartMax]);
+  const chartTicks = [chartMax, chartMax * 0.75, chartMax * 0.5, chartMax * 0.25, 0];
 
   const chartWidth = Math.max(440, chartData.length * 72);
 
@@ -274,17 +244,9 @@ function ReportPage() {
 
   }
 
-  const salesPath = chartData
+  const salesPath = chartData.map((item, index) => `${index === 0 ? "M" : "L"} ${xFor(index)} ${yFor(item.amount)}`).join(" ");
 
-    .map((item, index) => `${index === 0 ? "M" : "L"} ${xFor(index)} ${yFor(item.amount)}`)
-
-    .join(" ");
-
-  const profitPath = chartData
-
-    .map((item, index) => `${index === 0 ? "M" : "L"} ${xFor(index)} ${yFor(item.profit)}`)
-
-    .join(" ");
+  const profitPath = chartData.map((item, index) => `${index === 0 ? "M" : "L"} ${xFor(index)} ${yFor(item.profit)}`).join(" ");
 
   function setToday() {
 
@@ -337,13 +299,7 @@ function ReportPage() {
 <p>เลือกช่วงวันที่ที่ต้องการดู</p>
 </header>
 
-      {cloudError && (
-<div className="report-cloud-warning">
-
-          Cloud เชื่อมต่อไม่สำเร็จ รายงานกำลังใช้ข้อมูลสำรองจากเครื่อง
-</div>
-
-      )}
+      {cloudError && <div className="report-cloud-warning">Cloud เชื่อมต่อไม่สำเร็จ รายงานกำลังใช้ข้อมูลสำรองจากเครื่อง</div>}
 <section className="report-filter">
 <div className="report-date-box">
 <label>วันที่เริ่ม</label>
@@ -372,7 +328,7 @@ function ReportPage() {
 <article className="report-summary-card"><span>กำไร</span><strong>{summary.profit.toLocaleString()} บาท</strong></article>
 <article className="report-summary-card"><span>จำนวนบิล</span><strong>{filteredSales.length} บิล</strong></article>
 <article className="report-summary-card"><span>จำนวนสินค้า</span><strong>{summary.qty} ชิ้น</strong></article>
-<article className="report-summary-card"><span>เฉลี่ยต่อบิล</span><strong>{money(averageBill)} บาท</strong></article>
+<article className="report-summary-card"><span>เฉลี่ยต่อบิล</span><strong>{numberText(averageBill)} บาท</strong></article>
 </section>
 <section className="report-box report-chart-box">
 <div className="report-chart-title">
@@ -393,126 +349,37 @@ function ReportPage() {
 <div className="report-chart-shell">
 <div className="report-chart-y">
 
-                  {chartTicks.map((value, index) => (
-<span key={index}>{money(value)} บ.</span>
-
-                  ))}
+                  {chartTicks.map((value, index) => <span key={index}>{numberText(value)}</span>)}
 </div>
 <div className="report-chart-scroll">
-<div
-
-                    className="report-chart-canvas"
-
-                    style={{
-
-                      minWidth: chartData.length <= 7 ? "100%" : `${chartWidth}px`,
-
-                    }}
->
-<svg
-
-                      className="report-chart-svg"
-
-                      viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-
-                      preserveAspectRatio="none"
->
+<div className="report-chart-canvas" style={{ minWidth: chartData.length <= 7 ? "100%" : `${chartWidth}px` }}>
+<svg className="report-chart-svg" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
 
                       {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
 
                         const y = topPad + usableHeight * ratio;
 
-                        return (
-<line
-
-                            key={ratio}
-
-                            className="report-grid-line"
-
-                            x1="0"
-
-                            x2={chartWidth}
-
-                            y1={y}
-
-                            y2={y}
-
-                          />
-
-                        );
+                        return <line key={ratio} className="report-grid-line" x1="0" x2={chartWidth} y1={y} y2={y} />;
 
                       })}
-<path
-
-                        className="report-sales-line"
-
-                        d={salesPath}
-
-                        fill="none"
-
-                        vectorEffect="non-scaling-stroke"
-
-                      />
-<path
-
-                        className="report-profit-line"
-
-                        d={profitPath}
-
-                        fill="none"
-
-                        vectorEffect="non-scaling-stroke"
-
-                      />
+<path className="report-sales-line" d={salesPath} fill="none" vectorEffect="non-scaling-stroke" />
+<path className="report-profit-line" d={profitPath} fill="none" vectorEffect="non-scaling-stroke" />
 
                       {chartData.map((item, index) => (
 <g key={item.key}>
-<circle
-
-                            className="report-sales-point"
-
-                            cx={xFor(index)}
-
-                            cy={yFor(item.amount)}
-
-                            r="5"
-
-                            vectorEffect="non-scaling-stroke"
-
-                          />
-<circle
-
-                            className="report-profit-point"
-
-                            cx={xFor(index)}
-
-                            cy={yFor(item.profit)}
-
-                            r="5"
-
-                            vectorEffect="non-scaling-stroke"
-
-                          />
+<circle className="report-sales-point" cx={xFor(index)} cy={yFor(item.amount)} r="5" vectorEffect="non-scaling-stroke" />
+<circle className="report-profit-point" cx={xFor(index)} cy={yFor(item.profit)} r="5" vectorEffect="non-scaling-stroke" />
 </g>
 
                       ))}
 </svg>
-<div
-
-                      className="report-chart-labels"
-
-                      style={{
-
-                        gridTemplateColumns: `repeat(${chartData.length}, minmax(0, 1fr))`,
-
-                      }}
->
+<div className="report-chart-labels" style={{ gridTemplateColumns: `repeat(${chartData.length}, minmax(0, 1fr))` }}>
 
                       {chartData.map((item) => (
 <div className="report-chart-label" key={item.key}>
 <strong>{item.label}</strong>
 <span>{item.dateLabel}</span>
-<small>{money(item.amount)} บ.</small>
+<small>{numberText(item.amount)}</small>
 </div>
 
                       ))}
@@ -533,15 +400,7 @@ function ReportPage() {
               ) : (
 <div className="report-table-wrap">
 <table className="report-table">
-<thead>
-<tr>
-<th>อันดับ</th>
-<th>สินค้า</th>
-<th>จำนวน</th>
-<th>ยอดขาย</th>
-<th>กำไร</th>
-</tr>
-</thead>
+<thead><tr><th>อันดับ</th><th>สินค้า</th><th>จำนวน</th><th>ยอดขาย</th><th>กำไร</th></tr></thead>
 <tbody>
 
                       {topProducts.map((item, index) => (
@@ -569,16 +428,7 @@ function ReportPage() {
               ) : (
 <div className="report-table-wrap">
 <table className="report-table">
-<thead>
-<tr>
-<th>เลขบิล</th>
-<th>วันที่</th>
-<th>เวลา</th>
-<th>สินค้า</th>
-<th>ยอดขาย</th>
-<th>กำไร</th>
-</tr>
-</thead>
+<thead><tr><th>เลขบิล</th><th>วันที่</th><th>เวลา</th><th>สินค้า</th><th>ยอดขาย</th><th>กำไร</th></tr></thead>
 <tbody>
 
                       {filteredSales.map((sale) => (
