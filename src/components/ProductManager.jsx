@@ -1238,25 +1238,24 @@ option.id ===
 
     } catch (error) {
 
-      console.error(
+  console.error("Save product error:", error);
 
-        "Save product error:",
+  const errorName = error?.name || "UnknownError";
 
-        error
+  const errorMessage = error?.message || String(error);
 
-      );
+  window.alert(
 
-      window.alert(
+    "บันทึกสินค้าไม่สำเร็จ\n\n" +
 
-        isCreating
+    "Error: " + errorName + "\n" +
 
-          ? "เพิ่มสินค้าไม่สำเร็จ กรุณาลองใหม่"
+    "Message: " + errorMessage
 
-          : "บันทึกสินค้าไม่สำเร็จ กรุณาลองใหม่"
+  );
 
-      );
-
-    } finally {
+} finally {
+ 
 
       setSaving(
 
