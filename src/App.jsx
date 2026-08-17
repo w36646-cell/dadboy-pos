@@ -1486,32 +1486,34 @@ const [
 
   ========================= */
 
-  function saveProducts(
+  function saveProducts(newProducts) {
 
-    newProducts
+  setProducts(newProducts);
 
-  ) {
-
-    setProducts(
-
-      newProducts
-
-    );
+  try {
 
     localStorage.setItem(
 
       PRODUCTS_KEY,
 
-      JSON.stringify(
+      JSON.stringify(newProducts)
 
-        newProducts
+    );
 
-      )
+  } catch (error) {
+
+    console.warn(
+
+      "Product local cache skipped:",
+
+      error
 
     );
 
   }
 
+}
+ 
   async function saveProduct(
 
     updatedProduct
