@@ -2,16 +2,9 @@
 
    DADBOY POS — SALES SCREEN POLISH
 
-   CLEAN VERSION
+========================================================= */
 
-   ========================================================= */
-
-
-/* =========================================================
-
-   TOP BAR
-
-   ========================================================= */
+/* ส่วนบนค้างไว้ */
 
 .employee-pos-topbar {
 
@@ -21,24 +14,28 @@
 
   z-index: auto !important;
 
-  background: #f5f5f5 !important;
+  background:
 
-  backdrop-filter: none !important;
+    rgba(249, 250, 251, 0.97) !important;
 
-  -webkit-backdrop-filter: none !important;
+  backdrop-filter:
 
-  box-shadow: none !important;
+    blur(12px);
 
-  border: none !important;
+  -webkit-backdrop-filter:
+
+    blur(12px);
+
+  box-shadow:
+
+    0 1px 0
+
+    rgba(16, 24, 40, 0.08);
 
 }
 
 
-/* =========================================================
-
-   STICKY SALES HEADER
-
-   ========================================================= */
+/* หัวขายสินค้า freeze */
 
 .pos-sticky-sales-header {
 
@@ -48,150 +45,175 @@
 
   z-index: 1100 !important;
 
-  margin: 0 -4px 7px !important;
+  margin:
 
-  padding: 5px 4px 6px !important;
+    0 -4px 10px !important;
 
-  background: #f5f5f5 !important;
+  padding:
 
-  backdrop-filter: none !important;
+    8px 4px 9px !important;
 
-  -webkit-backdrop-filter: none !important;
+  background:
 
-  border: none !important;
+    rgba(249, 250, 251, 0.97);
 
-  border-bottom: none !important;
+  backdrop-filter:
 
-  box-shadow: none !important;
+    blur(12px);
 
-}
+  -webkit-backdrop-filter:
 
+    blur(12px);
 
-/* =========================================================
+  border-bottom:
 
-   PAGE BACKGROUND
+    1px solid
 
-   ========================================================= */
-
-.pos-modern {
-
-  background: #f5f5f5 !important;
-
-}
-
-.app.pos-page.pos-modern {
-
-  background: #f5f5f5 !important;
-
-}
-
-.pos-modern .product-panel {
-
-  background: #f5f5f5 !important;
+    rgba(16, 24, 40, 0.08);
 
 }
 
 
-/* =========================================================
-
-   TITLE
-
-   ========================================================= */
+/* ขายสินค้า / จำนวนสินค้า / ยอดรวม */
 
 .pos-title-row {
 
-  gap: 8px !important;
+  gap: 10px !important;
 
-  align-items: center !important;
+  align-items:
 
-  flex-wrap: wrap !important;
+    center !important;
+
+  flex-wrap:
+
+    wrap !important;
 
 }
 
 .pos-title-row h1 {
 
-  font-size: clamp(
+  font-size:
 
-    28px,
+    clamp(
 
-    3vw,
+      28px,
 
-    38px
+      3vw,
 
-  ) !important;
+      38px
+
+    ) !important;
 
 }
 
 .pos-product-count {
 
-  font-size: clamp(
+  font-size:
 
-    14px,
+    clamp(
 
-    1.35vw,
+      14px,
 
-    18px
+      1.35vw,
 
-  ) !important;
+      18px
 
-  color: #344054 !important;
+    ) !important;
+
+  color:
+
+    #344054 !important;
 
 }
 
 
-/* =========================================================
-
-   TOTAL
-
-   ========================================================= */
+/* ยอดรวมด้านบน */
 
 .pos-header-total {
 
-  display: inline-flex;
+  display:
 
-  align-items: center;
+    inline-flex;
 
-  min-height: 30px;
+  align-items:
 
-  padding: 4px 9px;
+    center;
 
-  border: 1px solid #b2ddff;
+  min-height:
 
-  border-radius: 999px;
+    32px;
 
-  background: #eff8ff;
+  padding:
 
-  color: #175cd3;
+    5px 11px;
 
-  font-size: clamp(
+  border:
 
-    13px,
+    1px solid #b2ddff;
 
-    1.45vw,
+  border-radius:
 
-    18px
+    999px;
 
-  );
+  background:
 
-  font-weight: 900;
+    #eff8ff;
 
-  line-height: 1;
+  color:
 
-  white-space: nowrap;
+    #175cd3;
+
+  font-size:
+
+    clamp(
+
+      14px,
+
+      1.45vw,
+
+      19px
+
+    );
+
+  font-weight:
+
+    900;
+
+  line-height:
+
+    1;
+
+  white-space:
+
+    nowrap;
 
   box-shadow:
 
     0 2px 8px
 
-    rgba(46, 144, 250, 0.15);
+    rgba(
 
-  transform-origin: center;
+      46,
+
+      144,
+
+      250,
+
+      0.15
+
+    );
+
+  transform-origin:
+
+    center;
 
 }
 
 .pos-header-total b {
 
-  font-weight: 900;
+  font-weight:
+
+    900;
 
 }
 
@@ -209,74 +231,149 @@
 
   0% {
 
-    transform: scale(1);
+    transform:
+
+      scale(1);
 
   }
 
   45% {
 
-    transform: scale(1.16);
+    transform:
+
+      scale(1.16);
+
+    box-shadow:
+
+      0 0 0 9px
+
+      rgba(
+
+        46,
+
+        144,
+
+        250,
+
+        0.14
+
+      );
 
   }
 
   100% {
 
-    transform: scale(1);
+    transform:
+
+      scale(1);
 
   }
 
 }
 
-
 /* =========================================================
 
-   FLY TO CART
+   สินค้าปลิวเข้าตะกร้า
 
-   ========================================================= */
+========================================================= */
 
 .pos-fly-to-cart {
 
-  position: fixed;
+  position:
 
-  z-index: 99999;
+    fixed;
 
-  width: 56px;
+  z-index:
 
-  height: 56px;
+    99999;
 
-  display: flex;
+  width:
 
-  align-items: center;
+    56px;
 
-  justify-content: center;
+  height:
 
-  pointer-events: none;
+    56px;
 
-  overflow: hidden;
+  display:
 
-  border-radius: 15px;
+    flex;
+
+  align-items:
+
+    center;
+
+  justify-content:
+
+    center;
+
+  pointer-events:
+
+    none;
+
+  overflow:
+
+    hidden;
+
+  border-radius:
+
+    15px;
 
   background:
 
-    rgba(255, 255, 255, 0.97);
+    rgba(
 
-  color: #175cd3;
+      255,
 
-  font-size: 18px;
+      255,
 
-  font-weight: 900;
+      255,
+
+      0.97
+
+    );
+
+  color:
+
+    #175cd3;
+
+  font-size:
+
+    18px;
+
+  font-weight:
+
+    900;
 
   box-shadow:
 
     0 8px 24px
 
-    rgba(16, 24, 40, 0.30);
+    rgba(
 
-  opacity: 1;
+      16,
+
+      24,
+
+      40,
+
+      0.30
+
+    );
+
+  opacity:
+
+    1;
 
   transform:
 
-    translate(0, 0)
+    translate(
+
+      0,
+
+      0
+
+    )
 
     scale(1);
 
@@ -304,13 +401,20 @@
 
 }
 
+
 .pos-fly-to-cart img {
 
-  width: 88%;
+  width:
 
-  height: 88%;
+    88%;
 
-  object-fit: contain;
+  height:
+
+    88%;
+
+  object-fit:
+
+    contain;
 
   filter:
 
@@ -318,7 +422,17 @@
 
       0 3px 2px
 
-      rgba(0, 0, 0, 0.2)
+      rgba(
+
+        0,
+
+        0,
+
+        0,
+
+        0.2
+
+      )
 
     );
 
@@ -327,54 +441,252 @@
 
 /* =========================================================
 
-   PRODUCT GRID
+   จอคอม
 
-   ========================================================= */
+========================================================= */
 
-.product-grid.pos-modern-grid,
+@media (min-width: 1000px) {
 
-.pos-modern .product-grid,
+  .product-grid.pos-modern-grid,
 
-.pos-modern-grid {
+  .pos-modern
 
-  width: 100% !important;
+  .product-grid,
 
-  display: grid !important;
+  .pos-modern-grid {
 
-  grid-template-columns:
+    grid-template-columns:
 
-    repeat(
+      repeat(
 
-      4,
+        5,
 
-      minmax(0, 1fr)
+        minmax(
 
-    ) !important;
+          0,
 
-  gap: 8px !important;
+          1fr
 
-  padding: 0 !important;
+        )
 
-  margin: 0 !important;
+      ) !important;
 
-  background:
+    gap:
 
-    transparent !important;
+      10px !important;
 
-  border: none !important;
+  }
 
-  box-shadow: none !important;
 
-  box-sizing: border-box;
+  .product-card.pos-image-card,
+
+  .pos-modern-grid
+
+  .pos-image-card {
+
+    height:
+
+      172px !important;
+
+    min-height:
+
+      172px !important;
+
+    max-height:
+
+      172px !important;
+
+  }
+
+
+  .pos-card-image-area {
+
+    padding:
+
+      7px
+
+      10px
+
+      51px !important;
+
+  }
+
+}
+
+
+/* จอคอมใหญ่ */
+
+@media (min-width: 1350px) {
+
+  .product-grid.pos-modern-grid,
+
+  .pos-modern
+
+  .product-grid,
+
+  .pos-modern-grid {
+
+    grid-template-columns:
+
+      repeat(
+
+        6,
+
+        minmax(
+
+          0,
+
+          1fr
+
+        )
+
+      ) !important;
+
+  }
+
+
+  .product-card.pos-image-card,
+
+  .pos-modern-grid
+
+  .pos-image-card {
+
+    height:
+
+      184px !important;
+
+    min-height:
+
+      184px !important;
+
+    max-height:
+
+      184px !important;
+
+  }
 
 }
 
 
 /* =========================================================
 
-   PRODUCT CARD
+   มือถือ
 
-   ========================================================= */
+========================================================= */
+
+@media (max-width: 720px) {
+
+  .pos-title-row {
+
+    gap:
+
+      6px !important;
+
+  }
+
+
+  .pos-title-row h1 {
+
+    font-size:
+
+      27px !important;
+
+  }
+
+
+  .pos-product-count {
+
+    font-size:
+
+      13px !important;
+
+  }
+
+
+  .pos-header-total {
+
+    min-height:
+
+      28px;
+
+    padding:
+
+      4px 8px;
+
+    font-size:
+
+      13px;
+
+  }
+
+
+  .pos-card-name {
+
+    font-size:
+
+      14px !important;
+
+  }
+
+
+  .pos-card-price {
+
+    font-size:
+
+      16px !important;
+
+  }
+
+}
+
+
+/* ===== DADBOY MOBILE STICKY FIX ===== */
+
+@media (max-width: 720px) {
+
+  .app.pos-page.pos-modern {
+
+    overflow-x: clip !important;
+
+    overflow-y: visible !important;
+
+  }
+
+  .pos-modern .product-panel {
+
+    overflow: visible !important;
+
+  }
+
+  .employee-pos-topbar {
+
+    position: static !important;
+
+    top: auto !important;
+
+  }
+
+  .pos-sticky-sales-header {
+
+    position: sticky !important;
+
+    top: 0 !important;
+
+    z-index: 1100 !important;
+
+  }
+
+}
+
+/* =========================================================
+
+   DADBOY PRODUCT CARD V3
+
+   Large image / compact translucent label
+
+========================================================= */
+
+/* ---------- CARD ---------- */
 
 .product-card.pos-image-card,
 
@@ -382,85 +694,28 @@
 
   position: relative !important;
 
-  width: 100% !important;
-
-  min-width: 0 !important;
-
-  max-width: none !important;
-
-  height: 150px !important;
-
-  min-height: 150px !important;
-
-  max-height: 150px !important;
-
-  display: block !important;
-
   overflow: hidden !important;
 
   padding: 0 !important;
 
-  margin: 0 !important;
+  border:
 
-  border: none !important;
+    1px solid
 
-  outline: none !important;
+    rgba(255, 255, 255, 0.92) !important;
 
-  border-radius: 13px !important;
+  border-radius: 14px !important;
 
-  box-shadow: none !important;
+  box-shadow:
 
-  -webkit-tap-highlight-color:
+    0 4px 12px
 
-    transparent;
-
-  touch-action:
-
-    manipulation;
-
-  user-select:
-
-    none;
-
-}
-
-.product-card.pos-image-card:active,
-
-.pos-modern-grid .pos-image-card:active {
-
-  transform:
-
-    scale(0.98);
+    rgba(16, 24, 40, 0.16) !important;
 
 }
 
 
-/* =========================================================
-
-   TOP NAME
-
-   ========================================================= */
-
-.product-card.pos-image-card
-
-.pos-card-top-name,
-
-.pos-modern-grid
-
-.pos-image-card
-
-.pos-card-top-name {
-
-  display: none !important;
-
-}
-
-
-/* =========================================================
-
-   IMAGE AREA
-
-   ========================================================= */
+/* ---------- PRODUCT IMAGE ---------- */
 
 .product-card.pos-image-card
 
@@ -472,25 +727,15 @@
 
 .pos-card-image-area {
 
-  position:
+  position: absolute !important;
 
-    absolute !important;
+  inset: 0 !important;
 
-  inset:
+  width: 100% !important;
 
-    0 !important;
+  height: 100% !important;
 
-  width:
-
-    100% !important;
-
-  height:
-
-    100% !important;
-
-  box-sizing:
-
-    border-box !important;
+  box-sizing: border-box !important;
 
   padding:
 
@@ -498,32 +743,16 @@
 
     4px
 
-    35px !important;
+    36px !important;
 
-  display:
+  display: flex !important;
 
-    flex !important;
+  align-items: center !important;
 
-  align-items:
-
-    center !important;
-
-  justify-content:
-
-    center !important;
-
-  overflow:
-
-    hidden !important;
+  justify-content: center !important;
 
 }
 
-
-/* =========================================================
-
-   IMAGE
-
-   ========================================================= */
 
 .product-card.pos-image-card
 
@@ -535,29 +764,15 @@
 
 .pos-card-image {
 
-  display:
+  width: 100% !important;
 
-    block !important;
+  height: 100% !important;
 
-  width:
+  max-width: none !important;
 
-    100% !important;
+  max-height: none !important;
 
-  height:
-
-    100% !important;
-
-  max-width:
-
-    none !important;
-
-  max-height:
-
-    none !important;
-
-  object-fit:
-
-    contain !important;
+  object-fit: contain !important;
 
   object-position:
 
@@ -565,25 +780,7 @@
 
   transform:
 
-    translate(
-
-      var(--product-image-x, 0%),
-
-      var(--product-image-y, 0%)
-
-    )
-
-    scale(
-
-      calc(
-
-        1.16 *
-
-        var(--product-image-scale, 1)
-
-      )
-
-    ) !important;
+    scale(1.16) !important;
 
   transform-origin:
 
@@ -606,11 +803,7 @@
 }
 
 
-/* =========================================================
-
-   SHADE
-
-   ========================================================= */
+/* ---------- BOTTOM TRANSLUCENT BAND ---------- */
 
 .product-card.pos-image-card
 
@@ -622,47 +815,41 @@
 
 .pos-card-shade {
 
-  position:
+  position: absolute !important;
 
-    absolute !important;
+  inset:
 
-  left:
+    auto
 
-    0 !important;
+    0
 
-  right:
-
-    0 !important;
-
-  bottom:
+    0
 
     0 !important;
 
-  height:
-
-    34% !important;
+  height: 31% !important;
 
   background:
 
-    linear-gradient(
+    rgba(
 
-      180deg,
+      30,
 
-      rgba(20, 20, 20, 0.02) 0%,
+      30,
 
-      rgba(20, 20, 20, 0.10) 35%,
+      30,
 
-      rgba(20, 20, 20, 0.48) 100%
+      0.62
 
     ) !important;
 
   backdrop-filter:
 
-    none !important;
+    blur(2px) !important;
 
   -webkit-backdrop-filter:
 
-    none !important;
+    blur(2px) !important;
 
   pointer-events:
 
@@ -671,11 +858,7 @@
 }
 
 
-/* =========================================================
-
-   PRODUCT INFO
-
-   ========================================================= */
+/* ---------- TEXT ---------- */
 
 .product-card.pos-image-card
 
@@ -687,29 +870,17 @@
 
 .pos-card-info {
 
-  position:
+  position: absolute !important;
 
-    absolute !important;
+  left: 0 !important;
 
-  left:
+  right: 0 !important;
 
-    0 !important;
+  bottom: 0 !important;
 
-  right:
+  width: 100% !important;
 
-    0 !important;
-
-  bottom:
-
-    0 !important;
-
-  width:
-
-    100% !important;
-
-  height:
-
-    34% !important;
+  height: 31% !important;
 
   box-sizing:
 
@@ -717,15 +888,13 @@
 
   padding:
 
-    3px
-
     4px
 
-    4px !important;
+    6px
 
-  display:
+    5px !important;
 
-    flex !important;
+  display: flex !important;
 
   flex-direction:
 
@@ -743,18 +912,10 @@
 
     center !important;
 
-  z-index:
-
-    4 !important;
+  z-index: 4 !important;
 
 }
 
-
-/* =========================================================
-
-   NAME
-
-   ========================================================= */
 
 .product-card.pos-image-card
 
@@ -766,13 +927,9 @@
 
 .pos-card-name {
 
-  width:
+  width: 100% !important;
 
-    100% !important;
-
-  margin:
-
-    0 !important;
+  margin: 0 !important;
 
   color:
 
@@ -780,7 +937,7 @@
 
   font-size:
 
-    14px !important;
+    16px !important;
 
   font-weight:
 
@@ -788,11 +945,15 @@
 
   line-height:
 
-    1.02 !important;
+    1.04 !important;
 
   letter-spacing:
 
     -0.2px !important;
+
+  white-space:
+
+    normal !important;
 
   overflow:
 
@@ -819,12 +980,6 @@
 }
 
 
-/* =========================================================
-
-   PRICE
-
-   ========================================================= */
-
 .product-card.pos-image-card
 
 .pos-card-price,
@@ -837,7 +992,7 @@
 
   margin-top:
 
-    2px !important;
+    3px !important;
 
   color:
 
@@ -845,11 +1000,11 @@
 
   font-size:
 
-    11px !important;
+    19px !important;
 
   font-weight:
 
-    850 !important;
+    900 !important;
 
   line-height:
 
@@ -868,11 +1023,7 @@
 }
 
 
-/* =========================================================
-
-   PACK TEXT
-
-   ========================================================= */
+/* ---------- PACK ---------- */
 
 .product-card.pos-image-card
 
@@ -880,7 +1031,7 @@
 
   margin-top:
 
-    1px !important;
+    2px !important;
 
   color:
 
@@ -898,7 +1049,7 @@
 
   font-size:
 
-    7px !important;
+    8px !important;
 
   line-height:
 
@@ -907,12 +1058,6 @@
 }
 
 
-/* =========================================================
-
-   PACK BADGE
-
-   ========================================================= */
-
 .product-card.pos-image-card
 
 .pos-pack-badge {
@@ -920,18 +1065,6 @@
   z-index:
 
     6 !important;
-
-  top:
-
-    4px !important;
-
-  right:
-
-    4px !important;
-
-  padding:
-
-    2px 4px !important;
 
   background:
 
@@ -943,7 +1076,7 @@
 
       39,
 
-      0.82
+      0.86
 
     ) !important;
 
@@ -951,18 +1084,8 @@
 
     #ffffff !important;
 
-  font-size:
-
-    6px !important;
-
 }
 
-
-/* =========================================================
-
-   STOCK
-
-   ========================================================= */
 
 .product-card.pos-image-card
 
@@ -979,50 +1102,25 @@
 
    DESKTOP
 
-   ========================================================= */
+========================================================= */
 
 @media (min-width: 1000px) {
 
-  .product-grid.pos-modern-grid,
-
-  .pos-modern .product-grid,
-
-  .pos-modern-grid {
-
-    grid-template-columns:
-
-      repeat(
-
-        5,
-
-        minmax(0, 1fr)
-
-      ) !important;
-
-    gap:
-
-      10px !important;
-
-  }
-
-
   .product-card.pos-image-card,
 
-  .pos-modern-grid
-
-  .pos-image-card {
+  .pos-modern-grid .pos-image-card {
 
     height:
 
-      176px !important;
+      200px !important;
 
     min-height:
 
-      176px !important;
+      200px !important;
 
     max-height:
 
-      176px !important;
+      200px !important;
 
   }
 
@@ -1033,11 +1131,11 @@
 
     padding:
 
-      3px
+      4px
 
-      6px
+      7px
 
-      43px !important;
+      48px !important;
 
   }
 
@@ -1048,25 +1146,22 @@
 
     transform:
 
-      translate(
+      scale(1.18) !important;
 
-        var(--product-image-x, 0%),
+  }
 
-        var(--product-image-y, 0%)
 
-      )
+  .product-card.pos-image-card
 
-      scale(
+  .pos-card-shade,
 
-        calc(
+  .product-card.pos-image-card
 
-          1.20 *
+  .pos-card-info {
 
-          var(--product-image-scale, 1)
+    height:
 
-        )
-
-      ) !important;
+      30% !important;
 
   }
 
@@ -1088,36 +1183,7 @@
 
     font-size:
 
-      13px !important;
-
-  }
-
-}
-
-
-/* =========================================================
-
-   LARGE DESKTOP
-
-   ========================================================= */
-
-@media (min-width: 1350px) {
-
-  .product-grid.pos-modern-grid,
-
-  .pos-modern .product-grid,
-
-  .pos-modern-grid {
-
-    grid-template-columns:
-
-      repeat(
-
-        6,
-
-        minmax(0, 1fr)
-
-      ) !important;
+      21px !important;
 
   }
 
@@ -1128,145 +1194,9 @@
 
    MOBILE
 
-   ========================================================= */
+========================================================= */
 
 @media (max-width: 720px) {
-
-  .app.pos-page.pos-modern {
-
-    overflow-x:
-
-      clip !important;
-
-    overflow-y:
-
-      visible !important;
-
-    background:
-
-      #f5f5f5 !important;
-
-  }
-
-
-  .pos-modern
-
-  .product-panel {
-
-    overflow:
-
-      visible !important;
-
-    background:
-
-      #f5f5f5 !important;
-
-  }
-
-
-  .employee-pos-topbar {
-
-    position:
-
-      static !important;
-
-    top:
-
-      auto !important;
-
-    background:
-
-      #f5f5f5 !important;
-
-  }
-
-
-  .pos-sticky-sales-header {
-
-    position:
-
-      sticky !important;
-
-    top:
-
-      0 !important;
-
-    z-index:
-
-      1100 !important;
-
-    margin:
-
-      0 -3px 5px !important;
-
-    padding:
-
-      3px 3px 5px !important;
-
-    background:
-
-      #f5f5f5 !important;
-
-    border:
-
-      none !important;
-
-    box-shadow:
-
-      none !important;
-
-  }
-
-
-  .pos-title-row {
-
-    gap:
-
-      5px !important;
-
-  }
-
-
-  .pos-title-row h1 {
-
-    font-size:
-
-      25px !important;
-
-  }
-
-
-  .pos-product-count {
-
-    font-size:
-
-      11px !important;
-
-  }
-
-
-  .pos-header-total {
-
-    min-height:
-
-      25px;
-
-    padding:
-
-      3px 7px;
-
-    font-size:
-
-      12px;
-
-  }
-
-
-  /* =======================================================
-
-     MOBILE GRID
-
-     ======================================================= */
 
   html body
 
@@ -1276,111 +1206,57 @@
 
   .product-grid.pos-modern-grid {
 
-    width:
-
-      100% !important;
-
-    display:
-
-      grid !important;
-
     grid-template-columns:
 
       repeat(
 
         3,
 
-        minmax(0, 1fr)
+        minmax(
+
+          0,
+
+          1fr
+
+        )
 
       ) !important;
 
     gap:
 
-      5px !important;
-
-    padding:
-
-      0 !important;
-
-    margin:
-
-      0 !important;
-
-    background:
-
-      transparent !important;
-
-    border:
-
-      none !important;
-
-    box-shadow:
-
-      none !important;
+      6px !important;
 
   }
 
-
-  /* =======================================================
-
-     MOBILE CARD — EXPANDED
-
-     ======================================================= */
 
   html body
 
   .app.pos-page.pos-modern
 
+  .product-panel
+
+  .product-grid.pos-modern-grid
+
   .product-card.pos-image-card {
-
-    width:
-
-      100% !important;
-
-    min-width:
-
-      0 !important;
-
-    max-width:
-
-      none !important;
 
     height:
 
-      122px !important;
+      150px !important;
 
     min-height:
 
-      122px !important;
+      150px !important;
 
     max-height:
 
-      122px !important;
-
-    border:
-
-      none !important;
-
-    outline:
-
-      none !important;
+      150px !important;
 
     border-radius:
 
-      10px !important;
-
-    box-shadow:
-
-      none !important;
+      11px !important;
 
   }
 
-
-  /* =======================================================
-
-     MOBILE IMAGE
-
-     ======================================================= */
 
   html body
 
@@ -1396,10 +1272,668 @@
 
       2px
 
-      32px !important;
+      38px !important;
 
   }
 
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-image {
+
+    transform:
+
+      scale(1.18) !important;
+
+  }
+
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-shade,
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-info {
+
+    height:
+
+      32% !important;
+
+  }
+
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-info {
+
+    padding:
+
+      3px
+
+      3px
+
+      4px !important;
+
+  }
+
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-name {
+
+    font-size:
+
+      13px !important;
+
+    line-height:
+
+      1.03 !important;
+
+  }
+
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-price {
+
+    margin-top:
+
+      2px !important;
+
+    font-size:
+
+      15px !important;
+
+  }
+
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-pack-text {
+
+    font-size:
+
+      7px !important;
+
+  }
+
+}
+
+
+/* =========================================================
+
+   SMALL PHONE
+
+========================================================= */
+
+@media (max-width: 390px) {
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-panel
+
+  .product-grid.pos-modern-grid
+
+  .product-card.pos-image-card {
+
+    height:
+
+      145px !important;
+
+    min-height:
+
+      145px !important;
+
+    max-height:
+
+      145px !important;
+
+  }
+
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-name {
+
+    font-size:
+
+      12px !important;
+
+  }
+
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-price {
+
+    font-size:
+
+      14px !important;
+
+  }
+
+}
+
+/* =========================================================
+
+   DADBOY PRODUCT CARD V3.1
+
+   Compact card / bold name / smaller price / lighter band
+
+========================================================= */
+
+/* แถบข้อความสูงขึ้น แต่โปร่งใสมาก */
+
+.product-card.pos-image-card .pos-card-shade,
+
+.pos-modern-grid .pos-image-card .pos-card-shade {
+
+  height: 38% !important;
+
+  background:
+
+    linear-gradient(
+
+      180deg,
+
+      rgba(20,20,20,0.06) 0%,
+
+      rgba(20,20,20,0.16) 35%,
+
+      rgba(20,20,20,0.25) 100%
+
+    ) !important;
+
+  backdrop-filter: none !important;
+
+  -webkit-backdrop-filter: none !important;
+
+}
+
+/* พื้นที่ชื่อ + ราคา */
+
+.product-card.pos-image-card .pos-card-info,
+
+.pos-modern-grid .pos-image-card .pos-card-info {
+
+  height: 38% !important;
+
+  padding:
+
+    4px
+
+    5px
+
+    5px !important;
+
+  justify-content:
+
+    center !important;
+
+}
+
+/* ชื่อสินค้าเด่นที่สุด */
+
+.product-card.pos-image-card .pos-card-name,
+
+.pos-modern-grid .pos-image-card .pos-card-name {
+
+  font-size: 18px !important;
+
+  font-weight: 950 !important;
+
+  line-height: 1.03 !important;
+
+  letter-spacing:
+
+    -0.25px !important;
+
+  text-shadow:
+
+    0 1px 2px
+
+    rgba(0,0,0,0.68) !important;
+
+}
+
+/* ราคาเล็กกว่าชื่ออย่างชัดเจน */
+
+.product-card.pos-image-card .pos-card-price,
+
+.pos-modern-grid .pos-image-card .pos-card-price {
+
+  margin-top: 3px !important;
+
+  font-size: 12px !important;
+
+  font-weight: 800 !important;
+
+  line-height: 1 !important;
+
+  text-shadow:
+
+    0 1px 2px
+
+    rgba(0,0,0,0.62) !important;
+
+}
+
+/* รูปใหญ่ขึ้น */
+
+.product-card.pos-image-card .pos-card-image,
+
+.pos-modern-grid .pos-image-card .pos-card-image {
+
+  transform:
+
+    scale(1.24) !important;
+
+}
+
+/* =========================================================
+
+   DESKTOP
+
+========================================================= */
+
+@media (min-width: 1000px) {
+
+  .product-card.pos-image-card,
+
+  .pos-modern-grid .pos-image-card {
+
+    height: 176px !important;
+
+    min-height: 176px !important;
+
+    max-height: 176px !important;
+
+  }
+
+  .product-card.pos-image-card .pos-card-image-area {
+
+    padding:
+
+      2px
+
+      5px
+
+      44px !important;
+
+  }
+
+  .product-card.pos-image-card .pos-card-image {
+
+    transform:
+
+      scale(1.26) !important;
+
+  }
+
+  .product-card.pos-image-card .pos-card-name {
+
+    font-size: 19px !important;
+
+    font-weight: 950 !important;
+
+  }
+
+  .product-card.pos-image-card .pos-card-price {
+
+    font-size: 13px !important;
+
+  }
+
+}
+
+/* =========================================================
+
+   MOBILE
+
+========================================================= */
+
+@media (max-width: 720px) {
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-grid.pos-modern-grid {
+
+    grid-template-columns:
+
+      repeat(3,minmax(0,1fr)) !important;
+
+    gap: 5px !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card {
+
+    height: 134px !important;
+
+    min-height: 134px !important;
+
+    max-height: 134px !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-image-area {
+
+    padding:
+
+      1px
+
+      1px
+
+      37px !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-image {
+
+    transform:
+
+      scale(1.27) !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-name {
+
+    font-size: 15px !important;
+
+    font-weight: 950 !important;
+
+    line-height: 1.02 !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-price {
+
+    margin-top: 2px !important;
+
+    font-size: 10px !important;
+
+    font-weight: 800 !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-pack-text {
+
+    font-size: 6px !important;
+
+  }
+
+}
+
+@media (max-width: 390px) {
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card {
+
+    height: 130px !important;
+
+    min-height: 130px !important;
+
+    max-height: 130px !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-name {
+
+    font-size: 14px !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-price {
+
+    font-size: 9px !important;
+
+  }
+
+}
+
+/* =========================================================
+
+   DADBOY PRODUCT CARD V3.2
+
+   compact mobile + image positioning controls
+
+========================================================= */
+
+/* ใช้ค่าที่ผู้ใช้ตั้งเอง ถ้าไม่มีจะ fallback = 1 / 0 / 0 */
+
+.product-card.pos-image-card .pos-card-image,
+
+.pos-modern-grid .pos-image-card .pos-card-image {
+
+  transform:
+
+    translate(
+
+      var(--product-image-x, 0%),
+
+      var(--product-image-y, 0%)
+
+    )
+
+    scale(
+
+      calc(
+
+        1.24 *
+
+        var(--product-image-scale, 1)
+
+      )
+
+    ) !important;
+
+}
+
+/* แถบสูง แต่ใสมาก */
+
+.product-card.pos-image-card .pos-card-shade,
+
+.pos-modern-grid .pos-image-card .pos-card-shade {
+
+  height: 38% !important;
+
+  background:
+
+    linear-gradient(
+
+      180deg,
+
+      rgba(20,20,20,0.02) 0%,
+
+      rgba(20,20,20,0.08) 40%,
+
+      rgba(20,20,20,0.18) 100%
+
+    ) !important;
+
+  backdrop-filter: none !important;
+
+  -webkit-backdrop-filter: none !important;
+
+}
+
+.product-card.pos-image-card .pos-card-info,
+
+.pos-modern-grid .pos-image-card .pos-card-info {
+
+  height: 38% !important;
+
+}
+
+/* ชื่อใหญ่ + หนา */
+
+.product-card.pos-image-card .pos-card-name,
+
+.pos-modern-grid .pos-image-card .pos-card-name {
+
+  font-weight: 950 !important;
+
+}
+
+/* Desktop */
+
+@media (min-width: 1000px) {
+
+  .product-card.pos-image-card .pos-card-image,
+
+  .pos-modern-grid .pos-image-card .pos-card-image {
+
+    transform:
+
+      translate(
+
+        var(--product-image-x, 0%),
+
+        var(--product-image-y, 0%)
+
+      )
+
+      scale(
+
+        calc(
+
+          1.26 *
+
+          var(--product-image-scale, 1)
+
+        )
+
+      ) !important;
+
+  }
+
+}
+
+/* Mobile */
+
+@media (max-width: 720px) {
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card {
+
+    height: 124px !important;
+
+    min-height: 124px !important;
+
+    max-height: 124px !important;
+
+  }
+
+  html body
+
+  .app.pos-page.pos-modern
+
+  .product-card.pos-image-card
+
+  .pos-card-image-area {
+
+    padding:
+
+      1px
+
+      1px
+
+      32px !important;
+
+  }
 
   html body
 
@@ -1423,7 +1957,7 @@
 
         calc(
 
-          1.18 *
+          1.27 *
 
           var(--product-image-scale, 1)
 
@@ -1433,61 +1967,6 @@
 
   }
 
-
-  /* =======================================================
-
-     MOBILE BAND
-
-     ======================================================= */
-
-  html body
-
-  .app.pos-page.pos-modern
-
-  .product-card.pos-image-card
-
-  .pos-card-shade,
-
-  html body
-
-  .app.pos-page.pos-modern
-
-  .product-card.pos-image-card
-
-  .pos-card-info {
-
-    height:
-
-      34% !important;
-
-  }
-
-
-  html body
-
-  .app.pos-page.pos-modern
-
-  .product-card.pos-image-card
-
-  .pos-card-info {
-
-    padding:
-
-      2px
-
-      3px
-
-      3px !important;
-
-  }
-
-
-  /* =======================================================
-
-     MOBILE NAME
-
-     ======================================================= */
-
   html body
 
   .app.pos-page.pos-modern
@@ -1496,26 +1975,11 @@
 
   .pos-card-name {
 
-    font-size:
+    font-size: 15px !important;
 
-      14px !important;
-
-    font-weight:
-
-      900 !important;
-
-    line-height:
-
-      1.02 !important;
+    font-weight: 950 !important;
 
   }
-
-
-  /* =======================================================
-
-     MOBILE PRICE
-
-     ======================================================= */
 
   html body
 
@@ -1525,43 +1989,13 @@
 
   .pos-card-price {
 
-    margin-top:
+    font-size: 12px !important;
 
-      2px !important;
-
-    font-size:
-
-      11px !important;
-
-    font-weight:
-
-      850 !important;
-
-  }
-
-
-  html body
-
-  .app.pos-page.pos-modern
-
-  .product-card.pos-image-card
-
-  .pos-card-pack-text {
-
-    font-size:
-
-      6px !important;
+    font-weight: 850 !important;
 
   }
 
 }
-
-
-/* =========================================================
-
-   SMALL PHONE
-
-   ========================================================= */
 
 @media (max-width: 390px) {
 
@@ -1571,39 +2005,13 @@
 
   .product-card.pos-image-card {
 
-    height:
+    height: 120px !important;
 
-      116px !important;
+    min-height: 120px !important;
 
-    min-height:
-
-      116px !important;
-
-    max-height:
-
-      116px !important;
+    max-height: 120px !important;
 
   }
-
-
-  html body
-
-  .app.pos-page.pos-modern
-
-  .product-card.pos-image-card
-
-  .pos-card-image-area {
-
-    padding:
-
-      2px
-
-      2px
-
-      30px !important;
-
-  }
-
 
   html body
 
@@ -1613,12 +2021,9 @@
 
   .pos-card-name {
 
-    font-size:
-
-      13px !important;
+    font-size: 14px !important;
 
   }
-
 
   html body
 
@@ -1628,11 +2033,9 @@
 
   .pos-card-price {
 
-    font-size:
-
-      10px !important;
+    font-size: 11px !important;
 
   }
 
 }
- 
+
