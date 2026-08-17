@@ -6,6 +6,7 @@
 
    ========================================================= */
 
+
 /* =========================================================
 
    TOP BAR
@@ -20,15 +21,15 @@
 
   z-index: auto !important;
 
-  background: rgba(249, 250, 251, 0.97) !important;
+  background: #f5f5f5 !important;
 
-  backdrop-filter: blur(12px);
+  backdrop-filter: none !important;
 
-  -webkit-backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: none !important;
 
-  box-shadow:
+  box-shadow: none !important;
 
-    0 1px 0 rgba(16, 24, 40, 0.08);
+  border: none !important;
 
 }
 
@@ -51,15 +52,42 @@
 
   padding: 5px 4px 6px !important;
 
-  background: rgba(249, 250, 251, 0.97);
+  background: #f5f5f5 !important;
 
-  backdrop-filter: blur(12px);
+  backdrop-filter: none !important;
 
-  -webkit-backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: none !important;
 
-  border-bottom:
+  border: none !important;
 
-    1px solid rgba(16, 24, 40, 0.08);
+  border-bottom: none !important;
+
+  box-shadow: none !important;
+
+}
+
+
+/* =========================================================
+
+   PAGE BACKGROUND
+
+   ========================================================= */
+
+.pos-modern {
+
+  background: #f5f5f5 !important;
+
+}
+
+.app.pos-page.pos-modern {
+
+  background: #f5f5f5 !important;
+
+}
+
+.pos-modern .product-panel {
+
+  background: #f5f5f5 !important;
 
 }
 
@@ -113,7 +141,7 @@
 
 /* =========================================================
 
-   TOTAL PILL
+   TOTAL
 
    ========================================================= */
 
@@ -153,7 +181,9 @@
 
   box-shadow:
 
-    0 2px 8px rgba(46, 144, 250, 0.15);
+    0 2px 8px
+
+    rgba(46, 144, 250, 0.15);
 
   transform-origin: center;
 
@@ -169,7 +199,9 @@
 
   animation:
 
-    pos-cart-pulse 0.42s ease;
+    pos-cart-pulse
+
+    0.42s ease;
 
 }
 
@@ -184,12 +216,6 @@
   45% {
 
     transform: scale(1.16);
-
-    box-shadow:
-
-      0 0 0 9px
-
-      rgba(46, 144, 250, 0.14);
 
   }
 
@@ -272,7 +298,9 @@
 
       ),
 
-    opacity 0.78s ease;
+    opacity
+
+      0.78s ease;
 
 }
 
@@ -329,6 +357,14 @@
 
   margin: 0 !important;
 
+  background:
+
+    transparent !important;
+
+  border: none !important;
+
+  box-shadow: none !important;
+
   box-sizing: border-box;
 
 }
@@ -336,7 +372,7 @@
 
 /* =========================================================
 
-   PRODUCT CARD — ONE SOURCE OF TRUTH
+   PRODUCT CARD
 
    ========================================================= */
 
@@ -350,11 +386,15 @@
 
   min-width: 0 !important;
 
+  max-width: none !important;
+
   height: 150px !important;
 
   min-height: 150px !important;
 
   max-height: 150px !important;
+
+  display: block !important;
 
   overflow: hidden !important;
 
@@ -362,27 +402,25 @@
 
   margin: 0 !important;
 
-  border:
+  border: none !important;
 
-    1px solid
-
-    rgba(255, 255, 255, 0.92) !important;
+  outline: none !important;
 
   border-radius: 13px !important;
 
-  box-shadow:
-
-    0 3px 9px
-
-    rgba(16, 24, 40, 0.15) !important;
+  box-shadow: none !important;
 
   -webkit-tap-highlight-color:
 
     transparent;
 
-  touch-action: manipulation;
+  touch-action:
 
-  user-select: none;
+    manipulation;
+
+  user-select:
+
+    none;
 
 }
 
@@ -390,14 +428,16 @@
 
 .pos-modern-grid .pos-image-card:active {
 
-  transform: scale(0.98);
+  transform:
+
+    scale(0.98);
 
 }
 
 
 /* =========================================================
 
-   REMOVE DUPLICATE TOP NAME
+   TOP NAME
 
    ========================================================= */
 
@@ -418,7 +458,7 @@
 
 /* =========================================================
 
-   PRODUCT IMAGE AREA
+   IMAGE AREA
 
    ========================================================= */
 
@@ -432,15 +472,25 @@
 
 .pos-card-image-area {
 
-  position: absolute !important;
+  position:
 
-  inset: 0 !important;
+    absolute !important;
 
-  width: 100% !important;
+  inset:
 
-  height: 100% !important;
+    0 !important;
 
-  box-sizing: border-box !important;
+  width:
+
+    100% !important;
+
+  height:
+
+    100% !important;
+
+  box-sizing:
+
+    border-box !important;
 
   padding:
 
@@ -450,20 +500,28 @@
 
     35px !important;
 
-  display: flex !important;
+  display:
 
-  align-items: center !important;
+    flex !important;
 
-  justify-content: center !important;
+  align-items:
 
-  overflow: hidden !important;
+    center !important;
+
+  justify-content:
+
+    center !important;
+
+  overflow:
+
+    hidden !important;
 
 }
 
 
 /* =========================================================
 
-   PRODUCT IMAGE
+   IMAGE
 
    ========================================================= */
 
@@ -477,17 +535,29 @@
 
 .pos-card-image {
 
-  display: block !important;
+  display:
 
-  width: 100% !important;
+    block !important;
 
-  height: 100% !important;
+  width:
 
-  max-width: none !important;
+    100% !important;
 
-  max-height: none !important;
+  height:
 
-  object-fit: contain !important;
+    100% !important;
+
+  max-width:
+
+    none !important;
+
+  max-height:
+
+    none !important;
+
+  object-fit:
+
+    contain !important;
 
   object-position:
 
@@ -507,7 +577,7 @@
 
       calc(
 
-        1.14 *
+        1.16 *
 
         var(--product-image-scale, 1)
 
@@ -538,7 +608,7 @@
 
 /* =========================================================
 
-   BOTTOM SHADE
+   SHADE
 
    ========================================================= */
 
@@ -552,15 +622,25 @@
 
 .pos-card-shade {
 
-  position: absolute !important;
+  position:
 
-  left: 0 !important;
+    absolute !important;
 
-  right: 0 !important;
+  left:
 
-  bottom: 0 !important;
+    0 !important;
 
-  height: 34% !important;
+  right:
+
+    0 !important;
+
+  bottom:
+
+    0 !important;
+
+  height:
+
+    34% !important;
 
   background:
 
@@ -570,19 +650,23 @@
 
       rgba(20, 20, 20, 0.02) 0%,
 
-      rgba(20, 20, 20, 0.12) 35%,
+      rgba(20, 20, 20, 0.10) 35%,
 
-      rgba(20, 20, 20, 0.50) 100%
+      rgba(20, 20, 20, 0.48) 100%
 
     ) !important;
 
-  backdrop-filter: none !important;
+  backdrop-filter:
+
+    none !important;
 
   -webkit-backdrop-filter:
 
     none !important;
 
-  pointer-events: none !important;
+  pointer-events:
+
+    none !important;
 
 }
 
@@ -603,19 +687,33 @@
 
 .pos-card-info {
 
-  position: absolute !important;
+  position:
 
-  left: 0 !important;
+    absolute !important;
 
-  right: 0 !important;
+  left:
 
-  bottom: 0 !important;
+    0 !important;
 
-  width: 100% !important;
+  right:
 
-  height: 34% !important;
+    0 !important;
 
-  box-sizing: border-box !important;
+  bottom:
+
+    0 !important;
+
+  width:
+
+    100% !important;
+
+  height:
+
+    34% !important;
+
+  box-sizing:
+
+    border-box !important;
 
   padding:
 
@@ -625,7 +723,9 @@
 
     4px !important;
 
-  display: flex !important;
+  display:
+
+    flex !important;
 
   flex-direction:
 
@@ -643,14 +743,16 @@
 
     center !important;
 
-  z-index: 4 !important;
+  z-index:
+
+    4 !important;
 
 }
 
 
 /* =========================================================
 
-   PRODUCT NAME
+   NAME
 
    ========================================================= */
 
@@ -664,23 +766,37 @@
 
 .pos-card-name {
 
-  width: 100% !important;
+  width:
 
-  margin: 0 !important;
+    100% !important;
 
-  color: #ffffff !important;
+  margin:
 
-  font-size: 14px !important;
+    0 !important;
 
-  font-weight: 900 !important;
+  color:
 
-  line-height: 1.02 !important;
+    #ffffff !important;
+
+  font-size:
+
+    14px !important;
+
+  font-weight:
+
+    900 !important;
+
+  line-height:
+
+    1.02 !important;
 
   letter-spacing:
 
     -0.2px !important;
 
-  overflow: hidden !important;
+  overflow:
+
+    hidden !important;
 
   display:
 
@@ -723,13 +839,21 @@
 
     2px !important;
 
-  color: #ffffff !important;
+  color:
 
-  font-size: 11px !important;
+    #ffffff !important;
 
-  font-weight: 850 !important;
+  font-size:
 
-  line-height: 1 !important;
+    11px !important;
+
+  font-weight:
+
+    850 !important;
+
+  line-height:
+
+    1 !important;
 
   white-space:
 
@@ -844,7 +968,9 @@
 
 .pos-card-stock {
 
-  display: none !important;
+  display:
+
+    none !important;
 
 }
 
@@ -1016,6 +1142,10 @@
 
       visible !important;
 
+    background:
+
+      #f5f5f5 !important;
+
   }
 
 
@@ -1026,6 +1156,10 @@
     overflow:
 
       visible !important;
+
+    background:
+
+      #f5f5f5 !important;
 
   }
 
@@ -1039,6 +1173,10 @@
     top:
 
       auto !important;
+
+    background:
+
+      #f5f5f5 !important;
 
   }
 
@@ -1064,6 +1202,18 @@
     padding:
 
       3px 3px 5px !important;
+
+    background:
+
+      #f5f5f5 !important;
+
+    border:
+
+      none !important;
+
+    box-shadow:
+
+      none !important;
 
   }
 
@@ -1112,7 +1262,11 @@
   }
 
 
-  /* ---------- 3 COLUMNS ---------- */
+  /* =======================================================
+
+     MOBILE GRID
+
+     ======================================================= */
 
   html body
 
@@ -1126,6 +1280,10 @@
 
       100% !important;
 
+    display:
+
+      grid !important;
+
     grid-template-columns:
 
       repeat(
@@ -1138,7 +1296,7 @@
 
     gap:
 
-      4px !important;
+      5px !important;
 
     padding:
 
@@ -1148,10 +1306,26 @@
 
       0 !important;
 
+    background:
+
+      transparent !important;
+
+    border:
+
+      none !important;
+
+    box-shadow:
+
+      none !important;
+
   }
 
 
-  /* ---------- CARD HEIGHT ---------- */
+  /* =======================================================
+
+     MOBILE CARD — EXPANDED
+
+     ======================================================= */
 
   html body
 
@@ -1159,26 +1333,54 @@
 
   .product-card.pos-image-card {
 
+    width:
+
+      100% !important;
+
+    min-width:
+
+      0 !important;
+
+    max-width:
+
+      none !important;
+
     height:
 
-      96px !important;
+      122px !important;
 
     min-height:
 
-      96px !important;
+      122px !important;
 
     max-height:
 
-      96px !important;
+      122px !important;
+
+    border:
+
+      none !important;
+
+    outline:
+
+      none !important;
 
     border-radius:
 
-      9px !important;
+      10px !important;
+
+    box-shadow:
+
+      none !important;
 
   }
 
 
-  /* ---------- IMAGE ---------- */
+  /* =======================================================
+
+     MOBILE IMAGE
+
+     ======================================================= */
 
   html body
 
@@ -1190,11 +1392,11 @@
 
     padding:
 
-      1px
+      2px
 
-      1px
+      2px
 
-      27px !important;
+      32px !important;
 
   }
 
@@ -1221,7 +1423,7 @@
 
         calc(
 
-          1.12 *
+          1.18 *
 
           var(--product-image-scale, 1)
 
@@ -1232,7 +1434,11 @@
   }
 
 
-  /* ---------- TEXT BAND ---------- */
+  /* =======================================================
+
+     MOBILE BAND
+
+     ======================================================= */
 
   html body
 
@@ -1269,12 +1475,18 @@
 
       2px
 
-      2px
+      3px
 
       3px !important;
 
   }
 
+
+  /* =======================================================
+
+     MOBILE NAME
+
+     ======================================================= */
 
   html body
 
@@ -1286,7 +1498,7 @@
 
     font-size:
 
-      12px !important;
+      14px !important;
 
     font-weight:
 
@@ -1294,10 +1506,16 @@
 
     line-height:
 
-      1 !important;
+      1.02 !important;
 
   }
 
+
+  /* =======================================================
+
+     MOBILE PRICE
+
+     ======================================================= */
 
   html body
 
@@ -1309,11 +1527,11 @@
 
     margin-top:
 
-      1px !important;
+      2px !important;
 
     font-size:
 
-      10px !important;
+      11px !important;
 
     font-weight:
 
@@ -1342,7 +1560,6 @@
 /* =========================================================
 
    SMALL PHONE
-<= 390px
 
    ========================================================= */
 
@@ -1356,15 +1573,15 @@
 
     height:
 
-      92px !important;
+      116px !important;
 
     min-height:
 
-      92px !important;
+      116px !important;
 
     max-height:
 
-      92px !important;
+      116px !important;
 
   }
 
@@ -1379,11 +1596,11 @@
 
     padding:
 
-      1px
+      2px
 
-      1px
+      2px
 
-      25px !important;
+      30px !important;
 
   }
 
@@ -1398,7 +1615,7 @@
 
     font-size:
 
-      11px !important;
+      13px !important;
 
   }
 
@@ -1413,7 +1630,7 @@
 
     font-size:
 
-      9px !important;
+      10px !important;
 
   }
 
