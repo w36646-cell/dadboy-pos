@@ -2646,23 +2646,6 @@ product.id,
 
   }
 
-  const totalQty =
-
-    cart.reduce(
-
-      (sum, item) =>
-
-        sum +
-
-        Number(
-
-          item.qty || 0
-
-        ),
-
-      0
-
-    );
 
   const total =
 
@@ -2687,8 +2670,6 @@ product.id,
       0
 
     );
-
-  void totalQty;
 
   /* =========================
 
@@ -2843,58 +2824,6 @@ item.id
           stockQuantity;
 
       }
-
-    );
-
-    console.log(
-
-      "Checkout stock calculation:",
-
-      checkoutCart.map(
-
-        (item) => ({
-
-          product:
-
-            item.name,
-
-          option:
-
-            item.option,
-
-          qty:
-
-            item.qty,
-
-          saleType:
-
-            item.saleType,
-
-          stockPerUnit:
-
-            getStockPerUnit(
-
-              item
-
-            ),
-
-          stockQuantity:
-
-            Number(
-
-              item.qty || 0
-
-            ) *
-
-            getStockPerUnit(
-
-              item
-
-            ),
-
-        })
-
-      )
 
     );
 
