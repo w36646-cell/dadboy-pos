@@ -672,6 +672,70 @@ export async function updateManyCloudStocks(
 
 }
 
+export async function updateSoldCloudStocks(
+
+  soldByProduct,
+
+  inventory
+
+) {
+
+  const productIds =
+
+    Object.keys(
+
+      soldByProduct || {}
+
+    );
+
+  if (
+
+    productIds.length === 0
+
+  ) {
+
+    return [];
+
+  }
+
+  const jobs =
+
+    productIds.map(
+
+      (productId) => {
+
+        const stock =
+
+          Number(
+
+            inventory[
+
+              productId
+
+            ] ?? 0
+
+          );
+
+        return updateCloudStock(
+
+          productId,
+
+          stock
+
+        );
+
+      }
+
+    );
+
+  return Promise.all(
+
+    jobs
+
+  );
+
+}
+
 export async function restoreCloudStocksFromItems(
 
   items
