@@ -50,6 +50,8 @@ import {
 
   saveCloudSale,
 
+  getCloudSales,
+
 } from "./services/salesService";
 
 import {
@@ -699,6 +701,36 @@ const [
 
   const [
 
+    headerSales,
+
+    setHeaderSales,
+
+  ] = useState(() => {
+
+    const savedSales =
+
+      readStorage(
+
+        SALES_KEY,
+
+        []
+
+      );
+
+    return Array.isArray(
+
+      savedSales
+
+    )
+
+      ? savedSales
+
+      : [];
+
+  });
+ 
+  const [
+
     syncVersion,
 
     setSyncVersion,
@@ -734,8 +766,235 @@ const [
   );
 
 }, [cart]);
- 
+  
+ useEffect(() => {
 
+    let cancelled = false;
+
+    async function refreshHeaderSales() {
+
+      if (
+
+        typeof navigator !==
+
+          "undefined" &&
+
+        navigator.onLine === false
+
+      ) {
+
+        return;
+
+      }
+
+      try {
+
+        const cloudSales =
+
+          await getCloudSales();
+
+        if (cancelled) {
+
+          return;
+
+        }
+
+        const mergedSales =
+
+          new Map();
+
+        (
+
+          Array.isArray(
+
+            cloudSales
+
+          )
+
+            ? cloudSales
+
+            : []
+
+        ).forEach((sale) => {
+
+          if (sale?.billId) {
+
+            mergedSales.set(
+
+              sale.billId,
+
+              sale
+
+            );
+
+          }
+
+        });
+
+        getPendingSales().forEach(
+
+          (sale) => {
+
+            if (
+
+              sale?.billId &&
+
+              !mergedSales.has(
+
+                sale.billId
+
+              )
+
+            ) {
+
+              mergedSales.set(
+
+                sale.billId,
+
+                sale
+
+              );
+
+            }
+
+          }
+
+        );
+
+        const nextSales =
+
+          Array.from(
+
+            mergedSales.values()
+
+          );
+
+        setHeaderSales(
+
+          nextSales
+
+        );
+
+        try {
+
+          localStorage.setItem(
+
+            SALES_KEY,
+
+            JSON.stringify(
+
+              nextSales
+
+            )
+
+          );
+
+        } catch (error) {
+
+          console.warn(
+
+            "Sales cache skipped:",
+
+            error
+
+          );
+
+        }
+
+      } catch (error) {
+
+        console.error(
+
+          "Header sales sync error:",
+
+          error
+
+        );
+
+      }
+
+    }
+
+    refreshHeaderSales();
+
+    function handleFocus() {
+
+      refreshHeaderSales();
+
+    }
+
+    function handleVisibility() {
+
+      if (
+
+        document.visibilityState ===
+
+        "visible"
+
+      ) {
+
+        refreshHeaderSales();
+
+      }
+
+    }
+
+    const timer =
+
+      window.setInterval(
+
+        refreshHeaderSales,
+
+        15000
+
+      );
+
+    window.addEventListener(
+
+      "focus",
+
+      handleFocus
+
+    );
+
+    document.addEventListener(
+
+      "visibilitychange",
+
+      handleVisibility
+
+    );
+
+    return () => {
+
+      cancelled = true;
+
+      window.clearInterval(
+
+        timer
+
+      );
+
+      window.removeEventListener(
+
+        "focus",
+
+        handleFocus
+
+      );
+
+      document.removeEventListener(
+
+        "visibilitychange",
+
+        handleVisibility
+
+      );
+
+    };
+
+  }, []);
+ 
   function notifySyncStateChanged() {
 
     setSyncVersion(
@@ -3080,6 +3339,42 @@ item.id,
 
     );
 
+    setHeaderSales(
+
+      (currentSales) => {
+
+        const safeSales =
+
+          Array.isArray(
+
+            currentSales
+
+          )
+
+            ? currentSales
+
+            : [];
+
+        return [
+
+          ...safeSales.filter(
+
+            (item) =>
+
+              item.billId !==
+
+              sale.billId
+
+          ),
+
+          sale,
+
+        ];
+
+      }
+
+    );
+ 
     saveInventoryLocal(
 
       newInventory
@@ -3326,11 +3621,7 @@ const todaySales =
 
   readStorage(
 
-    SALES_KEY,
-
-    []
-
-  ).filter(
+    headerSales.filter(
 
     (sale) =>
 
