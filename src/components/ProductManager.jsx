@@ -181,6 +181,8 @@ function ProductManager({
 
   ] = useState("");
 
+  const searchInputRef = useRef(null);
+ 
   const [
 
     editingProduct,
@@ -1368,6 +1370,8 @@ option.id ===
 >
 <input
 
+    ref={searchInputRef}
+
     className="search-input"
 
     type="search"
@@ -1378,11 +1382,7 @@ option.id ===
 
     onChange={(event) =>
 
-      setSearch(
-
-        event.target.value
-
-      )
+      setSearch(event.target.value)
 
     }
 
@@ -1407,11 +1407,23 @@ option.id ===
 
       aria-label="ล้างคำค้นหา"
 
-      onClick={() =>
+      onPointerDown={(event) => {
 
-        setSearch("")
+        event.preventDefault();
 
-      }
+      }}
+
+      onClick={() => {
+
+        setSearch("");
+
+        requestAnimationFrame(() => {
+
+          searchInputRef.current?.focus();
+
+        });
+
+      }}
 
       style={{
 
@@ -1421,9 +1433,7 @@ option.id ===
 
         right: "10px",
 
-        transform:
-
-          "translateY(-50%)",
+        transform: "translateY(-50%)",
 
         width: "36px",
 
@@ -1435,9 +1445,7 @@ option.id ===
 
         borderRadius: "50%",
 
-        background:
-
-          "transparent",
+        background: "transparent",
 
         color: "#777",
 
@@ -1457,7 +1465,7 @@ option.id ===
 
   )}
 </div>
- 
+  
 <div className="product-manager-layout">
 <div className="product-table-wrap">
 <table className="product-table">
