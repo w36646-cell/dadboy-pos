@@ -1352,37 +1352,112 @@ option.id ===
 </button>
 </div>
 </div>
+<div
+
+  style={{
+
+    position: "relative",
+
+    width: "100%",
+
+    maxWidth: "520px",
+
+    margin: "18px 0",
+
+  }}
+>
 <input
 
-        className="search-input"
+    className="search-input"
 
-        type="search"
+    type="search"
 
-        placeholder="ค้นหาสินค้า..."
+    placeholder="ค้นหาสินค้า..."
 
-        value={
+    value={search}
 
-          search
+    onChange={(event) =>
 
-        }
+      setSearch(
 
-        onChange={(
+        event.target.value
 
-          event
+      )
 
-        ) =>
+    }
 
-          setSearch(
+    style={{
 
-            event.target
+      width: "100%",
 
-              .value
+      maxWidth: "none",
 
-          )
+      margin: 0,
 
-        }
+      paddingRight: "52px",
 
-      />
+    }}
+
+  />
+
+  {search && (
+<button
+
+      type="button"
+
+      aria-label="ล้างคำค้นหา"
+
+      onClick={() =>
+
+        setSearch("")
+
+      }
+
+      style={{
+
+        position: "absolute",
+
+        top: "50%",
+
+        right: "10px",
+
+        transform:
+
+          "translateY(-50%)",
+
+        width: "36px",
+
+        height: "36px",
+
+        padding: 0,
+
+        border: 0,
+
+        borderRadius: "50%",
+
+        background:
+
+          "transparent",
+
+        color: "#777",
+
+        fontSize: "28px",
+
+        fontWeight: "400",
+
+        lineHeight: 1,
+
+        cursor: "pointer",
+
+      }}
+>
+
+      ×
+</button>
+
+  )}
+</div>
+ 
 <div className="product-manager-layout">
 <div className="product-table-wrap">
 <table className="product-table">
