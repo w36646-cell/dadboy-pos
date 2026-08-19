@@ -3619,16 +3619,14 @@ item.id,
 
 const todaySales =
 
-  readStorage(
-
-    headerSales.filter(
+  headerSales.filter(
 
     (sale) =>
 
       sale.soldDate === todayDate
 
   );
-
+ 
 const todaySoldQty =
 
   todaySales.reduce(
