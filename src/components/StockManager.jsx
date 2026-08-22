@@ -785,13 +785,17 @@ product.id
 </div>
 
 <aside 
+  <aside
+
   className="stock-form-panel"
+
   style={{
+
     position: "relative",
+
   }}
 >
-</aside>
-
+ 
           {selectedProduct && (
 <button
 
