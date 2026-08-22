@@ -1613,9 +1613,7 @@ sale.id
 
     position: "relative",
 
-    flex: "1 1 520px",
-
-    minWidth: "320px",
+    Width: "100%",
 
   }}
 >
