@@ -509,8 +509,6 @@ selectedProduct.id
       aria-label="ล้างคำค้นหา"
 
       onClick={() => {
-
-       onMouseDown={(event) => event.preventDefault()}
         
 onClick={() => {
 
