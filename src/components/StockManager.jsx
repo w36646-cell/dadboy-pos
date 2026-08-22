@@ -784,9 +784,76 @@ product.id
 </table>
 </div>
 
-<aside className="stock-form-panel">
+<aside 
+  className="stock-form-panel"
+  style={{
+    position: "relative",
+  }}
+>
+</aside>
 
-          {!selectedProduct ? (
+          {selectedProduct && (
+<button
+
+    type="button"
+
+    aria-label="ปิดรายการรับสินค้า"
+
+    onClick={() => {
+
+      setSelectedProduct(null);
+
+      setReceiveQty(1);
+
+      setReceiveUnit("unit");
+
+    }}
+
+    style={{
+
+      position: "absolute",
+
+      top: "10px",
+
+      right: "10px",
+
+      width: "38px",
+
+      height: "38px",
+
+      padding: 0,
+
+      border: "none",
+
+      borderRadius: "50%",
+
+      background: "#e5e7eb",
+
+      color: "#475467",
+
+      fontSize: "24px",
+
+      fontWeight: "700",
+
+      display: "flex",
+
+      alignItems: "center",
+
+      justifyContent: "center",
+
+      cursor: "pointer",
+
+      zIndex: 10,
+
+    }}
+>
+
+    ×
+</button>
+
+)}
+  
+ {!selectedProduct ? (
 <div className="stock-form-empty">
 
               เลือกสินค้าจากรายการด้านซ้าย
