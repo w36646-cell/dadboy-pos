@@ -210,8 +210,12 @@ function POSPage({
 
     ) {
 
-      searchInputRef.current.focus();
+      searchInputRef.current.focus({
 
+  preventScroll: true,
+
+});
+ 
     }
 
   }, [
@@ -1014,19 +1018,36 @@ option.id ===
         />
 <button
 
-          type="button"
+  type="button"
 
-          className="pos-search-close"
+  className="pos-search-close"
 
-          onClick={
+  onPointerDown={(event) => {
 
-            closeSearch
+    event.preventDefault();
 
-          }
+  }}
+
+  onClick={() => {
+
+    setSearchText("");
+
+    requestAnimationFrame(() => {
+
+      searchInputRef.current?.focus({
+
+        preventScroll: true,
+
+      });
+
+    });
+
+  }}
 >
 
-          ×
+  ×
 </button>
+ 
 </div>
 </div>
 
