@@ -1324,4 +1324,35 @@
   }
 
 }
+
+/* =========================================
+
+   PRODUCT NAME COLOR
+
+   ========================================= */
+
+/* สินค้าปกติ: ชื่อสินค้าเป็นสีฟ้า */
+
+.product-card.pos-image-card .pos-card-name {
+
+  color: #38bdf8 !important;
+
+}
+
+/* Stock ต่ำ/ถึง Min: ชื่อสินค้าเป็นสีแดง */
+
+.product-card.pos-image-card .pos-card-name.low-stock {
+
+  color: #ef4444 !important;
+
+}
+
+/* Stock ต่ำ/ถึง Min: ราคาเป็นสีแดง */
+
+.product-card.pos-image-card .pos-card-price.low-stock {
+
+  color: #ef4444 !important;
+
+}
+ 
  
