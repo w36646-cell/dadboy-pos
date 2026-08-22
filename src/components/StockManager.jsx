@@ -449,28 +449,110 @@ selectedProduct.id
 </button>
 </div>
 
+<div
+
+  style={{
+
+    position: "relative",
+
+    width: "100%",
+
+  }}
+>
 <input
 
-        className="search-input"
+    className="search-input"
 
-        type="search"
+    type="search"
 
-        placeholder="ค้นหาสินค้าที่จะรับเข้า..."
+    placeholder="ค้นหาสินค้าที่จะรับเข้า..."
 
-        value={searchText}
+    value={searchText}
 
-        onChange={(event) =>
+    onChange={(event) =>
 
-          setSearchText(
+      setSearchText(
 
-            event.target.value
+        event.target.value
 
-          )
+      )
 
-        }
+    }
 
-      />
+    style={{
 
+      width: "100%",
+
+      paddingRight: searchText
+
+        ? "46px"
+
+        : undefined,
+
+    }}
+
+  />
+
+  {searchText && (
+<button
+
+      type="button"
+
+      aria-label="ล้างการค้นหา"
+
+      onClick={() => {
+
+        setSearchText("");
+
+        setSelectedProduct(null);
+
+      }}
+
+      style={{
+
+        position: "absolute",
+
+        right: "12px",
+
+        top: "50%",
+
+        transform: "translateY(-50%)",
+
+        width: "32px",
+
+        height: "32px",
+
+        padding: 0,
+
+        border: "none",
+
+        borderRadius: "50%",
+
+        background: "#e5e7eb",
+
+        color: "#475467",
+
+        fontSize: "22px",
+
+        fontWeight: "700",
+
+        lineHeight: "32px",
+
+        textAlign: "center",
+
+        cursor: "pointer",
+
+        zIndex: 2,
+
+      }}
+>
+
+      ×
+</button>
+
+  )}
+</div>
+ 
 <div className="stock-layout">
 <div className="product-table-wrap">
 <table className="product-table">
