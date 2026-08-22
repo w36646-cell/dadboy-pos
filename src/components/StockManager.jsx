@@ -504,73 +504,72 @@ selectedProduct.id
   {searchText && (
 <button
 
-      type="button"
+    type="button"
 
-      aria-label="ล้างคำค้นหา"
+    aria-label="ล้างคำค้นหา"
 
-      onClick={() => {
-        
-onClick={() => {
+    onClick={() => {
 
-  setSearchText("");
+      setSearchText("");
 
-}}
- 
-      style={{
+    }}
 
-        position: "absolute",
+    style={{
 
-        right: "12px",
+      position: "absolute",
 
-        top: "50%",
+      right: "12px",
 
-        transform: "translateY(-50%)",
+      top: "50%",
 
-        width: "32px",
+      transform: "translateY(-50%)",
 
-        height: "32px",
+      width: "32px",
 
-        minWidth: "32px",
+      height: "32px",
 
-        padding: 0,
+      minWidth: "32px",
 
-        margin: 0,
+      padding: 0,
 
-        border: "none",
+      margin: 0,
 
-        borderRadius: "50%",
+      border: "none",
 
-        background: "#e5e7eb",
+      borderRadius: "50%",
 
-        color: "#475467",
+      background: "#e5e7eb",
 
-        fontSize: "22px",
+      color: "#475467",
 
-        fontWeight: "700",
+      fontSize: "22px",
 
-        lineHeight: "1",
+      fontWeight: "700",
 
-        display: "flex",
+      lineHeight: "1",
 
-        alignItems: "center",
+      display: "flex",
 
-        justifyContent: "center",
+      alignItems: "center",
 
-        cursor: "pointer",
+      justifyContent: "center",
 
-        zIndex: 5,
+      cursor: "pointer",
 
-        touchAction: "manipulation",
+      zIndex: 5,
 
-WebkitTapHighlightColor: "transparent",
- 
-      }}
+      touchAction: "manipulation",
+
+      WebkitTapHighlightColor: "transparent",
+
+    }}
 >
 
-      ×
+    ×
 </button>
 
-  )}
+)}
+ 
 </div>
   
 <div className="stock-layout">
