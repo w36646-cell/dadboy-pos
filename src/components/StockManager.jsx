@@ -785,7 +785,6 @@ product.id
 </div>
 
 <aside 
-  <aside
 
   className="stock-form-panel"
 
