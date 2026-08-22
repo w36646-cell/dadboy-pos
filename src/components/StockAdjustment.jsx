@@ -2,6 +2,8 @@ import {
 
   useMemo,
 
+  useRef,
+
   useState,
 
 } from "react";
@@ -114,6 +116,8 @@ function StockAdjustment({
 
   ] = useState("");
 
+  const searchInputRef = useRef(null);
+ 
   const [
 
     selectedProduct,
@@ -576,36 +580,138 @@ selectedProduct.id,
         กรุณาตรวจนับสินค้าก่อนยืนยัน
 </div>
 
+<div
+
+  style={{
+
+    position: "relative",
+
+    width: "100%",
+
+  }}
+>
 <input
 
-        className="search-input"
+    ref={searchInputRef}
 
-        type="search"
+    className="search-input"
 
-        placeholder="ค้นหาสินค้าที่จะปรับสต๊อก..."
+    type="search"
 
-        value={
+    placeholder="ค้นหาสินค้าที่จะปรับสต๊อก..."
 
-          searchText
+    value={searchText}
 
-        }
+    onChange={(event) =>
 
-        onChange={(
+      setSearchText(
 
-          event
+        event.target.value
 
-        ) =>
+      )
 
-          setSearchText(
+    }
 
-            event.target.value
+    style={{
 
-          )
+      width: "100%",
 
-        }
+      paddingRight: searchText
 
-      />
+        ? "48px"
 
+        : undefined,
+
+    }}
+
+  />
+
+  {searchText && (
+<button
+
+      type="button"
+
+      aria-label="ล้างคำค้นหา"
+
+      onPointerDown={(event) => {
+
+        event.preventDefault();
+
+      }}
+
+      onClick={() => {
+
+        setSearchText("");
+
+        requestAnimationFrame(() => {
+
+          searchInputRef.current?.focus({
+
+            preventScroll: true,
+
+          });
+
+        });
+
+      }}
+
+      style={{
+
+        position: "absolute",
+
+        right: "12px",
+
+        top: "50%",
+
+        transform: "translateY(-50%)",
+
+        width: "32px",
+
+        height: "32px",
+
+        minWidth: "32px",
+
+        padding: 0,
+
+        margin: 0,
+
+        border: "none",
+
+        borderRadius: "50%",
+
+        background: "#e5e7eb",
+
+        color: "#475467",
+
+        fontSize: "22px",
+
+        fontWeight: "700",
+
+        lineHeight: "1",
+
+        display: "flex",
+
+        alignItems: "center",
+
+        justifyContent: "center",
+
+        cursor: "pointer",
+
+        zIndex: 5,
+
+        touchAction: "manipulation",
+
+        WebkitTapHighlightColor: "transparent",
+
+      }}
+>
+
+      ×
+</button>
+
+  )}
+</div>
+ 
 <div className="stock-layout">
 
 <div className="product-table-wrap">
@@ -968,8 +1074,6 @@ product.id
                   handleKeyDown
 
                 }
-
-                autoFocus
 
               />
 
