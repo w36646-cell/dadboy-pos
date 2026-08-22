@@ -1,5 +1,7 @@
 import {
 
+  useEffect,
+
   useMemo,
 
   useRef,
@@ -14,8 +16,9 @@ import {
 
   saveCloudProduct,
 
-} from "../services/productService";
+  updateProductSortOrders,
 
+} from "../services/productService";
 
 
 function parseProductImageSettings(value) {
@@ -85,6 +88,7 @@ function parseProductImageSettings(value) {
   }
 
 }
+
 
 function serializeProductImageSettings(
 
@@ -161,6 +165,7 @@ function createEmptyForm() {
 
 }
 
+
 function ProductManager({
 
   products,
@@ -181,8 +186,34 @@ function ProductManager({
 
   ] = useState("");
 
-  const searchInputRef = useRef(null);
- 
+  const searchInputRef =
+
+    useRef(null);
+
+  const [
+
+    orderedProducts,
+
+    setOrderedProducts,
+
+  ] = useState(products);
+
+  const dragProductIdRef =
+
+    useRef(null);
+
+  const dragTimerRef =
+
+    useRef(null);
+
+  const draggingRef =
+
+    useRef(false);
+
+  const orderedProductsRef =
+
+    useRef(products);
+
   const [
 
     editingProduct,
@@ -223,6 +254,30 @@ function ProductManager({
 
     useRef(null);
 
+
+  useEffect(() => {
+
+    if (
+
+      !draggingRef.current
+
+    ) {
+
+      setOrderedProducts(
+
+        products
+
+      );
+
+      orderedProductsRef.current =
+
+        products;
+
+    }
+
+  }, [products]);
+
+
   const list =
 
     useMemo(() => {
@@ -237,11 +292,11 @@ function ProductManager({
 
       if (!keyword) {
 
-        return products;
+        return orderedProducts;
 
       }
 
-      return products.filter(
+      return orderedProducts.filter(
 
         (product) =>
 
@@ -263,11 +318,383 @@ function ProductManager({
 
     }, [
 
-      products,
+      orderedProducts,
 
       search,
 
     ]);
+
+
+  function cancelProductDragTimer() {
+
+    if (
+
+      dragTimerRef.current
+
+    ) {
+
+      window.clearTimeout(
+
+        dragTimerRef.current
+
+      );
+
+      dragTimerRef.current =
+
+        null;
+
+    }
+
+  }
+
+
+  function startProductDrag(
+
+    product,
+
+    event
+
+  ) {
+
+    /*
+
+      ตอนค้นหาอยู่
+
+      ไม่ให้ลากสลับลำดับ
+
+      เพราะ list เป็นรายการที่ถูกกรอง
+
+    */
+
+    if (search.trim()) {
+
+      return;
+
+    }
+
+    if (
+
+      event.target.closest(
+
+        "button, input, select, textarea"
+
+      )
+
+    ) {
+
+      return;
+
+    }
+
+    cancelProductDragTimer();
+
+    const pointerId =
+
+      event.pointerId;
+
+    const row =
+
+      event.currentTarget;
+
+    dragTimerRef.current =
+
+      window.setTimeout(
+
+        () => {
+
+          dragProductIdRef.current =
+product.id;
+
+          draggingRef.current =
+
+            true;
+
+          row.dataset.dragging =
+
+            "true";
+
+          try {
+
+            row.setPointerCapture?.(
+
+              pointerId
+
+            );
+
+          } catch {
+
+            // ไม่ต้องทำอะไร
+
+          }
+
+          if (
+
+            typeof navigator !==
+
+              "undefined" &&
+
+            typeof navigator.vibrate ===
+
+              "function"
+
+          ) {
+
+            navigator.vibrate(30);
+
+          }
+
+        },
+
+        450
+
+      );
+
+  }
+
+
+  function moveProductDrag(
+
+    event
+
+  ) {
+
+    if (
+
+      !draggingRef.current ||
+
+      dragProductIdRef.current ==
+
+        null
+
+    ) {
+
+      return;
+
+    }
+
+    const target =
+
+      document.elementFromPoint(
+
+        event.clientX,
+
+        event.clientY
+
+      );
+
+    const row =
+
+      target?.closest(
+
+        "tr[data-product-id]"
+
+      );
+
+    if (!row) {
+
+      return;
+
+    }
+
+    const overId =
+
+      row.getAttribute(
+
+        "data-product-id"
+
+      );
+
+    const draggedId =
+
+      String(
+
+        dragProductIdRef.current
+
+      );
+
+    if (
+
+      !overId ||
+
+      overId === draggedId
+
+    ) {
+
+      return;
+
+    }
+
+    setOrderedProducts(
+
+      (current) => {
+
+        const next = [
+
+          ...current,
+
+        ];
+
+        const fromIndex =
+
+          next.findIndex(
+
+            (product) =>
+
+              String(
+product.id
+
+              ) ===
+
+              draggedId
+
+          );
+
+        const toIndex =
+
+          next.findIndex(
+
+            (product) =>
+
+              String(
+product.id
+
+              ) ===
+
+              String(overId)
+
+          );
+
+        if (
+
+          fromIndex < 0 ||
+
+          toIndex < 0 ||
+
+          fromIndex ===
+
+            toIndex
+
+        ) {
+
+          return current;
+
+        }
+
+        const [moved] =
+
+          next.splice(
+
+            fromIndex,
+
+            1
+
+          );
+
+        next.splice(
+
+          toIndex,
+
+          0,
+
+          moved
+
+        );
+
+        orderedProductsRef.current =
+
+          next;
+
+        return next;
+
+      }
+
+    );
+
+  }
+
+
+  async function finishProductDrag(
+
+    event
+
+  ) {
+
+    cancelProductDragTimer();
+
+    if (
+
+      !draggingRef.current
+
+    ) {
+
+      return;
+
+    }
+
+    draggingRef.current =
+
+      false;
+
+    dragProductIdRef.current =
+
+      null;
+
+    if (
+
+      event?.currentTarget
+
+    ) {
+
+      delete event.currentTarget
+
+        .dataset.dragging;
+
+    }
+
+    try {
+
+      await updateProductSortOrders(
+
+        orderedProductsRef.current
+
+      );
+
+      window.location.reload();
+
+    } catch (error) {
+
+      console.error(
+
+        "Save product order error:",
+
+        error
+
+      );
+
+      window.alert(
+
+        "บันทึกลำดับสินค้าไม่สำเร็จ"
+
+      );
+
+    }
+
+  }
+
+
+  function cancelProductDrag() {
+
+    cancelProductDragTimer();
+
+    dragProductIdRef.current =
+
+      null;
+
+    draggingRef.current =
+
+      false;
+
+  }
 
   function scrollToEditor() {
 
@@ -1471,12 +1898,24 @@ option.id ===
 <table className="product-table">
 <thead>
 <tr>
-<th>
+<th
 
-                  รูป
+  style={{
+
+    width: "44px",
+
+    textAlign: "center",
+
+  }}
+>
+
+  ลาก
 </th>
 <th>
 
+  รูป
+</th>
+ 
                   ชื่อสินค้า
 </th>
 <th>
@@ -1622,30 +2061,114 @@ option.id ===
                   return (
 <tr
 
-                      key={
+  key={item.id}
+
+  data-product-id={
 item.id
 
-                      }
+  }
 
-                      onClick={() =>
+  onPointerDown={(event) =>
 
-                        openEdit(
+    startProductDrag(
 
-                          item
+      item,
 
-                        )
+      event
 
-                      }
+    )
 
-                      style={{
+  }
 
-                        cursor:
+  onPointerMove={
 
-                          "pointer",
+    moveProductDrag
 
-                      }}
+  }
+
+  onPointerUp={
+
+    finishProductDrag
+
+  }
+
+  onPointerCancel={() => {
+
+    cancelProductDrag();
+
+  }}
+
+  onPointerLeave={() => {
+
+    if (
+
+      !draggingRef.current
+
+    ) {
+
+      cancelProductDragTimer();
+
+    }
+
+  }}
+
+  onClick={() => {
+
+    if (
+
+      draggingRef.current
+
+    ) {
+
+      return;
+
+    }
+
+    openEdit(item);
+
+  }}
+
+  style={{
+
+    cursor: "grab",
+
+    touchAction: "pan-y",
+
+    userSelect: "none",
+
+  }}
 >
-<td>
+
+<td
+
+  onClick={(event) => {
+
+    event.stopPropagation();
+
+  }}
+
+  style={{
+
+    width: "44px",
+
+    textAlign: "center",
+
+    fontSize: "22px",
+
+    color: "#667085",
+
+    cursor: "grab",
+
+    touchAction: "none",
+
+  }}
+>
+
+  ☰
+</td>
+ 
+  
+ <td>
 <div className="manager-image-box">
 
                           {parseProductImageSettings(
