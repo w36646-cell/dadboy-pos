@@ -1605,6 +1605,8 @@ sale.id
 </div>
 
         )}
+<div className="bills-toolbar">
+ 
 <div
 
   style={{
