@@ -1,163 +1,365 @@
-const CACHE_NAME = "dadboy-pos-v1";
+const CACHE_NAME =
+
+  "dadboy-pos-v2";
+
+const APP_SCOPE =
+
+  self.registration.scope;
+
+const APP_PATH =
+
+  new URL(
+
+    APP_SCOPE
+
+  ).pathname;
+
+const INDEX_URL =
+
+  new URL(
+
+    "index.html",
+
+    APP_SCOPE
+
+  ).href;
 
 const APP_SHELL = [
 
-  "/",
+  APP_SCOPE,
 
-  "/index.html",
+  INDEX_URL,
 
 ];
 
-// ตอนติดตั้ง Service Worker
 
-self.addEventListener("install", (event) => {
+/*
 
-  event.waitUntil(
+  ==========================
 
-    caches
+  INSTALL
 
-      .open(CACHE_NAME)
+  ==========================
 
-      .then((cache) => {
+*/
 
-        return cache.addAll(APP_SHELL);
+self.addEventListener(
 
-      })
+  "install",
 
-  );
+  (event) => {
 
-  self.skipWaiting();
+    event.waitUntil(
 
-});
+      caches
 
-// ลบ cache รุ่นเก่า
+        .open(
 
-self.addEventListener("activate", (event) => {
+          CACHE_NAME
 
-  event.waitUntil(
+        )
 
-    caches
+        .then(
 
-      .keys()
+          (cache) =>
 
-      .then((cacheNames) => {
+            cache.addAll(
 
-        return Promise.all(
-
-          cacheNames
-
-            .filter(
-
-              (name) =>
-
-                name !== CACHE_NAME
+              APP_SHELL
 
             )
 
-            .map((name) =>
+        )
 
-              caches.delete(name)
+    );
 
-            )
-
-        );
-
-      })
-
-  );
-
-  self.clients.claim();
-
-});
-
-// ถ้ามีเน็ต ใช้ไฟล์จาก network
-
-// และเก็บสำเนาไว้ใน cache
-
-// ถ้าไม่มีเน็ต ใช้จาก cache
-
-self.addEventListener("fetch", (event) => {
-
-  if (
-
-    event.request.method !== "GET"
-
-  ) {
-
-    return;
+    self.skipWaiting();
 
   }
 
-  event.respondWith(
+);
 
-    fetch(event.request)
 
-      .then((response) => {
+/*
 
-        const responseClone =
+  ==========================
 
-          response.clone();
+  ACTIVATE
 
-        caches
+  ลบ cache รุ่นเก่า
 
-          .open(CACHE_NAME)
+  ==========================
 
-          .then((cache) => {
+*/
 
-            cache.put(
+self.addEventListener(
 
-              event.request,
+  "activate",
 
-              responseClone
+  (event) => {
+
+    event.waitUntil(
+
+      caches
+
+        .keys()
+
+        .then(
+
+          (cacheNames) =>
+
+            Promise.all(
+
+              cacheNames
+
+                .filter(
+
+                  (name) =>
+
+                    name !==
+
+                    CACHE_NAME
+
+                )
+
+                .map(
+
+                  (name) =>
+
+                    caches.delete(
+
+                      name
+
+                    )
+
+                )
+
+            )
+
+        )
+
+    );
+
+    self.clients.claim();
+
+  }
+
+);
+
+
+/*
+
+  ==========================
+
+  FETCH
+
+  สำคัญมาก:
+
+  Service Worker จะดูแลเฉพาะ
+
+  ไฟล์ของ dadboy-pos เท่านั้น
+
+  Supabase / API ภายนอก
+
+  ปล่อยผ่านตรงไป Network
+
+  ==========================
+
+*/
+
+self.addEventListener(
+
+  "fetch",
+
+  (event) => {
+
+    const request =
+
+      event.request;
+
+    if (
+
+      request.method !==
+
+      "GET"
+
+    ) {
+
+      return;
+
+    }
+
+    const url =
+
+      new URL(
+
+        request.url
+
+      );
+
+    /*
+
+      ห้าม Service Worker
+
+      ยุ่งกับ Supabase
+
+      หรือ API คนละ domain
+
+    */
+
+    if (
+
+      url.origin !==
+
+      self.location.origin
+
+    ) {
+
+      return;
+
+    }
+
+    /*
+
+      ดูแลเฉพาะ /dadboy-pos/
+
+    */
+
+    if (
+
+      !url.pathname.startsWith(
+
+        APP_PATH
+
+      )
+
+    ) {
+
+      return;
+
+    }
+
+    event.respondWith(
+
+      (async () => {
+
+        try {
+
+          /*
+
+            Network First
+
+          */
+
+          const response =
+
+            await fetch(
+
+              request
 
             );
 
-          });
+          /*
 
-        return response;
+            Cache เฉพาะ response
 
-      })
+            ที่สำเร็จ
 
-      .catch(() => {
+          */
 
-        return caches
+          if (
 
-          .match(event.request)
+            response &&
 
-          .then((cachedResponse) => {
+            response.ok
 
-            if (cachedResponse) {
+          ) {
 
-              return cachedResponse;
+            const cache =
 
-            }
+              await caches.open(
 
-            // ถ้าเป็นการเปิดหน้าเว็บ
-
-            // ให้กลับไป index.html
-
-            if (
-
-              event.request.mode ===
-
-              "navigate"
-
-            ) {
-
-              return caches.match(
-
-                "/index.html"
+                CACHE_NAME
 
               );
 
+            await cache.put(
+
+              request,
+
+              response.clone()
+
+            );
+
+          }
+
+          return response;
+
+        } catch {
+
+          /*
+
+            Network ไม่ได้
+
+            ค่อยใช้ Cache
+
+          */
+
+          const cached =
+
+            await caches.match(
+
+              request
+
+            );
+
+          if (cached) {
+
+            return cached;
+
+          }
+
+          /*
+
+            เปิดหน้าเว็บ Offline
+
+            ให้กลับ index.html
+
+          */
+
+          if (
+
+            request.mode ===
+
+            "navigate"
+
+          ) {
+
+            const index =
+
+              await caches.match(
+
+                INDEX_URL
+
+              );
+
+            if (index) {
+
+              return index;
+
             }
 
-            return Response.error();
+          }
 
-          });
+          return Response.error();
 
-      })
+        }
 
-  );
+      })()
 
-});
+    );
+
+  }
+
+);
+ 
