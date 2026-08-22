@@ -653,16 +653,26 @@ product.id
 
     try {
 
-      await updateProductSortOrders(
+  const updatedOrder =
 
-        orderedProductsRef.current
+    await updateProductSortOrders(
 
-      );
+      orderedProductsRef.current
 
-      window.location.reload();
+    );
 
-    } catch (error) {
+  setOrderedProducts(
 
+    updatedOrder
+
+  );
+
+  orderedProductsRef.current =
+
+    updatedOrder;
+
+} catch (error) {
+ 
       console.error(
 
         "Save product order error:",
@@ -1770,11 +1780,12 @@ option.id ===
 
             type="button"
 
-            onClick={
+            onClick={() => {
 
-              onClose
+  window.location.reload();
 
-            }
+}}
+ 
 >
 
             กลับหน้าขาย
