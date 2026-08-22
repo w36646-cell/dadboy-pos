@@ -18,53 +18,45 @@ function fromDatabase(row) {
 
   return {
 
-    id:
+    id: normalizeId(row.id),
 
-      normalizeId(row.id),
+    name: row.name || "",
 
-    name:
+    category: row.category || "",
 
-      row.name || "",
+    price: Number(
 
-    category:
+      row.price || 0
 
-      row.category || "",
+    ),
 
-    price:
+    cost: Number(
 
-      Number(
+      row.cost || 0
 
-        row.price || 0
+    ),
 
-      ),
+    image: row.image || "",
 
-    cost:
+    stock: Number(
 
-      Number(
+      row.stock ?? 0
 
-        row.cost || 0
+    ),
 
-      ),
+    // ลำดับสินค้า
 
-    image:
+    sortOrder: Number(
 
-      row.image || "",
+      row.sort_order ?? 0
 
-    stock:
+    ),
 
-      Number(
+    minStock: Number(
 
-        row.stock ?? 0
+      row.min_stock ?? 5
 
-      ),
-
-    minStock:
-
-      Number(
-
-        row.min_stock ?? 5
-
-      ),
+    ),
 
     trackStock:
 
@@ -76,57 +68,39 @@ function fromDatabase(row) {
 
     options:
 
-      Array.isArray(
-
-        row.options
-
-      )
+      Array.isArray(row.options)
 
         ? row.options
 
         : [],
 
-    /*
-
-      ==========================
-
-      ขายยกแพ็ก
-
-      ==========================
-
-    */
-
     packEnabled:
 
       row.pack_enabled === true,
 
-    packQty:
+    packQty: Math.max(
 
-      Math.max(
+      1,
 
-        1,
+      Number(
 
-        Number(
+        row.pack_qty ?? 1
 
-          row.pack_qty ?? 1
+      ) || 1
 
-        ) || 1
+    ),
 
-      ),
+    packPrice: Math.max(
 
-    packPrice:
+      0,
 
-      Math.max(
+      Number(
 
-        0,
+        row.pack_price ?? 0
 
-        Number(
+      ) || 0
 
-          row.pack_price ?? 0
-
-        ) || 0
-
-      ),
+    ),
 
   };
 
@@ -142,12 +116,7 @@ function toDatabase(
 
   return {
 
-    id:
-
-      String(
-product.id
-
-      ),
+    id: String(product.id),
 
     name:
 
@@ -157,45 +126,45 @@ product.id
 
       product.category || "",
 
-    price:
+    price: Number(
 
-      Number(
+      product.price || 0
 
-        product.price || 0
+    ),
 
-      ),
+    cost: Number(
 
-    cost:
+      product.cost || 0
 
-      Number(
-
-        product.cost || 0
-
-      ),
+    ),
 
     image:
 
       product.image || "",
 
-    stock:
+    stock: Number(
 
-      Number(
+      stock ??
 
-        stock ??
+        product.stock ??
 
-          product.stock ??
+        0
 
-          0
+    ),
 
-      ),
+    // ลำดับสินค้า
 
-    min_stock:
+    sort_order: Number(
 
-      Number(
+      product.sortOrder ?? 0
 
-        product.minStock ?? 5
+    ),
 
-      ),
+    min_stock: Number(
+
+      product.minStock ?? 5
+
+    ),
 
     track_stock:
 
@@ -225,53 +194,53 @@ product.id
 
         : [],
 
-    /*
-
-      ==========================
-
-      ขายยกแพ็ก
-
-      ==========================
-
-    */
-
     pack_enabled:
 
       product.packEnabled ===
 
       true,
 
-    pack_qty:
+    pack_qty: Math.max(
 
-      Math.max(
+      1,
 
-        1,
+      Number(
 
-        Number(
+        product.packQty ?? 1
 
-          product.packQty ?? 1
+      ) || 1
 
-        ) || 1
+    ),
 
-      ),
+    pack_price: Math.max(
 
-    pack_price:
+      0,
 
-      Math.max(
+      Number(
 
-        0,
+        product.packPrice ?? 0
 
-        Number(
+      ) || 0
 
-          product.packPrice ?? 0
-
-        ) || 0
-
-      ),
+    ),
 
   };
 
 }
+
+/*
+
+  =====================================
+
+  โหลดสินค้าจาก Supabase
+
+  เรียงตาม sort_order ก่อน
+
+  แล้วใช้ id เป็นลำดับสำรอง
+
+  =====================================
+
+*/
 
 export async function getCloudProducts() {
 
@@ -289,7 +258,29 @@ export async function getCloudProducts() {
 
       .select("*")
 
-      .order("id");
+      .order(
+
+        "sort_order",
+
+        {
+
+          ascending: true,
+
+        }
+
+      )
+
+      .order(
+
+        "id",
+
+        {
+
+          ascending: true,
+
+        }
+
+      );
 
   if (error) {
 
@@ -308,6 +299,16 @@ export async function getCloudProducts() {
   );
 
 }
+
+/*
+
+  =====================================
+
+  บันทึกสินค้า 1 รายการ
+
+  =====================================
+
+*/
 
 export async function saveCloudProduct(
 
@@ -345,9 +346,7 @@ export async function saveCloudProduct(
 
         {
 
-          onConflict:
-
-            "id",
+          onConflict: "id",
 
         }
 
@@ -370,6 +369,16 @@ export async function saveCloudProduct(
   );
 
 }
+
+/*
+
+  =====================================
+
+  Upload สินค้าหลายรายการ
+
+  =====================================
+
+*/
 
 export async function uploadProductsToCloud(
 
@@ -436,9 +445,7 @@ product.id
 
         {
 
-          onConflict:
-
-            "id",
+          onConflict: "id",
 
         }
 
@@ -463,6 +470,137 @@ product.id
   );
 
 }
+
+/*
+
+  =====================================
+
+  บันทึกลำดับสินค้า
+
+  ใช้สำหรับลากเรียงใน Product Manager
+
+  =====================================
+
+*/
+
+export async function updateProductSortOrders(
+
+  products
+
+) {
+
+  if (
+
+    !Array.isArray(
+
+      products
+
+    ) ||
+
+    products.length === 0
+
+  ) {
+
+    return [];
+
+  }
+
+  const jobs =
+
+    products.map(
+
+      (
+
+        product,
+
+        index
+
+      ) =>
+
+        supabase
+
+          .from(
+
+            "products"
+
+          )
+
+          .update({
+
+            sort_order:
+
+              index + 1,
+
+          })
+
+          .eq(
+
+            "id",
+
+            String(
+product.id
+
+            )
+
+          )
+
+    );
+
+  const results =
+
+    await Promise.all(
+
+      jobs
+
+    );
+
+  const failed =
+
+    results.find(
+
+      (result) =>
+
+        result.error
+
+    );
+
+  if (failed?.error) {
+
+    throw failed.error;
+
+  }
+
+  return products.map(
+
+    (
+
+      product,
+
+      index
+
+    ) => ({
+
+      ...product,
+
+      sortOrder:
+
+        index + 1,
+
+    })
+
+  );
+
+}
+
+/*
+
+  =====================================
+
+  Update Stock สินค้า 1 รายการ
+
+  =====================================
+
+*/
 
 export async function updateCloudStock(
 
@@ -544,6 +682,8 @@ export async function updateCloudStock(
 
         stock,
 
+        sort_order,
+
         min_stock,
 
         track_stock,
@@ -612,6 +752,16 @@ export async function updateCloudStock(
 
 }
 
+/*
+
+  =====================================
+
+  Update Stock หลังขาย
+
+  =====================================
+
+*/
+
 export async function updateSoldCloudStocks(
 
   soldByProduct,
@@ -630,7 +780,9 @@ export async function updateSoldCloudStocks(
 
   if (
 
-    productIds.length === 0
+    productIds.length ===
+
+    0
 
   ) {
 
@@ -676,6 +828,16 @@ export async function updateSoldCloudStocks(
 
 }
 
+/*
+
+  =====================================
+
+  คืน Stock จากรายการในบิล
+
+  =====================================
+
+*/
+
 export async function restoreCloudStocksFromItems(
 
   items
@@ -704,17 +866,11 @@ export async function restoreCloudStocksFromItems(
 
   /*
 
-    ==========================
-
     รวมจำนวน Stock ที่ต้องคืน
-
-    ==========================
 
     สินค้าปกติ:
 
     quantity = 2
-
-    stockQuantity ไม่มี
 
     => คืน 2 ชิ้น
 
@@ -726,11 +882,9 @@ export async function restoreCloudStocksFromItems(
 
     => คืน 12 ชิ้น
 
-    จึงใช้ stockQuantity ก่อน
+    ใช้ stockQuantity ก่อน
 
     แล้ว fallback ไป quantity
-
-    เพื่อรองรับบิลเก่าด้วย
 
   */
 
@@ -824,7 +978,9 @@ export async function restoreCloudStocksFromItems(
 
   if (
 
-    productIds.length === 0
+    productIds.length ===
+
+    0
 
   ) {
 
@@ -844,15 +1000,13 @@ export async function restoreCloudStocksFromItems(
 
     ทำทีละ Product
 
-    1. อ่าน Stock ล่าสุดจาก Cloud
+    1. อ่าน Stock ล่าสุด
 
-    2. บวกจำนวนคืน
+    2. บวกจำนวนที่คืน
 
-    3. Update
+    3. Update Cloud
 
-    4. อ่านค่าที่ Supabase คืนมา
-
-    5. ตรวจสอบว่า Stock เปลี่ยนจริง
+    4. ตรวจสอบผล
 
   */
 
@@ -904,7 +1058,11 @@ export async function restoreCloudStocksFromItems(
 
       await supabase
 
-        .from("products")
+        .from(
+
+          "products"
+
+        )
 
         .select(
 
@@ -1004,7 +1162,11 @@ export async function restoreCloudStocksFromItems(
 
       await supabase
 
-        .from("products")
+        .from(
+
+          "products"
+
+        )
 
         .update({
 
@@ -1030,13 +1192,21 @@ export async function restoreCloudStocksFromItems(
 
         .maybeSingle();
 
-    if (updateError) {
+    if (
+
+      updateError
+
+    ) {
 
       throw updateError;
 
     }
 
-    if (!updatedRow) {
+    if (
+
+      !updatedRow
+
+    ) {
 
       throw new Error(
 
