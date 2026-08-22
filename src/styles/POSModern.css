@@ -333,21 +333,13 @@
 
   margin: 0 !important;
 
-  border:
+  border: 2px solid #8e24aa !important;
 
-    2px solid #8e24aa !important;
+  border-radius: 10px !important;
 
-  border-radius:
+  background: #ffffff !important;
 
-    10px !important;
-
-  background:
-
-    #ffffff !important;
-
-  font-size:
-
-    18px !important;
+  font-size: 18px !important;
 
   line-height: 1;
 
@@ -361,7 +353,11 @@
 
   top: 0 !important;
 
-  right: 44px !important;
+  /* เปิดช่องค้นหาไปทางขวา */
+
+  left: 44px !important;
+
+  right: auto !important;
 
   width: 0;
 
@@ -391,9 +387,9 @@
 
 .pos-search-slide {
 
-  width: 220px;
+  width: min(220px, calc(100vw - 100px));
 
-  max-width: 220px;
+  max-width: min(220px, calc(100vw - 100px));
 
   opacity: 1;
 
@@ -405,45 +401,25 @@
 
   height: 40px;
 
-  padding:
+  padding: 0 35px 0 11px;
 
-    0 35px
+  border: 2px solid #8e24aa;
 
-    0 11px;
-
-  border:
-
-    2px solid #8e24aa;
-
-  border-radius:
-
-    10px;
+  border-radius: 10px;
 
   outline: none;
 
-  background:
+  background: #ffffff;
 
-    #ffffff;
+  font-size: 13px;
 
-  font-size:
-
-    13px;
+  box-sizing: border-box;
 
   box-shadow:
 
     0 5px 16px
 
-    rgba(
-
-      16,
-
-      24,
-
-      40,
-
-      0.18
-
-    );
+    rgba(16, 24, 40, 0.18);
 
 }
 
@@ -453,29 +429,37 @@
 
   height: 28px;
 
-  margin-left:
+  flex: 0 0 28px;
 
-    -32px;
+  margin-left: -32px;
 
   padding: 0;
 
   border: 0;
 
-  background:
+  background: transparent;
 
-    transparent;
+  color: #667085;
 
-  color:
+  font-size: 20px;
 
-    #667085;
+  line-height: 1;
 
-  font-size:
+  display: flex;
 
-    20px;
+  align-items: center;
+
+  justify-content: center;
+
+  cursor: pointer;
+
+  touch-action: manipulation;
+
+  -webkit-tap-highlight-color: transparent;
 
 }
 
-/* =========================================================
+ /* =========================================================
 
    PAGE
 
