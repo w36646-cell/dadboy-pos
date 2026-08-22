@@ -1284,6 +1284,7 @@ product.id
 </aside>
 </div>
 </div>
+</div>
 
   );
 
