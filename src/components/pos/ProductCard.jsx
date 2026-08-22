@@ -100,6 +100,8 @@ function ProductCard({
   packEnabled,
 
   normalPrice,
+  
+  lowStock,
 
   onClick,
 
@@ -195,15 +197,37 @@ function ProductCard({
 
       )}
 <div className="pos-card-info">
-<div className="pos-card-name">
+<div
 
-          {product.name}
+  className={
+
+    lowStock
+
+      ? "pos-card-name low-stock"
+
+      : "pos-card-name"
+
+  }
+>
+
+  {product.name}
 </div>
-<div className="pos-card-price">
+<div
 
-          {Number(normalPrice || 0).toLocaleString()} บาท
+  className={
+
+    lowStock
+
+      ? "pos-card-price low-stock"
+
+      : "pos-card-price"
+
+  }
+>
+
+  {Number(normalPrice || 0).toLocaleString()} บาท
 </div>
-
+ 
         {packEnabled && (
 <div className="pos-card-pack-text">
 
