@@ -512,8 +512,6 @@ selectedProduct.id
 
        onMouseDown={(event) => event.preventDefault()}
 
-onTouchStart={(event) => event.preventDefault()}
-
 onClick={() => {
 
   setSearchText("");
@@ -564,6 +562,10 @@ onClick={() => {
 
         zIndex: 5,
 
+        touchAction: "manipulation",
+
+WebkitTapHighlightColor: "transparent",
+ 
       }}
 >
 
