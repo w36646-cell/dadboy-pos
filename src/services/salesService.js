@@ -1,5 +1,66 @@
 import { supabase } from "../lib/supabase";
 
+
+function sleep(ms) {
+
+  return new Promise((resolve) => {
+
+    window.setTimeout(resolve, ms);
+
+  });
+
+}
+
+
+async function withRetry(
+
+  request,
+
+  attempts = 2
+
+) {
+
+  let lastError = null;
+
+  for (
+
+    let attempt = 0;
+
+    attempt < attempts;
+
+    attempt += 1
+
+  ) {
+
+    try {
+
+      return await request();
+
+    } catch (error) {
+
+      lastError = error;
+
+      if (
+
+        attempt <
+
+        attempts - 1
+
+      ) {
+
+        await sleep(500);
+
+      }
+
+    }
+
+  }
+
+  throw lastError;
+
+}
+
+
 function fromSaleItemRow(row) {
 
   const quantity = Number(
@@ -20,13 +81,17 @@ function fromSaleItemRow(row) {
 
   );
 
-  const stockQuantity = Number(
+  const stockQuantity =
 
-    row.stock_quantity ??
+    Number(
 
-      quantity * stockPerUnit
+      row.stock_quantity ??
 
-  );
+        quantity *
+
+          stockPerUnit
+
+    );
 
   return {
 
@@ -48,11 +113,15 @@ function fromSaleItemRow(row) {
 
       row.sale_type ||
 
-      (stockPerUnit > 1
+      (
 
-        ? "pack"
+        stockPerUnit > 1
 
-        : "unit"),
+          ? "pack"
+
+          : "unit"
+
+      ),
 
     stockPerUnit,
 
@@ -103,6 +172,7 @@ function fromSaleItemRow(row) {
   };
 
 }
+
 
 function fromSaleRow(row) {
 
@@ -179,6 +249,7 @@ row.id,
 
 }
 
+
 function createSalePayload(
 
   sale
@@ -239,6 +310,7 @@ function createSalePayload(
 
 }
 
+
 function createItemPayload(
 
   saleId,
@@ -251,137 +323,214 @@ function createItemPayload(
 
     items || []
 
-  ).map(
+  ).map((item) => {
 
-    (item) => {
+    const quantity =
 
-      const quantity =
+      Number(
 
-        Number(
+        item.quantity || 0
 
-          item.quantity || 0
+      );
 
-        );
+    const stockPerUnit =
 
-      const stockPerUnit =
+      Math.max(
 
-        Math.max(
-
-          1,
-
-          Number(
-
-            item.stockPerUnit ??
-
-              1
-
-          ) || 1
-
-        );
-
-      const stockQuantity =
+        1,
 
         Number(
 
-          item.stockQuantity ??
+          item.stockPerUnit ??
 
-            quantity *
+            1
 
-              stockPerUnit
+        ) || 1
 
-        );
+      );
 
-      const saleType =
+    const stockQuantity =
 
-        item.saleType ||
+      Number(
 
-        (stockPerUnit > 1
+        item.stockQuantity ??
+
+          quantity *
+
+            stockPerUnit
+
+      );
+
+    const saleType =
+
+      item.saleType ||
+
+      (
+
+        stockPerUnit > 1
 
           ? "pack"
 
-          : "unit");
+          : "unit"
 
-      return {
+      );
 
-        sale_id:
+    return {
 
-          saleId,
+      sale_id:
 
-        product_id:
+        saleId,
 
-          String(
+      product_id:
 
-            item.productId
+        String(
 
-          ),
+          item.productId
 
-        product_name:
+        ),
 
-          item.productName ||
+      product_name:
 
-          "",
+        item.productName ||
 
-        option_name:
+        "",
 
-          item.option || "",
+      option_name:
 
-        sale_type:
+        item.option || "",
 
-          saleType,
+      sale_type:
 
-        stock_per_unit:
+        saleType,
 
-          stockPerUnit,
+      stock_per_unit:
 
-        stock_quantity:
+        stockPerUnit,
 
-          stockQuantity,
+      stock_quantity:
 
-        qty:
+        stockQuantity,
 
-          quantity,
+      qty:
 
-        unit_price:
+        quantity,
 
-          Number(
+      unit_price:
 
-            item.unitPrice || 0
+        Number(
 
-          ),
+          item.unitPrice || 0
 
-        unit_cost:
+        ),
 
-          Number(
+      unit_cost:
 
-            item.unitCost || 0
+        Number(
 
-          ),
+          item.unitCost || 0
 
-        subtotal:
+        ),
 
-          Number(
+      subtotal:
 
-            item.lineTotal || 0
+        Number(
 
-          ),
+          item.lineTotal || 0
 
-        cost_total:
+        ),
 
-          Number(
+      cost_total:
 
-            item.lineCost || 0
+        Number(
 
-          ),
+          item.lineCost || 0
 
-        profit:
+        ),
 
-          Number(
+      profit:
 
-            item.lineProfit || 0
+        Number(
 
-          ),
+          item.lineProfit || 0
 
-      };
+        ),
+
+    };
+
+  });
+
+}
+
+
+/*
+
+  =========================================
+
+  โหลดหัวบิลอย่างเดียว
+
+  =========================================
+
+*/
+
+async function loadSaleRows() {
+
+  return withRetry(
+
+    async () => {
+
+      const {
+
+        data,
+
+        error,
+
+      } =
+
+        await supabase
+
+          .from("sales")
+
+          .select(`
+
+            id,
+
+            bill_id,
+
+            sold_at,
+
+            sold_date,
+
+            sold_time,
+
+            total_qty,
+
+            total_amount,
+
+            total_cost,
+
+            total_profit
+
+          `)
+
+          .order(
+
+            "sold_at",
+
+            {
+
+              ascending: false,
+
+            }
+
+          );
+
+      if (error) {
+
+        throw error;
+
+      }
+
+      return data || [];
 
     }
 
@@ -389,17 +538,190 @@ function createItemPayload(
 
 }
 
+
+/*
+
+  =========================================
+
+  โหลดรายการสินค้าแยกจากหัวบิล
+
+  แยก request เพื่อให้มือถือไม่ต้องรับ
+
+  nested response ขนาดใหญ่ในครั้งเดียว
+
+  =========================================
+
+*/
+
+async function loadSaleItemRows() {
+
+  return withRetry(
+
+    async () => {
+
+      const {
+
+        data,
+
+        error,
+
+      } =
+
+        await supabase
+
+          .from("sale_items")
+
+          .select(`
+
+            id,
+
+            sale_id,
+
+            product_id,
+
+            product_name,
+
+            option_name,
+
+            sale_type,
+
+            stock_per_unit,
+
+            stock_quantity,
+
+            qty,
+
+            unit_price,
+
+            unit_cost,
+
+            subtotal,
+
+            cost_total,
+
+            profit
+
+          `)
+
+          .order(
+
+            "id",
+
+            {
+
+              ascending: true,
+
+            }
+
+          );
+
+      if (error) {
+
+        throw error;
+
+      }
+
+      return data || [];
+
+    }
+
+  );
+
+}
+
+
+/*
+
+  =========================================
+
+  รวม sale_items กลับเข้าหัวบิล
+
+  =========================================
+
+*/
+
+function combineSalesAndItems(
+
+  saleRows,
+
+  itemRows
+
+) {
+
+  const itemsBySaleId =
+
+    new Map();
+
+  (
+
+    itemRows || []
+
+  ).forEach((item) => {
+
+    const key =
+
+      String(
+
+        item.sale_id
+
+      );
+
+    if (
+
+      !itemsBySaleId.has(
+
+        key
+
+      )
+
+    ) {
+
+      itemsBySaleId.set(
+
+        key,
+
+        []
+
+      );
+
+    }
+
+    itemsBySaleId
+
+      .get(key)
+
+      .push(item);
+
+  });
+
+  return (
+
+    saleRows || []
+
+  ).map((sale) => ({
+
+    ...sale,
+
+    sale_items:
+
+      itemsBySaleId.get(
+
+        String(sale.id)
+
+      ) || [],
+
+  }));
+
+}
+
+
 export async function saveCloudSale(
 
   sale
 
 ) {
 
-  if (
-
-    !sale?.billId
-
-  ) {
+  if (!sale?.billId) {
 
     throw new Error(
 
@@ -411,11 +733,11 @@ export async function saveCloudSale(
 
   /*
 
-    ==========================
+    =========================
 
     1. บันทึกหัวบิล
 
-    ==========================
+    =========================
 
   */
 
@@ -465,33 +787,11 @@ export async function saveCloudSale(
 
   /*
 
-    ==========================
+    =========================
 
     2. บันทึกรายการสินค้า
 
-    ==========================
-
-    สำคัญ:
-
-    เก็บข้อมูลการตัด Stock
-
-    ของสินค้าแพ็กไว้ด้วย
-
-    ตัวอย่าง:
-
-    quantity = 2 แพ็ก
-
-    stockPerUnit = 12
-
-    stockQuantity = 24
-
-    เวลายกเลิกบิล
-
-    ระบบจึงคืน Stock 24 ชิ้น
-
-    ไม่ใช่คืนเพียง 2
-
-    ==========================
+    =========================
 
   */
 
@@ -560,87 +860,75 @@ saleRow.id,
 
 }
 
+
+/*
+
+  =========================================
+
+  โหลดบิลทั้งหมด
+
+  เวอร์ชันใหม่:
+
+  1. โหลด sales
+
+  2. โหลด sale_items
+
+  3. รวมข้อมูลใน Browser
+
+  เหมาะกับมือถือมากกว่า nested query เดิม
+
+  =========================================
+
+*/
+
 export async function getCloudSales() {
 
-  const {
+  const [
 
-    data,
+    saleRows,
 
-    error,
+    itemRows,
 
-  } =
+  ] =
 
-    await supabase
+    await Promise.all([
 
-      .from("sales")
+      loadSaleRows(),
 
-      .select(`
+      loadSaleItemRows(),
 
-        *,
+    ]);
 
-        sale_items (
+  const combinedRows =
 
-          id,
+    combineSalesAndItems(
 
-          product_id,
+      saleRows,
 
-          product_name,
+      itemRows
 
-          option_name,
+    );
 
-          sale_type,
-
-          stock_per_unit,
-
-          stock_quantity,
-
-          qty,
-
-          unit_price,
-
-          unit_cost,
-
-          subtotal,
-
-          cost_total,
-
-          profit
-
-        )
-
-      `)
-
-      .order(
-
-        "sold_at",
-
-        {
-
-          ascending:
-
-            false,
-
-        }
-
-      );
-
-  if (error) {
-
-    throw error;
-
-  }
-
-  return (
-
-    data || []
-
-  ).map(
+  return combinedRows.map(
 
     fromSaleRow
 
   );
 
 }
+
+
+/*
+
+  =========================================
+
+  โหลดบิลเดียวจาก billId
+
+  แยก query เช่นเดียวกับด้านบน
+
+  =========================================
+
+*/
 
 export async function getCloudSaleByBillId(
 
@@ -650,9 +938,9 @@ export async function getCloudSaleByBillId(
 
   const {
 
-    data,
+    data: saleRow,
 
-    error,
+    error: saleError,
 
   } =
 
@@ -662,37 +950,23 @@ export async function getCloudSaleByBillId(
 
       .select(`
 
-        *,
+        id,
 
-        sale_items (
+        bill_id,
 
-          id,
+        sold_at,
 
-          product_id,
+        sold_date,
 
-          product_name,
+        sold_time,
 
-          option_name,
+        total_qty,
 
-          sale_type,
+        total_amount,
 
-          stock_per_unit,
+        total_cost,
 
-          stock_quantity,
-
-          qty,
-
-          unit_price,
-
-          unit_cost,
-
-          subtotal,
-
-          cost_total,
-
-          profit
-
-        )
+        total_profit
 
       `)
 
@@ -706,23 +980,99 @@ export async function getCloudSaleByBillId(
 
       .maybeSingle();
 
-  if (error) {
+  if (saleError) {
 
-    throw error;
+    throw saleError;
 
   }
 
-  return data
+  if (!saleRow) {
 
-    ? fromSaleRow(
+    return null;
 
-        data
+  }
+
+  const {
+
+    data: itemRows,
+
+    error: itemError,
+
+  } =
+
+    await supabase
+
+      .from("sale_items")
+
+      .select(`
+
+        id,
+
+        sale_id,
+
+        product_id,
+
+        product_name,
+
+        option_name,
+
+        sale_type,
+
+        stock_per_unit,
+
+        stock_quantity,
+
+        qty,
+
+        unit_price,
+
+        unit_cost,
+
+        subtotal,
+
+        cost_total,
+
+        profit
+
+      `)
+
+      .eq(
+
+        "sale_id",
+saleRow.id
 
       )
 
-    : null;
+      .order(
+
+        "id",
+
+        {
+
+          ascending: true,
+
+        }
+
+      );
+
+  if (itemError) {
+
+    throw itemError;
+
+  }
+
+  return fromSaleRow({
+
+    ...saleRow,
+
+    sale_items:
+
+      itemRows || [],
+
+  });
 
 }
+
 
 export async function deleteCloudSale(
 
@@ -732,13 +1082,9 @@ export async function deleteCloudSale(
 
   /*
 
-    Foreign Key ตอนนี้
+    Foreign Key ตอนนี้ยังเป็น No action
 
-    ยังเป็น No action
-
-    จึงลบรายการสินค้า
-
-    ก่อนลบหัวบิล
+    จึงลบรายการสินค้าก่อนลบหัวบิล
 
   */
 
@@ -802,6 +1148,7 @@ export async function deleteCloudSale(
 
 }
 
+
 export async function updateCloudSaleAfterItemDelete(
 
   sale,
@@ -812,25 +1159,40 @@ export async function updateCloudSaleAfterItemDelete(
 
   if (!sale?.id) {
 
-    throw new Error("Cloud sale id is required");
+    throw new Error(
+
+      "Cloud sale id is required"
+
+    );
 
   }
 
   if (!itemToDelete?.id) {
 
-    throw new Error("Cloud sale item id is required");
+    throw new Error(
+
+      "Cloud sale item id is required"
+
+    );
 
   }
 
   const remainingItems =
 
-    (sale.items || []).filter(
+    (
+
+      sale.items || []
+
+    ).filter(
 
       (item) =>
 
         String(item.id) !==
 
-        String(itemToDelete.id)
+        String(
+itemToDelete.id
+
+        )
 
     );
 
@@ -838,7 +1200,13 @@ export async function updateCloudSaleAfterItemDelete(
 
     remainingItems.reduce(
 
-      (sum, item) =>
+      (
+
+        sum,
+
+        item
+
+      ) =>
 
         sum +
 
@@ -860,13 +1228,21 @@ export async function updateCloudSaleAfterItemDelete(
 
     remainingItems.reduce(
 
-      (sum, item) =>
+      (
+
+        sum,
+
+        item
+
+      ) =>
 
         sum +
 
         Number(
 
-          item.lineTotal || 0
+          item.lineTotal ||
+
+            0
 
         ),
 
@@ -878,13 +1254,21 @@ export async function updateCloudSaleAfterItemDelete(
 
     remainingItems.reduce(
 
-      (sum, item) =>
+      (
+
+        sum,
+
+        item
+
+      ) =>
 
         sum +
 
         Number(
 
-          item.lineCost || 0
+          item.lineCost ||
+
+            0
 
         ),
 
@@ -894,7 +1278,9 @@ export async function updateCloudSaleAfterItemDelete(
 
   const totalProfit =
 
-    totalAmount - totalCost;
+    totalAmount -
+
+    totalCost;
 
   const {
 
@@ -904,7 +1290,11 @@ export async function updateCloudSaleAfterItemDelete(
 
     await supabase
 
-      .from("sale_items")
+      .from(
+
+        "sale_items"
+
+      )
 
       .delete()
 
@@ -933,13 +1323,21 @@ itemToDelete.id
 
       .update({
 
-        total_qty: totalQty,
+        total_qty:
 
-        total_amount: totalAmount,
+          totalQty,
 
-        total_cost: totalCost,
+        total_amount:
 
-        total_profit: totalProfit,
+          totalAmount,
+
+        total_cost:
+
+          totalCost,
+
+        total_profit:
+
+          totalProfit,
 
       })
 
@@ -960,7 +1358,9 @@ sale.id
 
     ...sale,
 
-    items: remainingItems,
+    items:
+
+      remainingItems,
 
     totalQty,
 
@@ -973,4 +1373,3 @@ sale.id
   };
 
 }
- 
