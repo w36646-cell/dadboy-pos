@@ -4,6 +4,8 @@ import {
 
   useMemo,
 
+  useRef,
+
   useState,
 
 } from "react";
@@ -490,6 +492,8 @@ function BillsPage({
 
   ] = useState("");
 
+  const searchInputRef = useRef(null);
+ 
   const [
 
     loading,
@@ -1601,37 +1605,137 @@ sale.id
 </div>
 
         )}
-<div className="bills-toolbar">
+<div
+
+  style={{
+
+    position: "relative",
+
+    flex: 1,
+
+  }}
+>
 <input
 
-          type="search"
+    ref={searchInputRef}
 
-          placeholder="ค้นหาเลขบิล วันที่ หรือสินค้า..."
+    type="search"
 
-          value={
+    placeholder="ค้นหาเลขบิล วันที่ หรือสินค้า..."
 
-            searchText
+    value={searchText}
 
-          }
+    onChange={(event) =>
 
-          onChange={(
+      setSearchText(
 
-            event
+        event.target.value
 
-          ) =>
+      )
 
-            setSearchText(
+    }
 
-              event.target
+    style={{
 
-                .value
+      width: "100%",
 
-            )
+      paddingRight: searchText
 
-          }
+        ? "48px"
 
-        />
-<div className="bills-count">
+        : undefined,
+
+    }}
+
+  />
+
+  {searchText && (
+<button
+
+      type="button"
+
+      aria-label="ล้างคำค้นหา"
+
+      onPointerDown={(event) => {
+
+        event.preventDefault();
+
+      }}
+
+      onClick={() => {
+
+        setSearchText("");
+
+        requestAnimationFrame(() => {
+
+          searchInputRef.current?.focus({
+
+            preventScroll: true,
+
+          });
+
+        });
+
+      }}
+
+      style={{
+
+        position: "absolute",
+
+        right: "10px",
+
+        top: "50%",
+
+        transform: "translateY(-50%)",
+
+        width: "32px",
+
+        height: "32px",
+
+        minWidth: "32px",
+
+        padding: 0,
+
+        margin: 0,
+
+        border: "none",
+
+        borderRadius: "50%",
+
+        background: "#e5e7eb",
+
+        color: "#475467",
+
+        fontSize: "22px",
+
+        fontWeight: "700",
+
+        lineHeight: "1",
+
+        display: "flex",
+
+        alignItems: "center",
+
+        justifyContent: "center",
+
+        cursor: "pointer",
+
+        zIndex: 5,
+
+        touchAction: "manipulation",
+
+        WebkitTapHighlightColor: "transparent",
+
+      }}
+>
+
+      ×
+</button>
+
+  )}
+</div>
+  
+ <div className="bills-count">
 
           {loading
 
