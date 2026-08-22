@@ -2,8 +2,6 @@ import {
 
   useMemo,
 
-  useRef,
-
   useState,
 
 } from "react";
@@ -98,8 +96,6 @@ function StockManager({
 
   ] = useState("");
 
-  const searchInputRef = useRef(null);
- 
   const [
 
     selectedProduct,
@@ -473,8 +469,6 @@ selectedProduct.id
 >
 <input
 
-    ref={searchInputRef}
-
     className="search-input"
 
     type="search"
@@ -516,16 +510,16 @@ selectedProduct.id
 
       onClick={() => {
 
-        setSearchText("");
+       onMouseDown={(event) => event.preventDefault()}
 
-        requestAnimationFrame(() => {
+onTouchStart={(event) => event.preventDefault()}
 
-          searchInputRef.current?.focus();
+onClick={() => {
 
-        });
+  setSearchText("");
 
-      }}
-
+}}
+ 
       style={{
 
         position: "absolute",
