@@ -502,13 +502,22 @@ function BillsPage({
 
   ] = useState(true);
 
-  const [
+const [
 
-    cloudError,
+  cloudError,
 
-    setCloudError,
+  setCloudError,
 
-  ] = useState(false);
+] = useState(false);
+
+const [
+
+  cloudErrorDetail,
+
+  setCloudErrorDetail,
+
+] = useState("");
+ 
 
   const [
 
@@ -656,30 +665,54 @@ function BillsPage({
 
       } catch (error) {
 
-        console.error(
+  console.error(
 
-          "Supabase load bills error:",
+    "Supabase load bills error:",
 
-          error
+    error
 
-        );
+  );
 
-        if (cancelled) {
+  if (cancelled) {
 
-          return;
+    return;
 
-        }
+  }
 
-        setSales(
+  const detail =
 
-          localSales
+    [
 
-        );
+      `name: ${error?.name || "-"}`,
 
-        setCloudError(true);
+      `message: ${error?.message || "-"}`,
 
-      } finally {
+      `code: ${error?.code || "-"}`,
 
+      `details: ${error?.details || "-"}`,
+
+      `hint: ${error?.hint || "-"}`,
+
+      `status: ${error?.status || error?.statusCode || "-"}`,
+
+    ].join("\n");
+
+  setCloudErrorDetail(
+
+    detail
+
+  );
+
+  setSales(
+
+    localSales
+
+  );
+
+  setCloudError(true);
+
+} finally {
+ 
         if (!cancelled) {
 
           setLoading(false);
@@ -1599,9 +1632,32 @@ sale.id
             }}
 >
 
-            Cloud เชื่อมต่อไม่สำเร็จ
+            <div>
 
-            ตอนนี้กำลังแสดงบิลสำรองจากเครื่อง
+  Cloud เชื่อมต่อไม่สำเร็จ
+</div>
+<div
+
+  style={{
+
+    marginTop: "8px",
+
+    whiteSpace: "pre-wrap",
+
+    fontSize: "11px",
+
+    fontFamily: "monospace",
+
+    wordBreak: "break-word",
+
+  }}
+>
+
+  {cloudErrorDetail ||
+
+    "ยังไม่มีรายละเอียด Error"}
+</div>
+ 
 </div>
 
         )}
