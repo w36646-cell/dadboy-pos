@@ -804,14 +804,54 @@ product.id
 
     onClick={() => {
 
-      setSelectedProduct(null);
+  const currentId = selectedProduct?.id;
 
-      setReceiveQty(1);
+  setSelectedProduct(null);
 
-      setReceiveUnit("unit");
+  setReceiveQty(1);
 
-    }}
+  setReceiveUnit("unit");
 
+  requestAnimationFrame(() => {
+
+    const currentRow =
+
+      document.querySelector(
+
+        `tr[data-product-id="${currentId}"]`
+
+      );
+
+    const nextRow =
+
+      currentRow?.nextElementSibling;
+
+    if (nextRow) {
+
+      nextRow.scrollIntoView({
+
+        behavior: "smooth",
+
+        block: "start",
+
+      });
+
+    } else {
+
+      currentRow?.scrollIntoView({
+
+        behavior: "smooth",
+
+        block: "start",
+
+      });
+
+    }
+
+  });
+
+}}
+ 
     style={{
 
       position: "absolute",
