@@ -1327,32 +1327,82 @@
 
 /* =========================================
 
-   PRODUCT NAME COLOR
+   PRODUCT NAME + PRICE COLOR
 
    ========================================= */
 
-/* สินค้าปกติ: ชื่อสินค้าเป็นสีฟ้า */
+/* สินค้าปกติ
 
-.product-card.pos-image-card .pos-card-name {
+   ชื่อสินค้า + ราคา = สีฟ้า
+
+   เพิ่มขอบขาวและเงา เพื่อให้อ่านได้บนการ์ดทุกสี
+
+*/
+
+.app.pos-page.pos-modern
+
+.product-card.pos-image-card
+
+.pos-card-name,
+
+.app.pos-page.pos-modern
+
+.product-card.pos-image-card
+
+.pos-card-price {
 
   color: #38bdf8 !important;
 
+  text-shadow:
+
+    -1px -1px 0 rgba(255, 255, 255, 0.95),
+
+     1px -1px 0 rgba(255, 255, 255, 0.95),
+
+    -1px  1px 0 rgba(255, 255, 255, 0.95),
+
+     1px  1px 0 rgba(255, 255, 255, 0.95),
+
+     0 2px 3px rgba(0, 0, 0, 0.40) !important;
+
 }
 
-/* Stock ต่ำ/ถึง Min: ชื่อสินค้าเป็นสีแดง */
 
-.product-card.pos-image-card .pos-card-name.low-stock {
+/* =========================================
+
+   LOW STOCK
+
+   stock <= minStock
+
+   ชื่อสินค้า + ราคา = สีแดง
+
+   ========================================= */
+
+.app.pos-page.pos-modern
+
+.product-card.pos-image-card
+
+.pos-card-name.low-stock,
+
+.app.pos-page.pos-modern
+
+.product-card.pos-image-card
+
+.pos-card-price.low-stock {
 
   color: #ef4444 !important;
 
+  text-shadow:
+
+    -1px -1px 0 rgba(255, 255, 255, 0.95),
+
+     1px -1px 0 rgba(255, 255, 255, 0.95),
+
+    -1px  1px 0 rgba(255, 255, 255, 0.95),
+
+     1px  1px 0 rgba(255, 255, 255, 0.95),
+
+     0 2px 3px rgba(0, 0, 0, 0.40) !important;
+
 }
-
-/* Stock ต่ำ/ถึง Min: ราคาเป็นสีแดง */
-
-.product-card.pos-image-card .pos-card-price.low-stock {
-
-  color: #ef4444 !important;
-
-}
- 
  
