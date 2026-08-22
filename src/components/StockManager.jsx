@@ -2,6 +2,8 @@ import {
 
   useMemo,
 
+  useRef,
+
   useState,
 
 } from "react";
@@ -96,6 +98,8 @@ function StockManager({
 
   ] = useState("");
 
+  const searchInputRef = useRef(null);
+ 
   const [
 
     selectedProduct,
@@ -351,8 +355,6 @@ selectedProduct.id,
 
     }
 
-    setSelectedProduct(null);
-
     setReceiveQty(1);
 
     setReceiveUnit("unit");
@@ -459,7 +461,19 @@ selectedProduct.id
 
   }}
 >
+<div
+
+  style={{
+
+    position: "relative",
+
+    width: "100%",
+
+  }}
+>
 <input
+
+    ref={searchInputRef}
 
     className="search-input"
 
@@ -485,7 +499,7 @@ selectedProduct.id
 
       paddingRight: searchText
 
-        ? "46px"
+        ? "48px"
 
         : undefined,
 
@@ -498,13 +512,17 @@ selectedProduct.id
 
       type="button"
 
-      aria-label="ล้างการค้นหา"
+      aria-label="ล้างคำค้นหา"
 
       onClick={() => {
 
         setSearchText("");
 
-        setSelectedProduct(null);
+        requestAnimationFrame(() => {
+
+          searchInputRef.current?.focus();
+
+        });
 
       }}
 
@@ -522,7 +540,11 @@ selectedProduct.id
 
         height: "32px",
 
+        minWidth: "32px",
+
         padding: 0,
+
+        margin: 0,
 
         border: "none",
 
@@ -536,13 +558,17 @@ selectedProduct.id
 
         fontWeight: "700",
 
-        lineHeight: "32px",
+        lineHeight: "1",
 
-        textAlign: "center",
+        display: "flex",
+
+        alignItems: "center",
+
+        justifyContent: "center",
 
         cursor: "pointer",
 
-        zIndex: 2,
+        zIndex: 5,
 
       }}
 >
@@ -552,7 +578,7 @@ selectedProduct.id
 
   )}
 </div>
- 
+  
 <div className="stock-layout">
 <div className="product-table-wrap">
 <table className="product-table">
