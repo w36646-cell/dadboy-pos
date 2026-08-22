@@ -659,20 +659,22 @@ product.id;
                   return (
 <tr
 
-                      key={
+  key={
 product.id
 
-                      }
+  }
 
-                      onClick={() =>
+  data-product-id={product.id}
 
-                        selectProduct(
+  onClick={() =>
 
-                          product
+    selectProduct(
 
-                        )
+      product
 
-                      }
+    )
+
+  }
 
                       style={{
 
