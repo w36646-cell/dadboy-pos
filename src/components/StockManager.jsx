@@ -511,7 +511,7 @@ selectedProduct.id
       onClick={() => {
 
        onMouseDown={(event) => event.preventDefault()}
-
+        
 onClick={() => {
 
   setSearchText("");
