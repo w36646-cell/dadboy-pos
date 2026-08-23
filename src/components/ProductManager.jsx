@@ -210,6 +210,18 @@ function ProductManager({
 
     useRef(false);
 
+  const dragRowRef =
+
+  useRef(null);
+
+const dragStartYRef =
+
+  useRef(0);
+
+const dragOverProductIdRef =
+
+  useRef(null);
+ 
   const orderedProductsRef =
 
     useRef(products);
@@ -350,368 +362,624 @@ function ProductManager({
 
   function startProductDrag(
 
-    product,
+  product,
 
-    event
+  event
 
-  ) {
+) {
 
-    /*
+  if (search.trim()) {
 
-      ตอนค้นหาอยู่
-
-      ไม่ให้ลากสลับลำดับ
-
-      เพราะ list เป็นรายการที่ถูกกรอง
-
-    */
-
-    if (search.trim()) {
-
-      return;
-
-    }
-
-    if (
-
-      event.target.closest(
-
-        "button, input, select, textarea"
-
-      )
-
-    ) {
-
-      return;
-
-    }
-
-    cancelProductDragTimer();
-
-    const pointerId =
-
-      event.pointerId;
-
-    const row =
-
-  event.currentTarget.closest(
-
-    "tr[data-product-id]"
-
-  );
- 
-    dragTimerRef.current =
-
-      window.setTimeout(
-
-        () => {
-
-          dragProductIdRef.current =
-product.id;
-
-          draggingRef.current =
-
-            true;
-
-          row.dataset.dragging =
-
-            "true";
-
-          try {
-
-            row.setPointerCapture?.(
-
-              pointerId
-
-            );
-
-          } catch {
-
-            // ไม่ต้องทำอะไร
-
-          }
-
-          if (
-
-            typeof navigator !==
-
-              "undefined" &&
-
-            typeof navigator.vibrate ===
-
-              "function"
-
-          ) {
-
-            navigator.vibrate(30);
-
-          }
-
-        },
-
-        450
-
-      );
+    return;
 
   }
 
+  if (
 
-  function moveProductDrag(
+    event.target.closest(
 
-    event
+      "button, input, select, textarea"
+
+    )
 
   ) {
 
-    if (
+    return;
 
-      !draggingRef.current ||
+  }
 
-      dragProductIdRef.current ==
+  cancelProductDragTimer();
 
-        null
+  const pointerId =
 
-    ) {
+    event.pointerId;
 
-      return;
+  const handle =
 
-    }
+    event.currentTarget;
 
-    const target =
+  const row =
 
-      document.elementFromPoint(
+    handle.closest(
 
-        event.clientX,
+      "tr[data-product-id]"
 
-        event.clientY
+    );
 
-      );
+  if (!row) {
 
-    const row =
+    return;
 
-      target?.closest(
+  }
+
+  dragTimerRef.current =
+
+    window.setTimeout(
+
+      () => {
+
+        dragProductIdRef.current =
+product.id;
+
+        dragOverProductIdRef.current =
+product.id;
+
+        draggingRef.current =
+
+          true;
+
+        dragRowRef.current =
+
+          row;
+
+        dragStartYRef.current =
+
+          event.clientY;
+
+        row.dataset.dragging =
+
+          "true";
+
+        row.style.position =
+
+          "relative";
+
+        row.style.zIndex =
+
+          "20";
+
+        row.style.willChange =
+
+          "transform";
+
+        try {
+
+          handle.setPointerCapture?.(
+
+            pointerId
+
+          );
+
+        } catch {
+
+          // ไม่ต้องทำอะไร
+
+        }
+
+        if (
+
+          typeof navigator !==
+
+            "undefined" &&
+
+          typeof navigator.vibrate ===
+
+            "function"
+
+        ) {
+
+          navigator.vibrate(30);
+
+        }
+
+      },
+
+      350
+
+    );
+
+}
+
+ function moveProductDrag(
+
+  event
+
+) {
+
+  if (
+
+    !draggingRef.current ||
+
+    dragProductIdRef.current ==
+
+      null
+
+  ) {
+
+    return;
+
+  }
+
+  event.preventDefault();
+
+  const draggedId =
+
+    String(
+
+      dragProductIdRef.current
+
+    );
+
+  const dragRow =
+
+    dragRowRef.current;
+
+  if (dragRow) {
+
+    const deltaY =
+
+      event.clientY -
+
+      dragStartYRef.current;
+
+    dragRow.style.transform =
+
+      `translateY(${deltaY}px) scale(1.015)`;
+
+  }
+
+  /*
+
+    เลื่อนหน้าจออัตโนมัติ
+
+    เมื่อลากใกล้ขอบบน/ล่าง
+
+  */
+
+  const edge = 100;
+
+  if (
+
+    event.clientY <
+
+    edge
+
+  ) {
+
+    window.scrollBy({
+
+      top: -14,
+
+      behavior: "auto",
+
+    });
+
+  } else if (
+
+    event.clientY >
+
+    window.innerHeight -
+
+      edge
+
+  ) {
+
+    window.scrollBy({
+
+      top: 14,
+
+      behavior: "auto",
+
+    });
+
+  }
+
+  /*
+
+    หาแถวที่นิ้วกำลังอยู่เหนือ
+
+  */
+
+  const elements =
+
+    document.elementsFromPoint(
+
+      event.clientX,
+
+      event.clientY
+
+    );
+
+  let overRow = null;
+
+  for (
+
+    const element of
+
+    elements
+
+  ) {
+
+    const candidate =
+
+      element.closest?.(
 
         "tr[data-product-id]"
 
       );
 
-    if (!row) {
+    if (!candidate) {
 
-      return;
+      continue;
 
     }
 
-    const overId =
+    const candidateId =
 
-      row.getAttribute(
+      candidate.getAttribute(
 
         "data-product-id"
 
       );
 
-    const draggedId =
-
-      String(
-
-        dragProductIdRef.current
-
-      );
-
     if (
 
-      !overId ||
+      candidateId &&
 
-      overId === draggedId
+      candidateId !==
+
+        draggedId
 
     ) {
 
-      return;
+      overRow =
+
+        candidate;
+
+      break;
 
     }
 
-    setOrderedProducts(
+  }
 
-      (current) => {
+  document
 
-        const next = [
+    .querySelectorAll(
 
-          ...current,
+      'tr[data-drag-over="true"]'
 
-        ];
+    )
 
-        const fromIndex =
+    .forEach((row) => {
 
-          next.findIndex(
+      delete row.dataset
 
-            (product) =>
+        .dragOver;
 
-              String(
+    });
+
+  if (!overRow) {
+
+    return;
+
+  }
+
+  const overId =
+
+    overRow.getAttribute(
+
+      "data-product-id"
+
+    );
+
+  if (!overId) {
+
+    return;
+
+  }
+
+  dragOverProductIdRef.current =
+
+    overId;
+
+  overRow.dataset.dragOver =
+
+    "true";
+
+}
+ 
+ async function finishProductDrag(
+
+  event
+
+) {
+
+  cancelProductDragTimer();
+
+  if (
+
+    !draggingRef.current
+
+  ) {
+
+    return;
+
+  }
+
+  const draggedId =
+
+    String(
+
+      dragProductIdRef.current
+
+    );
+
+  const overId =
+
+    String(
+
+      dragOverProductIdRef.current ||
+
+      draggedId
+
+    );
+
+  const dragRow =
+
+    dragRowRef.current;
+
+  if (dragRow) {
+
+    dragRow.style.transform =
+
+      "";
+
+    dragRow.style.position =
+
+      "";
+
+    dragRow.style.zIndex =
+
+      "";
+
+    dragRow.style.willChange =
+
+      "";
+
+    delete dragRow.dataset
+
+      .dragging;
+
+  }
+
+  document
+
+    .querySelectorAll(
+
+      'tr[data-drag-over="true"]'
+
+    )
+
+    .forEach((row) => {
+
+      delete row.dataset
+
+        .dragOver;
+
+    });
+
+  draggingRef.current =
+
+    false;
+
+  dragProductIdRef.current =
+
+    null;
+
+  dragOverProductIdRef.current =
+
+    null;
+
+  dragRowRef.current =
+
+    null;
+
+  const next = [
+
+    ...orderedProductsRef.current,
+
+  ];
+
+  const fromIndex =
+
+    next.findIndex(
+
+      (product) =>
+
+        String(
 product.id
 
-              ) ===
+        ) ===
 
-              draggedId
+        draggedId
 
-          );
+    );
 
-        const toIndex =
+  const toIndex =
 
-          next.findIndex(
+    next.findIndex(
 
-            (product) =>
+      (product) =>
 
-              String(
+        String(
 product.id
 
-              ) ===
+        ) ===
 
-              String(overId)
+        overId
 
-          );
+    );
 
-        if (
+  if (
 
-          fromIndex < 0 ||
+    fromIndex >= 0 &&
 
-          toIndex < 0 ||
+    toIndex >= 0 &&
 
-          fromIndex ===
+    fromIndex !==
 
-            toIndex
+      toIndex
 
-        ) {
+  ) {
 
-          return current;
+    const [moved] =
 
-        }
+      next.splice(
 
-        const [moved] =
+        fromIndex,
 
-          next.splice(
+        1
 
-            fromIndex,
+      );
 
-            1
+    next.splice(
 
-          );
+      toIndex,
 
-        next.splice(
+      0,
 
-          toIndex,
-
-          0,
-
-          moved
-
-        );
-
-        orderedProductsRef.current =
-
-          next;
-
-        return next;
-
-      }
+      moved
 
     );
 
   }
 
-
-  async function finishProductDrag(
-
-    event
-
-  ) {
-
-    cancelProductDragTimer();
-
-    if (
-
-      !draggingRef.current
-
-    ) {
-
-      return;
-
-    }
-
-    draggingRef.current =
-
-      false;
-
-    dragProductIdRef.current =
-
-      null;
-
-    const row =
-
-  event?.currentTarget?.closest(
-
-    "tr[data-product-id]"
-
-  );
-
-if (row) {
-
-  delete row.dataset.dragging;
-
-}
-
-    try {
-
-  const updatedOrder =
-
-    await updateProductSortOrders(
-
-      orderedProductsRef.current
-
-    );
-
   setOrderedProducts(
 
-    updatedOrder
+    next
 
   );
 
   orderedProductsRef.current =
 
-    updatedOrder;
+    next;
 
-} catch (error) {
+  try {
+
+    const updatedOrder =
+
+      await updateProductSortOrders(
+
+        next
+
+      );
+
+    setOrderedProducts(
+
+      updatedOrder
+
+    );
+
+    orderedProductsRef.current =
+
+      updatedOrder;
+
+  } catch (error) {
+
+    console.error(
+
+      "Save product order error:",
+
+      error
+
+    );
+
+    window.alert(
+
+      "บันทึกลำดับสินค้าไม่สำเร็จ"
+
+    );
+
+  }
+
+}
+
+function cancelProductDrag() {
+
+  cancelProductDragTimer();
+
+  const dragRow =
+
+    dragRowRef.current;
+
+  if (dragRow) {
+
+    dragRow.style.transform =
+
+      "";
+
+    dragRow.style.position =
+
+      "";
+
+    dragRow.style.zIndex =
+
+      "";
+
+    dragRow.style.willChange =
+
+      "";
+
+    delete dragRow.dataset
+
+      .dragging;
+
+  }
+
+  document
+
+    .querySelectorAll(
+
+      'tr[data-drag-over="true"]'
+
+    )
+
+    .forEach((row) => {
+
+      delete row.dataset
+
+        .dragOver;
+
+    });
+
+  dragProductIdRef.current =
+
+    null;
+
+  dragOverProductIdRef.current =
+
+    null;
+
+  dragRowRef.current =
+
+    null;
+
+  draggingRef.current =
+
+    false;
+
+}
  
-      console.error(
-
-        "Save product order error:",
-
-        error
-
-      );
-
-      window.alert(
-
-        "บันทึกลำดับสินค้าไม่สำเร็จ"
-
-      );
-
-    }
-
-  }
-
-
-  function cancelProductDrag() {
-
-    cancelProductDragTimer();
-
-    dragProductIdRef.current =
-
-      null;
-
-    draggingRef.current =
-
-      false;
-
-  }
-
   function scrollToEditor() {
 
     window.setTimeout(
