@@ -387,24 +387,42 @@ function savePendingStock(
 
     getPendingStocks();
 
-  localStorage.setItem(
+  try {
 
-    PENDING_STOCK_KEY,
+    localStorage.setItem(
 
-    JSON.stringify({
+      PENDING_STOCK_KEY,
 
-      ...current,
+      JSON.stringify({
 
-      [String(productId)]:
+        ...current,
 
-        Number(stock),
+        [String(productId)]:
 
-    })
+          Number(stock),
 
-  );
+      })
+
+    );
+
+    return true;
+
+  } catch (error) {
+
+    console.warn(
+
+      "Pending stock local save skipped:",
+
+      error
+
+    );
+
+    return false;
+
+  }
 
 }
-
+ 
 function removePendingStock(
 
   productId
@@ -1884,15 +1902,17 @@ cloudProduct.id
 
   function saveInventoryLocal(
 
+  newInventory
+
+) {
+
+  setInventory(
+
     newInventory
 
-  ) {
+  );
 
-    setInventory(
-
-      newInventory
-
-    );
+  try {
 
     localStorage.setItem(
 
@@ -1906,8 +1926,20 @@ cloudProduct.id
 
     );
 
+  } catch (error) {
+
+    console.warn(
+
+      "Inventory local cache skipped:",
+
+      error
+
+    );
+
   }
 
+}
+ 
   function getStock(
 
     productId
@@ -1980,18 +2012,30 @@ cloudProduct.id
 
     );
 
-    savePendingStock(
+    const pendingSaved =
 
-      productId,
+  savePendingStock(
 
-      newStock
+    productId,
 
-    );
+    newStock
 
-    notifySyncStateChanged();
+  );
 
-    updateCloudStock(
+if (!pendingSaved) {
 
+  console.warn(
+
+    "Stock pending could not be saved locally"
+
+  );
+
+}
+
+notifySyncStateChanged();
+
+updateCloudStock(
+ 
       productId,
 
       newStock
