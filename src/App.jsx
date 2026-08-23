@@ -699,36 +699,26 @@ const [
 
   ] = useState(false);
 
-  const [
+ const [
 
-    headerSales,
+  headerSales,
 
-    setHeaderSales,
+  setHeaderSales,
 
-  ] = useState(() => {
+] = useState(() => {
 
-    const savedSales =
+  /*
 
-      readStorage(
+    Local เก็บเฉพาะบิลที่ยังรอ Sync
 
-        SALES_KEY,
+    ประวัติบิลจริงอ่านจาก Cloud
 
-        []
+  */
 
-      );
+  return getPendingSales();
 
-    return Array.isArray(
-
-      savedSales
-
-    )
-
-      ? savedSales
-
-      : [];
-
-  });
- 
+});
+  
   const [
 
     syncVersion,
@@ -871,36 +861,40 @@ const [
 
         setHeaderSales(
 
-          nextSales
+  nextSales
 
-        );
+);
 
-        try {
+/*
 
-          localStorage.setItem(
+  ห้ามเก็บประวัติบิล Cloud ทั้งหมดในมือถืออีก
 
-            SALES_KEY,
+  ลบ cache ระบบเก่าด้วย
 
-            JSON.stringify(
+  เพื่อคืนพื้นที่ให้ Safari
 
-              nextSales
+*/
 
-            )
+try {
 
-          );
+  localStorage.removeItem(
 
-        } catch (error) {
+    SALES_KEY
 
-          console.warn(
+  );
 
-            "Sales cache skipped:",
+} catch (error) {
 
-            error
+  console.warn(
 
-          );
+    "Old sales cache cleanup skipped:",
 
-        }
+    error
 
+  );
+
+}
+ 
       } catch (error) {
 
         console.error(
@@ -3315,30 +3309,8 @@ item.id,
 
     };
 
-    const sales =
 
-      readStorage(
-
-        SALES_KEY,
-
-        []
-
-      );
-
-    localStorage.setItem(
-
-      SALES_KEY,
-
-      JSON.stringify([
-
-        ...sales,
-
-        sale,
-
-      ])
-
-    );
-
+    
     setHeaderSales(
 
       (currentSales) => {
