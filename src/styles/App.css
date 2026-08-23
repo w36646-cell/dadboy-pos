@@ -636,22 +636,30 @@ button {
 
 .product-table-wrap {
 
+  width: 100%;
+
   overflow-x: auto;
+
+  overflow-y: visible;
+
+  -webkit-overflow-scrolling: touch;
 
   border-radius: 12px;
 
   background: white;
 
 }
-
+ 
 .product-table {
 
   width: 100%;
 
+  min-width: 1050px;
+
   border-collapse: collapse;
 
 }
-
+ 
 .product-table th,
 
 .product-table td {
@@ -666,6 +674,24 @@ button {
 
 }
 
+.product-table tr[data-dragging="true"] td {
+
+  background: #fff4bf;
+
+  transition:
+
+    background 0.18s ease,
+
+    transform 0.18s ease;
+
+}
+
+.product-table tr[data-dragging="true"] {
+
+  transform: scale(1.01);
+
+}
+ 
 .manager-image-box {
 
   width: 72px;
