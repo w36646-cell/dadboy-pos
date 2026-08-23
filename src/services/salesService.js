@@ -553,6 +553,73 @@ async function loadSaleRows() {
 
 */
 
+async function loadSaleRows() {
+
+  return withRetry(
+
+    async () => {
+
+      const {
+
+        data,
+
+        error,
+
+      } =
+
+        await supabase
+
+          .from("sales")
+
+          .select(`
+
+            id,
+
+            bill_id,
+
+            sold_at,
+
+            sold_date,
+
+            sold_time,
+
+            total_qty,
+
+            total_amount,
+
+            total_cost,
+
+            total_profit
+
+          `)
+
+          .order(
+
+            "sold_at",
+
+            {
+
+              ascending: false,
+
+            }
+
+          );
+
+      if (error) {
+
+        throw error;
+
+      }
+
+      return data || [];
+
+    }
+
+  );
+
+}
+
+
 async function loadSaleItemRows() {
 
   return withRetry(
@@ -630,15 +697,106 @@ async function loadSaleItemRows() {
 }
 
 
-/*
+async function loadSaleItemsBySaleIds(
 
-  =========================================
+  saleIds
 
-  รวม sale_items กลับเข้าหัวบิล
+) {
 
-  =========================================
+  if (
 
-*/
+    !Array.isArray(saleIds) ||
+
+    saleIds.length === 0
+
+  ) {
+
+    return [];
+
+  }
+
+  return withRetry(
+
+    async () => {
+
+      const {
+
+        data,
+
+        error,
+
+      } =
+
+        await supabase
+
+          .from("sale_items")
+
+          .select(`
+
+            id,
+
+            sale_id,
+
+            product_id,
+
+            product_name,
+
+            option_name,
+
+            sale_type,
+
+            stock_per_unit,
+
+            stock_quantity,
+
+            qty,
+
+            unit_price,
+
+            unit_cost,
+
+            subtotal,
+
+            cost_total,
+
+            profit
+
+          `)
+
+          .in(
+
+            "sale_id",
+
+            saleIds
+
+          )
+
+          .order(
+
+            "id",
+
+            {
+
+              ascending: true,
+
+            }
+
+          );
+
+      if (error) {
+
+        throw error;
+
+      }
+
+      return data || [];
+
+    }
+
+  );
+
+}
+
 
 function combineSalesAndItems(
 
@@ -715,7 +873,175 @@ function combineSalesAndItems(
 }
 
 
-export async function saveCloudSale(
+/*
+
+  สำหรับหน้า Bills เท่านั้น
+
+  โหลดครั้งละ 50 บิล
+
+  ไม่ดึงประวัติทั้งหมด
+
+*/
+
+export async function getCloudSalesPage(
+
+  offset = 0,
+
+  limit = 50
+
+) {
+
+  const safeOffset =
+
+    Math.max(
+
+      0,
+
+      Number(offset) || 0
+
+    );
+
+  const safeLimit =
+
+    Math.max(
+
+      1,
+
+      Number(limit) || 50
+
+    );
+
+  /*
+
+    โหลดเกินมา 1 บิล
+
+    เพื่อดูว่ายังมีหน้าถัดไปหรือไม่
+
+  */
+
+  const {
+
+    data,
+
+    error,
+
+  } =
+
+    await supabase
+
+      .from("sales")
+
+      .select(`
+
+        id,
+
+        bill_id,
+
+        sold_at,
+
+        sold_date,
+
+        sold_time,
+
+        total_qty,
+
+        total_amount,
+
+        total_cost,
+
+        total_profit
+
+      `)
+
+      .order(
+
+        "sold_at",
+
+        {
+
+          ascending: false,
+
+        }
+
+      )
+
+      .range(
+
+        safeOffset,
+
+        safeOffset + safeLimit
+
+      );
+
+  if (error) {
+
+    throw error;
+
+  }
+
+  const rows =
+
+    data || [];
+
+  const hasMore =
+
+    rows.length >
+
+    safeLimit;
+
+  const pageRows =
+
+    rows.slice(
+
+      0,
+
+      safeLimit
+
+    );
+
+  const saleIds =
+
+    pageRows.map(
+
+      (sale) =>
+sale.id
+
+    );
+
+  const itemRows =
+
+    await loadSaleItemsBySaleIds(
+
+      saleIds
+
+    );
+
+  const combined =
+
+    combineSalesAndItems(
+
+      pageRows,
+
+      itemRows
+
+    );
+
+  return {
+
+    sales:
+
+      combined.map(
+
+        fromSaleRow
+
+      ),
+
+    hasMore,
+
+  };
+
+}
+ export async function saveCloudSale(
 
   sale
 
