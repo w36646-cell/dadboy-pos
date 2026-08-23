@@ -394,8 +394,12 @@ function ProductManager({
 
     const row =
 
-      event.currentTarget;
+  event.currentTarget.closest(
 
+    "tr[data-product-id]"
+
+  );
+ 
     dragTimerRef.current =
 
       window.setTimeout(
@@ -639,17 +643,19 @@ product.id
 
       null;
 
-    if (
+    const row =
 
-      event?.currentTarget
+  event?.currentTarget?.closest(
 
-    ) {
+    "tr[data-product-id]"
 
-      delete event.currentTarget
+  );
 
-        .dataset.dragging;
+if (row) {
 
-    }
+  delete row.dataset.dragging;
+
+}
 
     try {
 
@@ -2080,7 +2086,34 @@ item.id
 
   }
 
-  onPointerDown={(event) =>
+  onClick={() => {
+
+    if (
+
+      draggingRef.current
+
+    ) {
+
+      return;
+
+    }
+
+    openEdit(item);
+
+  }}
+>
+ 
+<td
+
+  onClick={(event) => {
+
+    event.stopPropagation();
+
+  }}
+
+  onPointerDown={(event) => {
+
+    event.stopPropagation();
 
     startProductDrag(
 
@@ -2088,23 +2121,37 @@ item.id
 
       event
 
-    )
+    );
 
-  }
+  }}
 
-  onPointerMove={
+  onPointerMove={(event) => {
 
-    moveProductDrag
+    event.stopPropagation();
 
-  }
+    moveProductDrag(
 
-  onPointerUp={
+      event
 
-    finishProductDrag
+    );
 
-  }
+  }}
 
-  onPointerCancel={() => {
+  onPointerUp={(event) => {
+
+    event.stopPropagation();
+
+    finishProductDrag(
+
+      event
+
+    );
+
+  }}
+
+  onPointerCancel={(event) => {
+
+    event.stopPropagation();
 
     cancelProductDrag();
 
@@ -2124,44 +2171,11 @@ item.id
 
   }}
 
-  onClick={() => {
-
-    if (
-
-      draggingRef.current
-
-    ) {
-
-      return;
-
-    }
-
-    openEdit(item);
-
-  }}
-
-  style={{
-
-    cursor: "grab",
-
-    touchAction: "pan-y",
-
-    userSelect: "none",
-
-  }}
->
-
-<td
-
-  onClick={(event) => {
-
-    event.stopPropagation();
-
-  }}
-
   style={{
 
     width: "44px",
+
+    minWidth: "44px",
 
     textAlign: "center",
 
@@ -2173,13 +2187,18 @@ item.id
 
     touchAction: "none",
 
+    userSelect: "none",
+
+    WebkitUserSelect: "none",
+
+    WebkitTouchCallout: "none",
+
   }}
 >
 
   ☰
 </td>
- 
-  
+   
  <td>
 <div className="manager-image-box">
 
