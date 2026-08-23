@@ -19,7 +19,7 @@ import {
   updateCloudSaleAfterItemDelete,
 
 } from "../services/salesService";
-  
+   
 import {
 
   restoreCloudStocksFromItems,
@@ -440,18 +440,10 @@ function removeLocalBill(
 
     );
 
-  writeStorage(
-
-    SALES_KEY,
-
-    updatedSales
-
-  );
-
   return updatedSales;
 
 }
-
+ 
 function BillsPage({
 
   onInventoryUpdated,
@@ -1258,14 +1250,6 @@ function openBillDetail(
             : currentSale
 
       );
-
-    writeStorage(
-
-      SALES_KEY,
-
-      updatedSales
-
-    );
 
     setSales(
 
