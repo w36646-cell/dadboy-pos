@@ -14,12 +14,12 @@ import {
 
   deleteCloudSale,
 
-  getCloudSales,
+  getCloudSalesPage,
 
   updateCloudSaleAfterItemDelete,
 
 } from "../services/salesService";
- 
+  
 import {
 
   restoreCloudStocksFromItems,
@@ -458,24 +458,18 @@ function BillsPage({
 
 }) {
 
-  const [
+const [
 
-    sales,
+  sales,
 
-    setSales,
+  setSales,
 
-  ] = useState(() =>
+] = useState(() =>
 
-    readStorage(
+  getPendingSales()
 
-      SALES_KEY,
-
-      []
-
-    )
-
-  );
-
+);
+ 
   const [
 
     selectedBill,
@@ -493,7 +487,37 @@ function BillsPage({
   ] = useState("");
 
   const searchInputRef = useRef(null);
- 
+
+  const billDetailRef =
+
+  useRef(null);
+
+const PAGE_SIZE = 50;
+
+const [
+
+  cloudLoadedCount,
+
+  setCloudLoadedCount,
+
+] = useState(0);
+
+const [
+
+  hasMoreBills,
+
+  setHasMoreBills,
+
+] = useState(true);
+
+const [
+
+  loadingMore,
+
+  setLoadingMore,
+
+] = useState(false);
+  
   const [
 
     loading,
@@ -577,152 +601,192 @@ const [
 
     async function loadBills() {
 
-      setLoading(true);
+  setLoading(true);
 
-      const localSales =
+  const pendingSales =
 
-        readStorage(
+    getPendingSales();
 
-          SALES_KEY,
+  /*
 
-          []
+    Offline:
 
-        );
+    แสดงเฉพาะบิลที่ยังอยู่ในเครื่อง
 
-      /*
+    เช่น บิลที่ยังรอ Sync
 
-        Offline:
+  */
 
-        แสดงบิลในเครื่องอย่างเดียว
+  if (
 
-      */
+    typeof navigator !==
 
-      if (
+      "undefined" &&
 
-        typeof navigator !==
+    navigator.onLine === false
 
-          "undefined" &&
+  ) {
 
-        navigator.onLine === false
+    if (!cancelled) {
 
-      ) {
+      setSales(
 
-        if (!cancelled) {
+        pendingSales
 
-          setSales(
+      );
 
-            localSales
+      setCloudError(false);
 
-          );
+      setCloudLoadedCount(0);
 
-          setCloudError(true);
+      setHasMoreBills(false);
 
-          setLoading(false);
+      setLoading(false);
 
-        }
-
-        return;
-
-      }
-
-      try {
-
-        const cloudSales =
-
-          await getCloudSales();
-
-        if (cancelled) {
-
-          return;
-
-        }
-
-        const mergedSales =
-
-          mergeSales(
-
-            cloudSales,
-
-            localSales
-
-          );
-
-        setSales(
-
-          mergedSales
-
-        );
-
-        writeStorage(
-
-          SALES_KEY,
-
-          mergedSales
-
-        );
-
-        setCloudError(false);
-
-      } catch (error) {
-
-  console.error(
-
-    "Supabase load bills error:",
-
-    error
-
-  );
-
-  if (cancelled) {
+    }
 
     return;
 
   }
 
-  const detail =
+  try {
 
-    [
+    const result =
 
-      `name: ${error?.name || "-"}`,
+      await getCloudSalesPage(
 
-      `message: ${error?.message || "-"}`,
+        0,
 
-      `code: ${error?.code || "-"}`,
+        PAGE_SIZE
 
-      `details: ${error?.details || "-"}`,
+      );
 
-      `hint: ${error?.hint || "-"}`,
+    if (cancelled) {
 
-      `status: ${error?.status || error?.statusCode || "-"}`,
-
-    ].join("\n");
-
-  setCloudErrorDetail(
-
-    detail
-
-  );
-
-  setSales(
-
-    localSales
-
-  );
-
-  setCloudError(true);
-
-} finally {
- 
-        if (!cancelled) {
-
-          setLoading(false);
-
-        }
-
-      }
+      return;
 
     }
 
+    const mergedSales =
+
+      mergeSales(
+
+        result.sales,
+
+        pendingSales
+
+      );
+
+    setSales(
+
+      mergedSales
+
+    );
+
+    setCloudLoadedCount(
+
+      result.sales.length
+
+    );
+
+    setHasMoreBills(
+
+      result.hasMore
+
+    );
+
+    /*
+
+      ล้างประวัติบิล Local รุ่นเก่า
+
+      Cloud history ไม่ต้องเก็บในมือถือ
+
+    */
+
+    try {
+
+      localStorage.removeItem(
+
+        SALES_KEY
+
+      );
+
+    } catch (error) {
+
+      console.warn(
+
+        "Old sales cache cleanup skipped:",
+
+        error
+
+      );
+
+    }
+
+    setCloudError(false);
+
+    setCloudErrorDetail("");
+
+  } catch (error) {
+
+    console.error(
+
+      "Supabase load bills error:",
+
+      error
+
+    );
+
+    if (cancelled) {
+
+      return;
+
+    }
+
+    const detail =
+
+      [
+
+        `name: ${error?.name || "-"}`,
+
+        `message: ${error?.message || "-"}`,
+
+        `code: ${error?.code || "-"}`,
+
+        `details: ${error?.details || "-"}`,
+
+        `hint: ${error?.hint || "-"}`,
+
+        `status: ${error?.status || error?.statusCode || "-"}`,
+
+      ].join("\n");
+
+    setCloudErrorDetail(
+
+      detail
+
+    );
+
+    setSales(
+
+      pendingSales
+
+    );
+
+    setCloudError(true);
+
+  } finally {
+
+    if (!cancelled) {
+
+      setLoading(false);
+
+    }
+
+  }
+
+}
+ 
     function handleOnline() {
 
       setIsOnline(true);
@@ -789,6 +853,140 @@ const [
 
   }, []);
 
+ async function loadMoreBills() {
+
+  if (
+
+    loadingMore ||
+
+    !hasMoreBills ||
+
+    !isOnline
+
+  ) {
+
+    return;
+
+  }
+
+  setLoadingMore(true);
+
+  try {
+
+    const result =
+
+      await getCloudSalesPage(
+
+        cloudLoadedCount,
+
+        PAGE_SIZE
+
+      );
+
+    const pendingSales =
+
+      getPendingSales();
+
+    const mergedSales =
+
+      mergeSales(
+
+        [
+
+          ...sales.filter(
+
+            (sale) =>
+sale.id
+
+          ),
+
+          ...result.sales,
+
+        ],
+
+        pendingSales
+
+      );
+
+    setSales(
+
+      mergedSales
+
+    );
+
+    setCloudLoadedCount(
+
+      (current) =>
+
+        current +
+
+        result.sales.length
+
+    );
+
+    setHasMoreBills(
+
+      result.hasMore
+
+    );
+
+  } catch (error) {
+
+    console.error(
+
+      "Load more bills error:",
+
+      error
+
+    );
+
+    window.alert(
+
+      "โหลดบิลเพิ่มไม่สำเร็จ"
+
+    );
+
+  } finally {
+
+    setLoadingMore(false);
+
+  }
+
+}
+
+
+function openBillDetail(
+
+  sale
+
+) {
+
+  setSelectedBill(
+
+    sale
+
+  );
+
+  requestAnimationFrame(
+
+    () => {
+
+      billDetailRef.current
+
+        ?.scrollIntoView({
+
+          behavior: "smooth",
+
+          block: "start",
+
+        });
+
+    }
+
+  );
+
+}
+ 
   const filteredSales =
 
     useMemo(() => {
@@ -1848,13 +2046,14 @@ sale.id
 
                   onClick={() =>
 
-                    setSelectedBill(
+  openBillDetail(
 
-                      sale
+    sale
 
-                    )
+  )
 
-                  }
+}
+ 
 >
 <div className="bill-row-main">
 <strong>
@@ -1911,8 +2110,80 @@ sale.id
             )
 
           )}
+
+{!loading &&
+
+  hasMoreBills &&
+
+  isOnline && (
+<button
+
+      type="button"
+
+      onClick={
+
+        loadMoreBills
+
+      }
+
+      disabled={
+
+        loadingMore
+
+      }
+
+      style={{
+
+        width: "100%",
+
+        marginTop: "12px",
+
+        padding: "12px",
+
+        borderRadius: "10px",
+
+        border:
+
+          "1px solid #d0d5dd",
+
+        background:
+
+          "#ffffff",
+
+        color:
+
+          "#344054",
+
+        fontWeight: 700,
+
+        cursor:
+
+          loadingMore
+
+            ? "wait"
+
+            : "pointer",
+
+      }}
+>
+
+      {loadingMore
+
+        ? "กำลังโหลด..."
+
+        : "โหลดเพิ่มอีก 50 บิล"}
+</button>
+
+  )}
+   
 </section>
-<section className="bill-detail-box">
+<section
+
+  ref={billDetailRef}
+
+  className="bill-detail-box"
+>
+ 
 
           {!selectedBill ? (
 <div className="bills-empty">
