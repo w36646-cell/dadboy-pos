@@ -2000,3 +2000,50 @@ button {
 
 /* ===== END DADBOY PRODUCT EDITOR - POS CARD SHAPE ===== */
 
+.product-table
+
+tr[data-dragging="true"] td {
+
+  background: #fff4bf;
+
+  box-shadow:
+
+    0 6px 18px
+
+    rgba(0, 0, 0, 0.12);
+
+}
+
+.product-table
+
+tr[data-dragging="true"] {
+
+  transition:
+
+    box-shadow 0.15s ease;
+
+}
+
+.product-table
+
+tr[data-drag-over="true"] td {
+
+  border-top:
+
+    3px solid #f4b400;
+
+  background:
+
+    #fffbea;
+
+}
+
+.product-table tbody tr {
+
+  transition:
+
+    background 0.16s ease;
+
+}
+ 
+
