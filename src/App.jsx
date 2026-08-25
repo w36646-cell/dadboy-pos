@@ -622,9 +622,9 @@ function pendingAdjustmentsCount() {
 
   ยอดขายรายวันหน้า POS
 
-  นับเฉพาะ:
+  นับยอดขายของวันนั้นทั้งหมด:
 
-  15:00 - 00:00
+  00:00 - 24:00
 
 */
 
@@ -650,58 +650,10 @@ function isSaleInDailyWindow(
 
   }
 
-  const soldAt =
-
-    new Date(
-
-      sale.soldAt
-
-    );
-
-  if (
-
-    !Number.isNaN(
-
-      soldAt.getTime()
-
-    )
-
-  ) {
-
-    return (
-
-      soldAt.getHours() >=
-
-      15
-
-    );
-
-  }
-
-  const hour =
-
-    Number(
-
-      String(
-
-        sale.soldTime ||
-
-          ""
-
-      ).split(":")[0]
-
-    );
-
-  return (
-
-    Number.isFinite(hour) &&
-
-    hour >= 15
-
-  );
+  return true;
 
 }
-
+ 
 function App() {
 
   const initialProducts =
@@ -866,7 +818,7 @@ const [
 
   ช่วงเวลา:
 
-  15:00 - 00:00
+  00:00 - 24:00
 
   โหลดเมื่อ:
 
@@ -902,7 +854,7 @@ async function refreshHeaderSales() {
 
   start.setHours(
 
-    15,
+    0,
 
     0,
 
@@ -998,7 +950,7 @@ async function refreshHeaderSales() {
 
       รวมเฉพาะบิล Offline/Pending
 
-      ของวันนี้หลัง 15:00
+      ของวันนี้
 
     */
 
