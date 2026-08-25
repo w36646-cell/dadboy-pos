@@ -47,7 +47,7 @@ function ReportPage() {
 
   const [sales, setSales] = useState([]);
 
-  const [Billsales, setBillSales] = useState([]);
+  const [billsales, setBillSales] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
@@ -106,6 +106,32 @@ useEffect(() => {
           : []
 
       );
+
+      const today =
+
+  dateKey(new Date());
+
+
+const todayBills =
+
+  await getCloudTodayBills(
+
+    today,
+
+    today
+
+  );
+
+
+setBillSales(
+
+  Array.isArray(todayBills)
+
+    ? todayBills
+
+    : []
+
+);
 
       setCloudError(
 
@@ -494,7 +520,7 @@ useEffect(() => {
 <section className="report-box">
 <h2>บิลขาย</h2>
 
-              {filteredSales.length === 0 ? (
+              {billSales.length === 0 ? (
 <div className="report-empty">ไม่มีบิลในช่วงวันที่นี้</div>
 
               ) : (
@@ -503,7 +529,7 @@ useEffect(() => {
 <thead><tr><th>เลขบิล</th><th>วันที่</th><th>เวลา</th><th>สินค้า</th><th>ยอดขาย</th><th>กำไร</th></tr></thead>
 <tbody>
 
-                      {filteredSales.map((sale) => (
+                      {billSales.map((sale) => (
 <tr key={sale.billId}>
 <td>{sale.billId}</td>
 <td>{sale.soldDate}</td>
