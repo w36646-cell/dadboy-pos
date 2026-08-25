@@ -1,26 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { getCloudSales } from "../services/salesService";
+import { getCloudSalesRange } from "../services/salesService";
 
 import "./ReportPage.css";
-
-const SALES_KEY = "dadboy_sales_v1";
-
-function readSales() {
-
-  try {
-
-    const saved = localStorage.getItem(SALES_KEY);
-
-    return saved ? JSON.parse(saved) : [];
-
-  } catch {
-
-    return [];
-
-  }
-
-}
 
 function dateKey(date) {
 
@@ -72,48 +54,122 @@ function ReportPage() {
 
   const [endDate, setEndDate] = useState(dateKey(today));
 
-  async function loadSales() {
+useEffect(() => {
 
-    setLoading(true);
+  let active = true;
+
+  async function loadSalesRange() {
+
+    setLoading(
+
+      true
+
+    );
 
     try {
 
-      const cloudSales = await getCloudSales();
+      const cloudSales =
 
-      setSales(Array.isArray(cloudSales) ? cloudSales : []);
+        await getCloudSalesRange(
 
-      setCloudError(false);
+          startDate,
+
+          endDate
+
+        );
+
+      if (!active) {
+
+        return;
+
+      }
+
+      setSales(
+
+        Array.isArray(
+
+          cloudSales
+
+        )
+
+          ? cloudSales
+
+          : []
+
+      );
+
+      setCloudError(
+
+        false
+
+      );
 
     } catch (error) {
 
-      console.error("Report Cloud error:", error);
+      console.error(
 
-      const localSales = readSales();
+        "Report Cloud error:",
 
-      setSales(Array.isArray(localSales) ? localSales : []);
+        error
 
-      setCloudError(true);
+      );
+
+      if (!active) {
+
+        return;
+
+      }
+
+      /*
+
+        Cloud เป็นแหล่งข้อมูลหลัก
+
+        ไม่ดึงประวัติ Sales เก่า
+
+        จาก localStorage อีก
+
+      */
+
+      setSales([]);
+
+      setCloudError(
+
+        true
+
+      );
 
     } finally {
 
-      setLoading(false);
+      if (active) {
+
+        setLoading(
+
+          false
+
+        );
+
+      }
 
     }
 
   }
 
-  useEffect(() => {
+  loadSalesRange();
 
-    loadSales();
+  return () => {
 
-    function handleFocus() { loadSales(); }
+    active = false;
 
-    window.addEventListener("focus", handleFocus);
+  };
 
-    return () => window.removeEventListener("focus", handleFocus);
+}, [
 
-  }, []);
+  startDate,
 
+  endDate,
+
+]);
+  
   const filteredSales = useMemo(() => {
 
     return sales.filter((sale) => {
@@ -299,7 +355,14 @@ function ReportPage() {
 <p>เลือกช่วงวันที่ที่ต้องการดู</p>
 </header>
 
-      {cloudError && <div className="report-cloud-warning">Cloud เชื่อมต่อไม่สำเร็จ รายงานกำลังใช้ข้อมูลสำรองจากเครื่อง</div>}
+     {cloudError && (
+<div className="report-cloud-warning">
+
+    Cloud เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง
+</div>
+
+)}
+ 
 <section className="report-filter">
 <div className="report-date-box">
 <label>วันที่เริ่ม</label>
