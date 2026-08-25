@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { getCloudSalesRange } from "../services/salesService";
+import { 
+
+  getCloudSalesRange,
+
+  getCloudTodayBills
+
+} from "../services/salesService";
+ 
 
 import "./ReportPage.css";
 
@@ -39,6 +46,8 @@ function numberText(value) {
 function ReportPage() {
 
   const [sales, setSales] = useState([]);
+
+  const [Billsales, setBillSales] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
