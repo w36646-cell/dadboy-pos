@@ -2562,3 +2562,54 @@ export async function getCloudTodayBills(){
 
 }
  
+export async function getCloudTodayBills(
+
+startDate,
+
+endDate
+
+){
+
+const { data,error } = await supabase
+
+.from("sales")
+
+.select("*")
+
+.gte(
+
+" sold_date ",
+
+startDate
+
+)
+
+.lte(
+
+" sold_date ",
+
+endDate
+
+)
+
+.order(
+
+"sold_at",
+
+{
+
+ascending:false
+
+}
+
+);
+
+if(error){
+
+throw error;
+
+}
+
+return data.map(fromSaleRow);
+
+}
