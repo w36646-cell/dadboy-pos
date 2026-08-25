@@ -362,20 +362,11 @@ export async function saveCloudProduct(
 
   }
 
-  return {
+  return fromDatabase(
 
-  id:
+  data
 
-    normalizeId(
-data.id
-
-    ),
-
-  stock:
-
-    actualStock,
-
-};
+);
 
 }
 
@@ -721,11 +712,20 @@ export async function updateCloudStock(
 
   }
 
-  return fromDatabase(
+  return {
 
-    data
+  id:
 
-  );
+    normalizeId(
+data.id
+
+    ),
+
+  stock:
+
+    actualStock,
+
+};
 
 }
 
