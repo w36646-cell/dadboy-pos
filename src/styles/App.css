@@ -658,7 +658,9 @@ button {
 
   min-width: 1050px;
 
-  border-collapse: collapse;
+  border-collapse: separate;
+  
+  border-spacing: 0;
 
 }
  
@@ -669,6 +671,8 @@ button {
   padding: 11px;
 
   border-bottom: 1px solid #eee;
+
+  border-right: none;
 
   text-align: left;
 
