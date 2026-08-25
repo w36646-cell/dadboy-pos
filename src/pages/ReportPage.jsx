@@ -482,35 +482,6 @@ useEffect(() => {
 
               )}
 </section>
-<section className="report-box">
-<h2>บิลขาย</h2>
-
-              {filteredSales.length === 0 ? (
-<div className="report-empty">ไม่มีบิลในช่วงวันที่นี้</div>
-
-              ) : (
-<div className="report-table-wrap">
-<table className="report-table">
-<thead><tr><th>เลขบิล</th><th>วันที่</th><th>เวลา</th><th>สินค้า</th><th>ยอดขาย</th><th>กำไร</th></tr></thead>
-<tbody>
-
-                      {filteredSales.map((sale) => (
-<tr key={sale.billId}>
-<td>{sale.billId}</td>
-<td>{sale.soldDate}</td>
-<td>{sale.soldTime}</td>
-<td>{sale.totalQty}</td>
-<td>{Number(sale.totalAmount || 0).toLocaleString()}</td>
-<td>{Number(sale.totalProfit || 0).toLocaleString()}</td>
-</tr>
-
-                      ))}
-</tbody>
-</table>
-</div>
-
-              )}
-</section>
 </div>
 </>
 
