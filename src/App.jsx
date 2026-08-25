@@ -50,7 +50,7 @@ import {
 
   saveCloudSale,
 
-  getCloudSales,
+  getCloudTodaySales,
 
 } from "./services/salesService";
 
@@ -617,6 +617,91 @@ function pendingAdjustmentsCount() {
 
 }
 
+
+/*
+
+  ยอดขายรายวันหน้า POS
+
+  นับเฉพาะ:
+
+  15:00 - 00:00
+
+*/
+
+function isSaleInDailyWindow(
+
+  sale,
+
+  targetDate
+
+) {
+
+  if (
+
+    !sale ||
+
+    sale.soldDate !==
+
+      targetDate
+
+  ) {
+
+    return false;
+
+  }
+
+  const soldAt =
+
+    new Date(
+
+      sale.soldAt
+
+    );
+
+  if (
+
+    !Number.isNaN(
+
+      soldAt.getTime()
+
+    )
+
+  ) {
+
+    return (
+
+      soldAt.getHours() >=
+
+      15
+
+    );
+
+  }
+
+  const hour =
+
+    Number(
+
+      String(
+
+        sale.soldTime ||
+
+          ""
+
+      ).split(":")[0]
+
+    );
+
+  return (
+
+    Number.isFinite(hour) &&
+
+    hour >= 15
+
+  );
+
+}
+
 function App() {
 
   const initialProducts =
@@ -775,57 +860,179 @@ const [
 
 }, [cart]);
   
- useEffect(() => {
+/*
 
-    let cancelled = false;
+  โหลดเฉพาะยอดขายวันนี้
 
-    async function refreshHeaderSales() {
+  ช่วงเวลา:
 
-      if (
+  15:00 - 00:00
 
-        typeof navigator !==
+  โหลดเมื่อ:
 
-          "undefined" &&
+  - เปิด/Refresh หน้า
 
-        navigator.onLine === false
+  - ทุก 10 นาที
 
-      ) {
+  - หลังขายสำเร็จ
 
-        return;
+*/
 
-      }
+async function refreshHeaderSales() {
 
-      try {
+  if (
 
-        const cloudSales =
+    typeof navigator !==
 
-          await getCloudSales();
+      "undefined" &&
 
-        if (cancelled) {
+    navigator.onLine ===
 
-          return;
+      false
+
+  ) {
+
+    return;
+
+  }
+
+  const start =
+
+    new Date();
+
+  start.setHours(
+
+    15,
+
+    0,
+
+    0,
+
+    0
+
+  );
+
+  const end =
+
+    new Date(start);
+
+  end.setDate(
+
+    end.getDate() + 1
+
+  );
+
+  end.setHours(
+
+    0,
+
+    0,
+
+    0,
+
+    0
+
+  );
+
+  const todayDate =
+
+    start.toLocaleDateString(
+
+      "en-CA"
+
+    );
+
+  try {
+
+    const cloudSales =
+
+      await getCloudTodaySales(
+
+        start.toISOString(),
+
+        end.toISOString()
+
+      );
+
+    const mergedSales =
+
+      new Map();
+
+    (
+
+      Array.isArray(
+
+        cloudSales
+
+      )
+
+        ? cloudSales
+
+        : []
+
+    ).forEach(
+
+      (sale) => {
+
+        if (
+
+          sale?.billId
+
+        ) {
+
+          mergedSales.set(
+
+            sale.billId,
+
+            sale
+
+          );
 
         }
 
-        const mergedSales =
+      }
 
-          new Map();
+    );
 
-        (
+    /*
 
-          Array.isArray(
+      รวมเฉพาะบิล Offline/Pending
 
-            cloudSales
+      ของวันนี้หลัง 15:00
+
+    */
+
+    getPendingSales()
+
+      .filter(
+
+        (sale) =>
+
+          isSaleInDailyWindow(
+
+            sale,
+
+            todayDate
 
           )
 
-            ? cloudSales
+      )
 
-            : []
+      .forEach(
 
-        ).forEach((sale) => {
+        (sale) => {
 
-          if (sale?.billId) {
+          if (
+
+            sale?.billId &&
+
+            !mergedSales.has(
+
+              sale.billId
+
+            )
+
+          ) {
 
             mergedSales.set(
 
@@ -837,175 +1044,98 @@ const [
 
           }
 
-        });
+        }
 
-        getPendingSales().forEach(
+      );
 
-          (sale) => {
+    setHeaderSales(
 
-            if (
+      Array.from(
 
-              sale?.billId &&
+        mergedSales.values()
 
-              !mergedSales.has(
+      )
 
-                sale.billId
+    );
 
-              )
+    /*
 
-            ) {
+      ล้าง cache ประวัติบิลรุ่นเก่า
 
-              mergedSales.set(
+    */
 
-                sale.billId,
+    try {
 
-                sale
+      localStorage.removeItem(
 
-              );
+        SALES_KEY
 
-            }
+      );
 
-          }
+    } catch (error) {
 
-        );
+      console.warn(
 
-        const nextSales =
+        "Old sales cache cleanup skipped:",
 
-          Array.from(
+        error
 
-            mergedSales.values()
+      );
 
-          );
+    }
 
-        setHeaderSales(
+  } catch (error) {
 
-  nextSales
+    console.error(
 
-);
+      "Header sales sync error:",
 
-/*
+      error
 
-  ห้ามเก็บประวัติบิล Cloud ทั้งหมดในมือถืออีก
+    );
 
-  ลบ cache ระบบเก่าด้วย
-
-  เพื่อคืนพื้นที่ให้ Safari
-
-*/
-
-try {
-
-  localStorage.removeItem(
-
-    SALES_KEY
-
-  );
-
-} catch (error) {
-
-  console.warn(
-
-    "Old sales cache cleanup skipped:",
-
-    error
-
-  );
+  }
 
 }
- 
-      } catch (error) {
 
-        console.error(
 
-          "Header sales sync error:",
+useEffect(() => {
 
-          error
+  /*
 
-        );
+    Refresh หน้า / เปิด App
 
-      }
+  */
 
-    }
+  refreshHeaderSales();
 
-    refreshHeaderSales();
+  /*
 
-    function handleFocus() {
+    โหลดใหม่ทุก 10 นาที
 
-      refreshHeaderSales();
+  */
 
-    }
+  const timer =
 
-    function handleVisibility() {
+    window.setInterval(
 
-      if (
+      refreshHeaderSales,
 
-        document.visibilityState ===
-
-        "visible"
-
-      ) {
-
-        refreshHeaderSales();
-
-      }
-
-    }
-
-    const timer =
-
-      window.setInterval(
-
-        refreshHeaderSales,
-
-        15000
-
-      );
-
-    window.addEventListener(
-
-      "focus",
-
-      handleFocus
+      600000
 
     );
 
-    document.addEventListener(
+  return () => {
 
-      "visibilitychange",
+    window.clearInterval(
 
-      handleVisibility
+      timer
 
     );
 
-    return () => {
+  };
 
-      cancelled = true;
-
-      window.clearInterval(
-
-        timer
-
-      );
-
-      window.removeEventListener(
-
-        "focus",
-
-        handleFocus
-
-      );
-
-      document.removeEventListener(
-
-        "visibilitychange",
-
-        handleVisibility
-
-      );
-
-    };
-
-  }, []);
+}, []);
  
   function notifySyncStateChanged() {
 
@@ -3503,7 +3633,7 @@ item.id,
 
         );
 
-    const saleJob =
+   const saleJob =
 
       saveCloudSale(
 
@@ -3520,6 +3650,16 @@ item.id,
           );
 
           notifySyncStateChanged();
+
+          /*
+
+            หลังคิดเงินและบิลขึ้น Cloud แล้ว
+
+            โหลดยอดขายวันนี้ใหม่ทันที
+
+          */
+
+          refreshHeaderSales();
 
           return true;
 
@@ -3639,7 +3779,13 @@ const todaySales =
 
     (sale) =>
 
-      sale.soldDate === todayDate
+      isSaleInDailyWindow(
+
+        sale,
+
+        todayDate
+
+      )
 
   );
  
