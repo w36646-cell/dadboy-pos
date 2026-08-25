@@ -1,46 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { getCloudSales } from "../services/salesService";
+import { getCloudDashboardSales } from "../services/salesService";
 
 import { getCloudDashboardProducts } from "../services/productService";
 
 import "./DashboardPage.css";
-
-const SALES_KEY = "dadboy_sales_v1";
-
-function readStorage(key, fallback) {
-
-  try {
-
-    const saved = localStorage.getItem(key);
-
-    return saved ? JSON.parse(saved) : fallback;
-
-  } catch {
-
-    return fallback;
-
-  }
-
-}
-
-function writeStorage(key, value) {
-
-  try {
-
-    localStorage.setItem(key, JSON.stringify(value));
-
-    return true;
-
-  } catch (error) {
-
-    console.warn("Dashboard cache write skipped:", error);
-
-    return false;
-
-  }
-
-}
 
 function formatDateKey(date) {
 
@@ -160,32 +124,106 @@ function DashboardPage({ onOpenStock }) {
 
   }, []);
 
-  /*
+ /*
 
-    SALES:
+  SALES:
 
-    Cloud สำเร็จ = ถือว่าสำเร็จทันที
+  Dashboard โหลดเฉพาะข้อมูลที่จำเป็น
 
-    การเขียน localStorage เป็นเพียง cache
+  - หัวบิลสำหรับกราฟย้อนหลัง
 
-    ต่อให้ Safari เขียน cache ไม่ได้
+  - sale_items เฉพาะวันที่เลือก
 
-    ก็ห้ามเปลี่ยนสถานะ Cloud เป็น ERROR
+  Cloud เป็นข้อมูลหลัก
 
-  */
+  ไม่เก็บประวัติ Sales ทั้งหมดใน localStorage
 
-  const reloadSales = useCallback(async () => {
+*/
 
-    try {
+const reloadSales =
 
-      const cloudSales = await getCloudSales();
+  useCallback(
 
-      const safeSales = Array.isArray(cloudSales)
+    async () => {
 
-        ? cloudSales
+      try {
 
-        : [];
+        const cloudSales =
 
+          await getCloudDashboardSales(
+
+            selectedDate
+
+          );
+
+        const safeSales =
+
+          Array.isArray(
+
+            cloudSales
+
+          )
+
+            ? cloudSales
+
+            : [];
+
+        setSales(
+
+          safeSales
+
+        );
+
+        setSalesCloudError(
+
+          false
+
+        );
+
+        return true;
+
+      } catch (error) {
+
+        console.error(
+
+          "Dashboard Cloud sales error:",
+
+          error
+
+        );
+
+        /*
+
+          ไม่เอาประวัติ Sales เก่า
+
+          จาก localStorage มาใช้แล้ว
+
+          ถ้ามีข้อมูลเดิมบนหน้าจอ
+
+          ให้คงไว้ก่อน
+
+        */
+
+        setSalesCloudError(
+
+          true
+
+        );
+
+        return false;
+
+      }
+
+    },
+
+    [
+
+      selectedDate,
+
+    ]
+
+  );
+ 
       setSales(safeSales);
 
       setSalesCloudError(false);
@@ -274,57 +312,11 @@ function DashboardPage({ onOpenStock }) {
 
     }, 600000);
 
-    function handleFocus() {
-
-      reloadStockData();
-
-      reloadSales();
-
-    }
-
-    function handleVisibility() {
-
-      if (document.visibilityState === "visible") {
-
-        reloadStockData();
-
-        reloadSales();
-
-      }
-
-    }
-
-    window.addEventListener("focus", handleFocus);
-
-    document.addEventListener(
-
-      "visibilitychange",
-
-      handleVisibility
-
-    );
-
     return () => {
 
       active = false;
 
       window.clearInterval(timer);
-
-      window.removeEventListener(
-
-        "focus",
-
-        handleFocus
-
-      );
-
-      document.removeEventListener(
-
-        "visibilitychange",
-
-        handleVisibility
-
-      );
 
     };
 
@@ -968,7 +960,8 @@ function DashboardPage({ onOpenStock }) {
 
           โหลดยอดขายจาก Cloud ไม่สำเร็จ
 
-          กำลังใช้ข้อมูลยอดขายสำรองจากเครื่อง
+          ข้อมูลบน Dashboard อาจยังไม่อัปเดต กรุณาลองใหม่อีกครั้ง
+  
 </div>
 
       )}
