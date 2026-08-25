@@ -680,8 +680,6 @@ export async function updateCloudStock(
 )
 
 .maybeSingle();
- 
-      .maybeSingle();
 
   if (error) {
 
