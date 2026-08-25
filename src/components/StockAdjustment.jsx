@@ -509,7 +509,7 @@ selectedProduct.id,
 
   return (
 <div className="stock-page">
-<div className="stock-page-header pos-sticky-sales-header">
+<div className="stock-page-header">
 <div>
 <h1>
 
