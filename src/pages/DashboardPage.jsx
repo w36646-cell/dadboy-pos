@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { getCloudSales } from "../services/salesService";
 
-import { getCloudProducts } from "../services/productService";
+import { getCloudDashboardProducts } from "../services/productService";
 
 import "./DashboardPage.css";
 
@@ -124,7 +124,7 @@ function DashboardPage({ onOpenStock }) {
 
     try {
 
-      const cloudProducts = await getCloudProducts();
+      const cloudProducts = await getCloudDashboardProducts();
 
       const safeProducts = Array.isArray(cloudProducts)
 
