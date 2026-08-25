@@ -432,6 +432,7 @@ setBillSales(
 <button type="button" onClick={setThisWeek}>อาทิตย์นี้</button>
 <button type="button" onClick={setLast7Days}>7 วัน</button>
 <button type="button" onClick={setThisMonth}>เดือนนี้</button>
+</div> 
 </div>
 </section>
 
