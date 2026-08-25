@@ -1,13 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { 
-
-  getCloudSalesRange,
-
-  getCloudTodayBills
-
-} from "../services/salesService";
- 
+import { getCloudSalesRange } from "../services/salesService";
 
 import "./ReportPage.css";
 
@@ -47,8 +40,6 @@ function ReportPage() {
 
   const [sales, setSales] = useState([]);
 
-  const [billsales, setBillSales] = useState([]);
-
   const [loading, setLoading] = useState(true);
 
   const [cloudError, setCloudError] = useState(false);
@@ -59,11 +50,9 @@ function ReportPage() {
 
   firstDay.setDate(firstDay.getDate() - 6);
 
-  const todayKey = dateKey(new Date());
+  const [startDate, setStartDate] = useState(dateKey(firstDay));
 
-  const [startDate, setStartDate] = useState(todayKey);
-
-  const [endDate, setEndDate] = useState(todayKey);
+  const [endDate, setEndDate] = useState(dateKey(today));
 
 useEffect(() => {
 
@@ -108,32 +97,6 @@ useEffect(() => {
           : []
 
       );
-
-      const today =
-
-  dateKey(new Date());
-
-
-const todayBills =
-
-  await getCloudTodayBills(
-
-    startDate,
-
-    endDate
-
-  );
-
-
-setBillSales(
-
-  Array.isArray(todayBills)
-
-    ? todayBills
-
-    : []
-
-);
 
       setCloudError(
 
@@ -410,22 +373,10 @@ setBillSales(
 <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
 </div>
 <div className="report-quick-buttons">
-<button type="button" onClick={setToday}>
-
-วันนี้
-</button>
-<button type="button" onClick={setYesterday}>
-
-เมื่อวาน
-</button>
-<button type="button" onClick={setLast7Days}>
-
-7 วัน
-</button>
-<button type="button" onClick={setThisMonth}>
-
-เดือนนี้
-</button>
+<button type="button" onClick={setToday}>วันนี้</button>
+<button type="button" onClick={setThisWeek}>อาทิตย์นี้</button>
+<button type="button" onClick={setLast7Days}>7 วัน</button>
+<button type="button" onClick={setThisMonth}>เดือนนี้</button>
 </div>
 </section>
 
@@ -534,7 +485,7 @@ setBillSales(
 <section className="report-box">
 <h2>บิลขาย</h2>
 
-              {billSales.length === 0 ? (
+              {filteredSales.length === 0 ? (
 <div className="report-empty">ไม่มีบิลในช่วงวันที่นี้</div>
 
               ) : (
@@ -543,7 +494,7 @@ setBillSales(
 <thead><tr><th>เลขบิล</th><th>วันที่</th><th>เวลา</th><th>สินค้า</th><th>ยอดขาย</th><th>กำไร</th></tr></thead>
 <tbody>
 
-                      {billSales.map((sale) => (
+                      {filteredSales.map((sale) => (
 <tr key={sale.billId}>
 <td>{sale.billId}</td>
 <td>{sale.soldDate}</td>
