@@ -59,9 +59,11 @@ function ReportPage() {
 
   firstDay.setDate(firstDay.getDate() - 6);
 
-  const [startDate, setStartDate] = useState(dateKey(firstDay));
+  const todayKey = dateKey(new Date());
 
-  const [endDate, setEndDate] = useState(dateKey(today));
+  const [startDate, setStartDate] = useState(todayKey);
+
+  const [endDate, setEndDate] = useState(todayKey);
 
 useEffect(() => {
 
@@ -116,9 +118,9 @@ const todayBills =
 
   await getCloudTodayBills(
 
-    today,
+    startDate,
 
-    today
+    endDate
 
   );
 
@@ -408,6 +410,24 @@ setBillSales(
 <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
 </div>
 <div className="report-quick-buttons">
+<button type="button" onClick={setToday}>
+
+วันนี้
+</button>
+<button type="button" onClick={setYesterday}>
+
+เมื่อวาน
+</button>
+<button type="button" onClick={setLast7Days}>
+
+7 วัน
+</button>
+<button type="button" onClick={setThisMonth}>
+
+เดือนนี้
+</button>
+</div>
+ 
 <button type="button" onClick={setToday}>วันนี้</button>
 <button type="button" onClick={setThisWeek}>อาทิตย์นี้</button>
 <button type="button" onClick={setLast7Days}>7 วัน</button>
