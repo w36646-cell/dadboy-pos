@@ -1079,6 +1079,565 @@ export async function getCloudTodaySales(
   );
 
 }
+
+/*
+
+  =========================================
+
+  โหลด Sales สำหรับ Dashboard แบบประหยัด
+
+  1. กราฟ:
+
+     โหลดเฉพาะหัวบิล
+
+     ตั้งแต่วันจันทร์ของอาทิตย์ที่แล้ว
+
+     ถึงวันนี้
+
+  2. วันที่ที่ผู้ใช้เลือก:
+
+     โหลด sale_items เฉพาะวันนั้น
+
+  3. ไม่โหลดประวัติทั้งหมด
+
+  =========================================
+
+*/
+
+export async function getCloudDashboardSales(
+
+  selectedDate
+
+) {
+
+  const safeSelectedDate =
+
+    String(
+
+      selectedDate || ""
+
+    ).slice(
+
+      0,
+
+      10
+
+    );
+
+  if (
+
+    !/^\d{4}-\d{2}-\d{2}$/.test(
+
+      safeSelectedDate
+
+    )
+
+  ) {
+
+    throw new Error(
+
+      `Invalid dashboard date: ${selectedDate}`
+
+    );
+
+  }
+
+  function toDateKey(
+
+    date
+
+  ) {
+
+    const year =
+
+      date.getFullYear();
+
+    const month =
+
+      String(
+
+        date.getMonth() + 1
+
+      ).padStart(
+
+        2,
+
+        "0"
+
+      );
+
+    const day =
+
+      String(
+
+        date.getDate()
+
+      ).padStart(
+
+        2,
+
+        "0"
+
+      );
+
+    return `${year}-${month}-${day}`;
+
+  }
+
+
+  /*
+
+    หาวันจันทร์ของอาทิตย์นี้
+
+  */
+
+  const today =
+
+    new Date();
+
+  today.setHours(
+
+    0,
+
+    0,
+
+    0,
+
+    0
+
+  );
+
+  const dayOfWeek =
+
+    today.getDay();
+
+  const daysFromMonday =
+
+    dayOfWeek === 0
+
+      ? 6
+
+      : dayOfWeek - 1;
+
+  const thisMonday =
+
+    new Date(
+
+      today
+
+    );
+
+  thisMonday.setDate(
+
+    today.getDate() -
+
+      daysFromMonday
+
+  );
+
+
+  /*
+
+    วันจันทร์ของอาทิตย์ที่แล้ว
+
+  */
+
+  const lastMonday =
+
+    new Date(
+
+      thisMonday
+
+    );
+
+  lastMonday.setDate(
+
+    thisMonday.getDate() - 7
+
+  );
+
+
+  const trendStart =
+
+    toDateKey(
+
+      lastMonday
+
+    );
+
+  const trendEnd =
+
+    toDateKey(
+
+      today
+
+    );
+
+
+  /*
+
+    โหลดหัวบิลสำหรับกราฟ
+
+    ไม่มี sale_items
+
+  */
+
+  const trendRows =
+
+    await withRetry(
+
+      async () => {
+
+        const {
+
+          data,
+
+          error,
+
+        } =
+
+          await supabase
+
+            .from(
+
+              "sales"
+
+            )
+
+            .select(`
+
+              id,
+
+              bill_id,
+
+              sold_at,
+
+              sold_date,
+
+              sold_time,
+
+              total_qty,
+
+              total_amount,
+
+              total_cost,
+
+              total_profit
+
+            `)
+
+            .gte(
+
+              "sold_date",
+
+              trendStart
+
+            )
+
+            .lte(
+
+              "sold_date",
+
+              trendEnd
+
+            )
+
+            .order(
+
+              "sold_at",
+
+              {
+
+                ascending: false,
+
+              }
+
+            );
+
+        if (error) {
+
+          throw error;
+
+        }
+
+        return data || [];
+
+      }
+
+    );
+
+
+  /*
+
+    ถ้าวันที่เลือกอยู่ในช่วงกราฟแล้ว
+
+    ใช้หัวบิลจาก trendRows ได้เลย
+
+    ไม่ยิง query ซ้ำ
+
+  */
+
+  const selectedInsideTrend =
+
+    safeSelectedDate >=
+
+      trendStart &&
+
+    safeSelectedDate <=
+
+      trendEnd;
+
+  let selectedRows =
+
+    [];
+
+
+  if (
+
+    selectedInsideTrend
+
+  ) {
+
+    selectedRows =
+
+      trendRows.filter(
+
+        (row) =>
+
+          String(
+
+            row.sold_date || ""
+
+          ).slice(
+
+            0,
+
+            10
+
+          ) ===
+
+          safeSelectedDate
+
+      );
+
+  } else {
+
+    /*
+
+      ถ้าเลือกวันที่เก่ากว่า
+
+      ช่วงกราฟ 14 วัน
+
+      โหลดเฉพาะวันนั้นเพิ่ม
+
+    */
+
+    selectedRows =
+
+      await withRetry(
+
+        async () => {
+
+          const {
+
+            data,
+
+            error,
+
+          } =
+
+            await supabase
+
+              .from(
+
+                "sales"
+
+              )
+
+              .select(`
+
+                id,
+
+                bill_id,
+
+                sold_at,
+
+                sold_date,
+
+                sold_time,
+
+                total_qty,
+
+                total_amount,
+
+                total_cost,
+
+                total_profit
+
+              `)
+
+              .eq(
+
+                "sold_date",
+
+                safeSelectedDate
+
+              )
+
+              .order(
+
+                "sold_at",
+
+                {
+
+                  ascending: false,
+
+                }
+
+              );
+
+          if (error) {
+
+            throw error;
+
+          }
+
+          return data || [];
+
+        }
+
+      );
+
+  }
+
+
+  /*
+
+    โหลดรายการสินค้า
+
+    เฉพาะบิลของวันที่เลือก
+
+  */
+
+  const selectedSaleIds =
+
+    selectedRows.map(
+
+      (row) =>
+row.id
+
+    );
+
+  const selectedItemRows =
+
+    await loadSaleItemsBySaleIds(
+
+      selectedSaleIds
+
+    );
+
+
+  /*
+
+    รวม items เข้ากับบิล
+
+    ของวันที่เลือก
+
+  */
+
+  const selectedCombined =
+
+    combineSalesAndItems(
+
+      selectedRows,
+
+      selectedItemRows
+
+    ).map(
+
+      fromSaleRow
+
+    );
+
+
+  /*
+
+    กราฟใช้เฉพาะหัวบิล
+
+    ไม่ต้องมี items
+
+  */
+
+  const result =
+
+    new Map();
+
+
+  trendRows.forEach(
+
+    (row) => {
+
+      result.set(
+
+        String(
+row.id
+
+        ),
+
+        fromSaleRow({
+
+          ...row,
+
+          sale_items: [],
+
+        })
+
+      );
+
+    }
+
+  );
+
+
+  /*
+
+    ถ้าวันที่เลือกทับกับช่วงกราฟ
+
+    ให้ข้อมูลแบบละเอียด
+
+    เขียนทับหัวบิลเดิม
+
+    ป้องกันบิลซ้ำ
+
+  */
+
+  selectedCombined.forEach(
+
+    (sale) => {
+
+      result.set(
+
+        String(
+sale.id
+
+        ),
+
+        sale
+
+      );
+
+    }
+
+  );
+
+
+  return Array.from(
+
+    result.values()
+
+  );
+
+}
  
  export async function saveCloudSale(
 
