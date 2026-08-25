@@ -385,8 +385,6 @@ setBillSales(
 
   }
 
-  </section>
-
   return (
 <div className="report-page">
 <header className="report-header">
