@@ -362,11 +362,20 @@ export async function saveCloudProduct(
 
   }
 
-  return fromDatabase(
+  return {
 
-    data
+  id:
 
-  );
+    normalizeId(
+data.id
+
+    ),
+
+  stock:
+
+    actualStock,
+
+};
 
 }
 
@@ -666,42 +675,12 @@ export async function updateCloudStock(
 
       .select(
 
-        `
+  "id, stock"
 
-        id,
+)
 
-        name,
-
-        category,
-
-        price,
-
-        cost,
-
-        image,
-
-        stock,
-
-        sort_order,
-
-        min_stock,
-
-        track_stock,
-
-        has_option,
-
-        options,
-
-        pack_enabled,
-
-        pack_qty,
-
-        pack_price
-
-        `
-
-      )
-
+.maybeSingle();
+ 
       .maybeSingle();
 
   if (error) {
