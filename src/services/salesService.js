@@ -2508,7 +2508,3 @@ sale.id
   };
 
 }
-
-export async function getCloudTodayBills(){
-
- 
