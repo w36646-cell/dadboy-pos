@@ -963,6 +963,123 @@ sale.id
   };
 
 }
+
+/*
+
+  โหลดเฉพาะหัวบิลตามช่วงเวลาที่กำหนด
+
+  ใช้สำหรับยอดขายรายวันหน้า POS
+
+  ไม่โหลด sale_items
+
+  ไม่โหลดประวัติบิลทั้งหมด
+
+*/
+
+export async function getCloudTodaySales(
+
+  startIso,
+
+  endIso
+
+) {
+
+  return withRetry(
+
+    async () => {
+
+      const {
+
+        data,
+
+        error,
+
+      } =
+
+        await supabase
+
+          .from("sales")
+
+          .select(`
+
+            id,
+
+            bill_id,
+
+            sold_at,
+
+            sold_date,
+
+            sold_time,
+
+            total_qty,
+
+            total_amount,
+
+            total_cost,
+
+            total_profit
+
+          `)
+
+          .gte(
+
+            "sold_at",
+
+            startIso
+
+          )
+
+          .lt(
+
+            "sold_at",
+
+            endIso
+
+          )
+
+          .order(
+
+            "sold_at",
+
+            {
+
+              ascending: false,
+
+            }
+
+          );
+
+      if (error) {
+
+        throw error;
+
+      }
+
+      return (
+
+        data || []
+
+      ).map(
+
+        (row) =>
+
+          fromSaleRow({
+
+            ...row,
+
+            sale_items: [],
+
+          })
+
+      );
+
+    }
+
+  );
+
+}
+ 
  export async function saveCloudSale(
 
   sale
