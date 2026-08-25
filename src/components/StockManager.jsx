@@ -427,7 +427,7 @@ selectedProduct.id
 
   return (
 <div className="stock-page">
-<div className="stock-page-header">
+<div className="stock-page-header pos-sticky-sales-header">
 <div>
 <h1>
 
