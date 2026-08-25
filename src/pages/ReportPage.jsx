@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { getCloudSalesRange } from "../services/salesService";
+import {
 
+  getCloudSalesRange,
+
+  getCloudTodaySales
+
+} from "../services/salesService";
+ 
 import "./ReportPage.css";
 
 function dateKey(date) {
@@ -40,6 +46,8 @@ function ReportPage() {
 
   const [sales, setSales] = useState([]);
 
+  const [todayBills, setTodayBills] = useState([]);
+ 
   const [loading, setLoading] = useState(true);
 
   const [cloudError, setCloudError] = useState(false);
@@ -98,6 +106,54 @@ useEffect(() => {
 
       );
 
+      const now = new Date();
+
+const start = new Date(
+
+  now.getFullYear(),
+
+  now.getMonth(),
+
+  now.getDate()
+
+);
+
+const end = new Date(
+
+  now.getFullYear(),
+
+  now.getMonth(),
+
+  now.getDate() + 1
+
+);
+
+const todayData =
+
+  await getCloudTodaySales(
+
+    start.toISOString(),
+
+    end.toISOString()
+
+  );
+
+if (!active) {
+
+  return;
+
+}
+
+setTodayBills(
+
+  Array.isArray(todayData)
+
+    ? todayData
+
+    : []
+
+);
+ 
       setCloudError(
 
         false
@@ -485,7 +541,7 @@ useEffect(() => {
 <section className="report-box">
 <h2>บิลขาย</h2>
 
-              {filteredSales.length === 0 ? (
+              {todayBills.length === 0 ? (
 <div className="report-empty">ไม่มีบิลในช่วงวันที่นี้</div>
 
               ) : (
@@ -494,7 +550,7 @@ useEffect(() => {
 <thead><tr><th>เลขบิล</th><th>วันที่</th><th>เวลา</th><th>สินค้า</th><th>ยอดขาย</th><th>กำไร</th></tr></thead>
 <tbody>
 
-                      {filteredSales.map((sale) => (
+                      {todayBills.map((sale) => (
 <tr key={sale.billId}>
 <td>{sale.billId}</td>
 <td>{sale.soldDate}</td>
