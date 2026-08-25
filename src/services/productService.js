@@ -304,6 +304,131 @@ export async function getCloudProducts() {
 
   =====================================
 
+  โหลดสินค้าแบบเบาสำหรับ Dashboard
+
+  ไม่โหลด:
+
+  - image
+
+  - options
+
+  - price
+
+  - category
+
+  - pack settings
+
+  Dashboard ใช้เฉพาะ:
+
+  - id
+
+  - name
+
+  - cost
+
+  - stock
+
+  - min_stock
+
+  - track_stock
+
+  =====================================
+
+*/
+
+export async function getCloudDashboardProducts() {
+
+  const {
+
+    data,
+
+    error,
+
+  } =
+
+    await supabase
+
+      .from("products")
+
+      .select(`
+
+        id,
+
+        name,
+
+        cost,
+
+        stock,
+
+        min_stock,
+
+        track_stock
+
+      `);
+
+  if (error) {
+
+    throw error;
+
+  }
+
+  return (
+
+    data || []
+
+  ).map(
+
+    (row) => ({
+
+      id:
+
+        normalizeId(
+row.id
+
+        ),
+
+      name:
+
+        row.name || "",
+
+      cost:
+
+        Number(
+
+          row.cost || 0
+
+        ),
+
+      stock:
+
+        Number(
+
+          row.stock ?? 0
+
+        ),
+
+      minStock:
+
+        Number(
+
+          row.min_stock ?? 5
+
+        ),
+
+      trackStock:
+
+        row.track_stock === true,
+
+    })
+
+  );
+
+}
+
+/*
+
+  =====================================
+
   บันทึกสินค้า 1 รายการ
 
   =====================================
