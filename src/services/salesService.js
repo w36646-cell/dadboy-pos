@@ -1104,6 +1104,217 @@ export async function getCloudTodaySales(
 
 */
 
+/*
+
+  =========================================
+
+  โหลด Sales ตามช่วงวันที่สำหรับ Report
+
+  - โหลดเฉพาะหัวบิลในช่วงวันที่เลือก
+
+  - โหลด sale_items เฉพาะบิลเหล่านั้น
+
+  - ไม่โหลดประวัติทั้งหมด
+
+  =========================================
+
+*/
+
+export async function getCloudSalesRange(
+
+  startDate,
+
+  endDate
+
+) {
+
+  const safeStartDate =
+
+    String(
+
+      startDate || ""
+
+    ).slice(
+
+      0,
+
+      10
+
+    );
+
+  const safeEndDate =
+
+    String(
+
+      endDate || ""
+
+    ).slice(
+
+      0,
+
+      10
+
+    );
+
+  const datePattern =
+
+    /^\d{4}-\d{2}-\d{2}$/;
+
+  if (
+
+    !datePattern.test(
+
+      safeStartDate
+
+    ) ||
+
+    !datePattern.test(
+
+      safeEndDate
+
+    )
+
+  ) {
+
+    throw new Error(
+
+      `Invalid report date range: ${startDate} - ${endDate}`
+
+    );
+
+  }
+
+  if (
+
+    safeStartDate >
+
+    safeEndDate
+
+  ) {
+
+    return [];
+
+  }
+
+  const saleRows =
+
+    await withRetry(
+
+      async () => {
+
+        const {
+
+          data,
+
+          error,
+
+        } =
+
+          await supabase
+
+            .from(
+
+              "sales"
+
+            )
+
+            .select(`
+
+              id,
+
+              bill_id,
+
+              sold_at,
+
+              sold_date,
+
+              sold_time,
+
+              total_qty,
+
+              total_amount,
+
+              total_cost,
+
+              total_profit
+
+            `)
+
+            .gte(
+
+              "sold_date",
+
+              safeStartDate
+
+            )
+
+            .lte(
+
+              "sold_date",
+
+              safeEndDate
+
+            )
+
+            .order(
+
+              "sold_at",
+
+              {
+
+                ascending: false,
+
+              }
+
+            );
+
+        if (error) {
+
+          throw error;
+
+        }
+
+        return data || [];
+
+      }
+
+    );
+
+  const saleIds =
+
+    saleRows.map(
+
+      (sale) =>
+sale.id
+
+    );
+
+  const itemRows =
+
+    await loadSaleItemsBySaleIds(
+
+      saleIds
+
+    );
+
+  const combinedRows =
+
+    combineSalesAndItems(
+
+      saleRows,
+
+      itemRows
+
+    );
+
+  return combinedRows.map(
+
+    fromSaleRow
+
+  );
+
+}
+
 export async function getCloudDashboardSales(
 
   selectedDate
