@@ -638,11 +638,7 @@ button {
 
   width: 100%;
 
-  max-height: 70vh;
-
   overflow-x: auto;
-
-  overflow-y: auto;
 
   -webkit-overflow-scrolling: touch;
 
@@ -689,6 +685,8 @@ button {
   z-index: 20;
 
   background: white;
+
+  box-shadow: 0 1px 0 rgba(16, 24, 40, 0,12);
 
 }
  
