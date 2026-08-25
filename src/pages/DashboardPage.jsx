@@ -224,46 +224,6 @@ const reloadSales =
 
   );
  
-      setSales(safeSales);
-
-      setSalesCloudError(false);
-
-      /*
-
-        Cache แยก try ออกมาต่างหาก
-
-        ห้าม cache error ทำให้ Cloud error
-
-      */
-
-      writeStorage(SALES_KEY, safeSales);
-
-      return true;
-
-    } catch (error) {
-
-      console.error("Dashboard Cloud sales error:", error);
-
-      const localSales = readStorage(SALES_KEY, []);
-
-      setSales(
-
-        Array.isArray(localSales)
-
-          ? localSales
-
-          : []
-
-      );
-
-      setSalesCloudError(true);
-
-      return false;
-
-    }
-
-  }, []);
-
   /*
 
     โหลด:
