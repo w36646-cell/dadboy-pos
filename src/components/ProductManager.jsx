@@ -1982,7 +1982,7 @@ option.id ===
 
   return (
 <div className="product-manager">
-<div className="manager-header pos-sticky-sales-header">
+<div className="manager-header">
  
 <div>
 <h1>
