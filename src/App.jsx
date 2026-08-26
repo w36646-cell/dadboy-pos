@@ -2621,7 +2621,9 @@ item.id
 
     option,
 
-    quantity = 1
+    quantity = 1,
+
+    specialMode = "normal"
 
   ) {
 
@@ -2742,6 +2744,124 @@ item.id
     const cost =
 
       baseCost + extraCost;
+
+    const normalizedSpecialMode =
+
+      specialMode ||
+
+      "normal";
+
+    /*
+
+      =========================
+
+      กินเอง
+
+      =========================
+
+      - ไม่เข้า Cart
+
+      - ไม่สร้าง Sale
+
+      - ไม่เพิ่มยอดขาย
+
+      - ตัด Stock
+
+      - บันทึกใน stock_adjustments
+
+    */
+
+    if (
+
+      normalizedSpecialMode ===
+
+      "selfUse"
+
+    ) {
+
+      const stockQuantity =
+
+        safeQty *
+
+        stockPerUnit;
+
+      const previousStock =
+
+        getStock(
+product.id
+
+        );
+
+      const actualStock =
+
+        previousStock -
+
+        stockQuantity;
+
+      if (
+
+        actualStock < 0
+
+      ) {
+
+        window.alert(
+
+          `Stock ไม่พอ\nคงเหลือ ${previousStock} ชิ้น\nต้องใช้ ${stockQuantity} ชิ้น`
+
+        );
+
+        return;
+
+      }
+
+      const totalSelfUseCost =
+
+        cost *
+
+        stockQuantity;
+
+      adjustStock({
+
+        productId:
+product.id,
+
+        productName:
+
+          product.name,
+
+        previousStock,
+
+        actualStock,
+
+        reason:
+
+          "กินเอง",
+
+        note:
+
+          `${optionName} | ` +
+
+          `จำนวน ${safeQty}${isPack ? " แพ็ก" : " ชิ้น"} | ` +
+
+          `ใช้สต๊อก ${stockQuantity} ชิ้น | ` +
+
+          `ต้นทุนรวม ${Number(
+
+            totalSelfUseCost
+
+          ).toFixed(2)} บาท`,
+
+        adjustedAt:
+
+          new Date()
+
+            .toISOString(),
+
+      });
+
+      return;
+
+    }
  
     setCart(
 
@@ -2803,9 +2923,19 @@ product.id
 
               optionName &&
 
-            item.saleType ===
+           item.saleType ===
 
-              saleType;
+              saleType &&
+
+            (
+
+              item.specialMode ||
+
+              "normal"
+
+            ) ===
+
+              normalizedSpecialMode;
 
           if (
 
@@ -2891,12 +3021,16 @@ product.id
 
                     cost,
 
-                    saleType,
+                   saleType,
 
                     stockPerUnit,
 
-                    qty:
+                    specialMode:
 
+                      normalizedSpecialMode,
+
+                    qty:
+ 
                       Number(
 
                         item.qty
@@ -2967,7 +3101,12 @@ product.id,
 
             stockPerUnit,
 
+            specialMode:
+
+              normalizedSpecialMode,
+
             lastAddedAt:
+ 
 
               now,
 
