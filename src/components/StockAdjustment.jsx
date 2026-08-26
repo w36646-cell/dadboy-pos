@@ -117,7 +117,89 @@ function StockAdjustment({
   ] = useState("");
 
   const searchInputRef = useRef(null);
- 
+
+  const adjustmentTableScrollRef =
+
+    useRef(null);
+
+  const adjustmentStickyScrollRef =
+
+    useRef(null);
+
+
+  function syncFromAdjustmentTable(
+
+    event
+
+  ) {
+
+    const sticky =
+
+      adjustmentStickyScrollRef.current;
+
+    if (!sticky) {
+
+      return;
+
+    }
+
+    if (
+
+      Math.abs(
+
+        sticky.scrollLeft -
+
+        event.currentTarget.scrollLeft
+
+      ) > 1
+
+    ) {
+
+      sticky.scrollLeft =
+
+        event.currentTarget.scrollLeft;
+
+    }
+
+  }
+
+
+  function syncFromAdjustmentStickyHeader(
+
+    event
+
+  ) {
+
+    const table =
+
+      adjustmentTableScrollRef.current;
+
+    if (!table) {
+
+      return;
+
+    }
+
+    if (
+
+      Math.abs(
+
+        table.scrollLeft -
+
+        event.currentTarget.scrollLeft
+
+      ) > 1
+
+    ) {
+
+      table.scrollLeft =
+
+        event.currentTarget.scrollLeft;
+
+    }
+
+  }
+
   const [
 
     selectedProduct,
@@ -713,10 +795,53 @@ selectedProduct.id,
 </div>
  
 <div className="stock-layout">
+<div className="product-table-column">
+<div
 
-<div className="product-table-wrap">
+  className="product-table-sticky-wrap"
+
+  ref={adjustmentStickyScrollRef}
+
+  onScroll={syncFromAdjustmentStickyHeader}
+>
 <table className="product-table">
 <thead>
+<tr>
+<th>
+
+  รูป
+</th>
+<th>
+
+  ชื่อสินค้า
+</th>
+<th>
+
+  คงเหลือ
+</th>
+<th>
+
+  Min
+</th>
+<th>
+
+  บรรจุ / แพ็ก
+</th>
+</tr>
+</thead>
+</table>
+</div>
+
+<div
+
+  className="product-table-wrap"
+
+  ref={adjustmentTableScrollRef}
+
+  onScroll={syncFromAdjustmentTable}
+>
+<table className="product-table">
+<thead className="sticky-table-header">
 <tr>
 <th>
 
@@ -740,7 +865,7 @@ selectedProduct.id,
 </th>
 </tr>
 </thead>
-
+ 
 <tbody>
 
               {filteredProducts.map(
@@ -932,6 +1057,8 @@ product.id
               )}
 </tbody>
 </table>
+</div>
+
 </div>
 
 <aside className="stock-form-panel">
