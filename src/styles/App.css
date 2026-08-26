@@ -907,64 +907,53 @@ button {
 
 .product-table-sticky-wrap {
 
+  position: sticky;
+
+  top: 0;
+
+  z-index: 40;
+
+  display: block;
+
+  width: 100%;
+
+  overflow-x: auto;
+
+  overflow-y: hidden;
+
+  -webkit-overflow-scrolling: touch;
+
+  border-radius: 12px 12px 0 0;
+
+  background: white;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+
+  scrollbar-width: none;
+
+}
+
+
+.product-table-sticky-wrap::-webkit-scrollbar {
+
   display: none;
 
 }
 
 
-@media (max-width: 900px) {
+.product-table-sticky-wrap .product-table {
 
-  .product-table-sticky-wrap {
-
-    position: sticky;
-
-    top: 0;
-
-    z-index: 40;
-
-    display: block;
-
-    width: 100%;
-
-    overflow-x: auto;
-
-    overflow-y: hidden;
-
-    -webkit-overflow-scrolling: touch;
-
-    border-radius: 12px 12px 0 0;
-
-    background: white;
-
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-
-    scrollbar-width: none;
-
-  }
-
-
-  .product-table-sticky-wrap::-webkit-scrollbar {
-
-    display: none;
-
-  }
-
-
-  .product-table-sticky-wrap .product-table {
-
-    margin: 0;
-
-  }
-
-
-  .product-table-wrap .sticky-table-header {
-
-    display: none;
-
-  }
+  margin: 0;
 
 }
- 
+
+
+.product-table-wrap .sticky-table-header {
+
+  display: none;
+
+}
+  
 .product-table tr[data-dragging="true"] td {
 
   background: #fff4bf;
