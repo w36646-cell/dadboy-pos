@@ -116,9 +116,14 @@ function StockAdjustment({
 
   ] = useState("");
 
-  const searchInputRef = useRef(null);
+ const searchInputRef = useRef(null);
+
+  const adjustmentFormRef =
+
+    useRef(null);
 
   const adjustmentTableScrollRef =
+ 
 
     useRef(null);
 
@@ -321,8 +326,28 @@ product.id
 
     setNote("");
 
-  }
 
+    window.setTimeout(
+
+      () => {
+
+        adjustmentFormRef.current
+
+          ?.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "start",
+
+          });
+
+      },
+
+      60
+
+    );
+
+  }
 
   const currentStock =
 
@@ -937,7 +962,14 @@ product.id;
                   return (
 <tr
 
+                      <tr
+
                       key={
+product.id
+
+                      }
+
+                      data-product-id={
 product.id
 
                       }
@@ -1063,9 +1095,131 @@ product.id
 
 </div>
 
-<aside className="stock-form-panel">
+<aside
+
+  ref={adjustmentFormRef}
+
+  className="stock-form-panel"
+
+  style={{
+
+    position: "relative",
+
+  }}
+>
+
+          {selectedProduct && (
+<button
+
+    type="button"
+
+    aria-label="ปิดรายการปรับสต๊อก"
+
+    onClick={() => {
+
+      const currentId =
+
+        selectedProduct?.id;
+
+      setSelectedProduct(null);
+
+      setActualStock("");
+
+      setReason(
+
+        "ตรวจนับประจำสัปดาห์"
+
+      );
+
+      setNote("");
+
+
+      requestAnimationFrame(() => {
+
+        const currentRow =
+
+          document.querySelector(
+
+            `tr[data-product-id="${currentId}"]`
+
+          );
+
+        const nextRow =
+
+          currentRow?.nextElementSibling;
+
+        if (nextRow) {
+
+          nextRow.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "start",
+
+          });
+
+        } else {
+
+          currentRow?.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "start",
+
+          });
+
+        }
+
+      });
+
+    }}
+
+    style={{
+
+      position: "absolute",
+
+      top: "10px",
+
+      right: "10px",
+
+      width: "38px",
+
+      height: "38px",
+
+      padding: 0,
+
+      border: "none",
+
+      borderRadius: "50%",
+
+      background: "#e5e7eb",
+
+      color: "#475467",
+
+      fontSize: "24px",
+
+      fontWeight: "700",
+
+      display: "flex",
+
+      alignItems: "center",
+
+      justifyContent: "center",
+
+      cursor: "pointer",
+
+      zIndex: 10,
+
+    }}
+>
+
+    ×
+</button>
+
+)}
 
           {!selectedProduct ? (
+ 
 <div className="stock-form-empty">
 
               เลือกสินค้าที่ต้องการปรับยอด
