@@ -2700,7 +2700,7 @@ item.id
 
         : 1;
 
-    const baseCost =
+   const baseCost =
 
       Number(
 
@@ -2708,18 +2708,38 @@ item.id
 
       );
 
-    const cost =
+    const defaultExtraCost =
 
       option?.id === "cup"
 
-        ? baseCost + 4
+        ? 4
 
         : option?.id === "ownCup"
 
-          ? baseCost + 2
+          ? 2
 
-          : baseCost;
+          : 0;
 
+    const extraCost =
+
+      Math.max(
+
+        0,
+
+        Number(
+
+          option?.extraCost ??
+
+            defaultExtraCost
+
+        ) || 0
+
+      );
+
+    const cost =
+
+      baseCost + extraCost;
+ 
     setCart(
 
       (currentCart) => {
