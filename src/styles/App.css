@@ -812,6 +812,59 @@ button {
   width: 280px;
 
 }
+
+.stock-adjustment-sync-table {
+
+  min-width: 1050px;
+
+  table-layout: fixed;
+
+}
+
+
+.stock-adjustment-sync-table th:nth-child(1),
+
+.stock-adjustment-sync-table td:nth-child(1) {
+
+  width: 110px;
+
+}
+
+
+.stock-adjustment-sync-table th:nth-child(2),
+
+.stock-adjustment-sync-table td:nth-child(2) {
+
+  width: 430px;
+
+}
+
+
+.stock-adjustment-sync-table th:nth-child(3),
+
+.stock-adjustment-sync-table td:nth-child(3) {
+
+  width: 160px;
+
+}
+
+
+.stock-adjustment-sync-table th:nth-child(4),
+
+.stock-adjustment-sync-table td:nth-child(4) {
+
+  width: 120px;
+
+}
+
+
+.stock-adjustment-sync-table th:nth-child(5),
+
+.stock-adjustment-sync-table td:nth-child(5) {
+
+  width: 230px;
+
+}
  
 .product-table th,
 
