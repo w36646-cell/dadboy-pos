@@ -638,11 +638,9 @@ button {
 
   width: 100%;
 
-  /* แก้จาก overflow-x เป็น auto (ทั้ง x และ y) และจำกัดความสูงเพื่อให้ sticky ทำงาน */
+  overflow-x: auto;
 
-  overflow: auto;
-
-  max-height: calc(100vh - 40px);
+  overflow-y: visible;
 
   -webkit-overflow-scrolling: touch;
 
@@ -650,8 +648,7 @@ button {
 
   background: white;
 
-}
- 
+} 
   
 .product-table {
 
