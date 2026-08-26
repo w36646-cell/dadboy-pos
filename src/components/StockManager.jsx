@@ -100,6 +100,10 @@ function StockManager({
 
  const searchInputRef = useRef(null);
 
+  const stockFormRef =
+
+    useRef(null);
+
   const stockTableScrollRef =
 
     useRef(null);
@@ -292,7 +296,9 @@ function StockManager({
   }
 
 
-  function selectProduct(product) {
+ function selectProduct(product) {
+
+    document.activeElement?.blur();
 
     setSelectedProduct(product);
 
@@ -308,8 +314,29 @@ function StockManager({
 
     );
 
-  }
+    window.setTimeout(() => {
 
+      stockFormRef.current
+
+        ?.scrollIntoView({
+
+          behavior: "smooth",
+
+          block: "start",
+
+        });
+
+      stockFormRef.current
+
+        ?.focus({
+
+          preventScroll: true,
+
+        });
+
+    }, 60);
+
+  }
 
   function getReceivePieces() {
 
@@ -910,7 +937,11 @@ product.id
 
 </div>
 
-<aside 
+<aside
+
+  ref={stockFormRef}
+
+  tabIndex={-1}
 
   className="stock-form-panel"
 
@@ -918,9 +949,11 @@ product.id
 
     position: "relative",
 
+    outline: "none",
+
   }}
 >
- 
+  
           {selectedProduct && (
 <button
 
@@ -1390,8 +1423,6 @@ product.id
                     handleKeyDown
 
                   }
-
-                  autoFocus
 
                 />
 
