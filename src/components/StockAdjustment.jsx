@@ -122,9 +122,12 @@ function StockAdjustment({
 
     useRef(null);
 
+  const actualStockInputRef =
+
+    useRef(null);
+
   const adjustmentTableScrollRef =
  
-
     useRef(null);
 
   const adjustmentStickyScrollRef =
@@ -341,12 +344,28 @@ product.id
 
           });
 
+        window.setTimeout(() => {
+
+          actualStockInputRef.current
+
+            ?.focus({
+
+              preventScroll: true,
+
+            });
+
+          actualStockInputRef.current
+
+            ?.select();
+
+        }, 350);
+
       },
 
       60
 
     );
-
+ 
   }
 
   const currentStock =
@@ -1322,9 +1341,14 @@ product.id
 
 <input
 
+               <input
+
+                ref={actualStockInputRef}
+
                 className="manager-input"
 
                 type="number"
+ 
 
                 min="0"
 
