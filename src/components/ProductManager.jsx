@@ -153,7 +153,11 @@ function createEmptyForm() {
 
     cupPrice: 25,
 
+    cupExtraCost: 4,
+
     ownCupPrice: 20,
+
+    ownCupExtraCost: 2,
 
     packQty: 1,
 
@@ -1268,13 +1272,23 @@ option.id ===
 
         ),
 
-      cupPrice:
+     cupPrice:
 
         Number(
 
           cupOption?.price ??
 
             25
+
+        ),
+
+      cupExtraCost:
+
+        Number(
+
+          cupOption?.extraCost ??
+
+            4
 
         ),
 
@@ -1288,8 +1302,18 @@ option.id ===
 
         ),
 
-      packQty:
+      ownCupExtraCost:
 
+        Number(
+
+          ownCupOption?.extraCost ??
+
+            2
+
+        ),
+
+      packQty:
+ 
         Math.max(
 
           1,
@@ -1738,9 +1762,13 @@ option.id ===
 
                   normalPrice,
 
-              },
+                extraCost: 0,
 
+              },
+ 
               {
+
+                {
 
                 id:
 
@@ -1764,9 +1792,25 @@ option.id ===
 
                   ),
 
+                extraCost:
+
+                  Math.max(
+
+                    0,
+
+                    Number(
+
+                      form.cupExtraCost
+
+                    ) || 0
+
+                  ),
+
               },
 
               {
+
+                {
 
                 id:
 
@@ -1785,6 +1829,20 @@ option.id ===
                     Number(
 
                       form.ownCupPrice
+
+                    ) || 0
+
+                  ),
+
+                extraCost:
+
+                  Math.max(
+
+                    0,
+
+                    Number(
+
+                      form.ownCupExtraCost
 
                     ) || 0
 
@@ -3192,8 +3250,44 @@ style={{
                   />
 <label>
 
+                    ต้นทุนเพิ่ม — ใส่แก้ว
+</label>
+<input
+
+                    type="number"
+
+                    min="0"
+
+                    step="0.01"
+
+                    value={
+
+                      form.cupExtraCost
+
+                    }
+
+                    onChange={(
+
+                      event
+
+                    ) =>
+
+                      updateField(
+
+                        "cupExtraCost",
+
+                        event.target.value
+
+                      )
+
+                    }
+
+                  />
+<label>
+
                     เอาแก้วมาเอง
 </label>
+ 
 <input
 
                     type="number"
@@ -3221,6 +3315,41 @@ style={{
                         event.target
 
                           .value
+
+                      )
+
+                    }
+
+                 />
+<label>
+
+                    ต้นทุนเพิ่ม — เอาแก้วมาเอง
+</label>
+<input
+
+                    type="number"
+
+                    min="0"
+
+                    step="0.01"
+
+                    value={
+
+                      form.ownCupExtraCost
+
+                    }
+
+                    onChange={(
+
+                      event
+
+                    ) =>
+
+                      updateField(
+
+                        "ownCupExtraCost",
+
+                        event.target.value
 
                       )
 
