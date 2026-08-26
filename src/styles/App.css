@@ -771,7 +771,7 @@ button {
 
 .stock-receive-sync-table {
 
-  min-width: 1050px;
+  min-width: 800px;
 
   table-layout: fixed;
 
@@ -782,7 +782,7 @@ button {
 
 .stock-receive-sync-table td:nth-child(1) {
 
-  width: 110px;
+  width: 90px;
 
 }
 
@@ -791,7 +791,7 @@ button {
 
 .stock-receive-sync-table td:nth-child(2) {
 
-  width: 480px;
+  width: 300px;
 
 }
 
@@ -800,7 +800,7 @@ button {
 
 .stock-receive-sync-table td:nth-child(3) {
 
-  width: 180px;
+  width: 150px;
 
 }
 
@@ -809,13 +809,13 @@ button {
 
 .stock-receive-sync-table td:nth-child(4) {
 
-  width: 280px;
+  width: 260px;
 
 }
-
+ 
 .stock-adjustment-sync-table {
 
-  min-width: 1050px;
+  min-width: 820px;
 
   table-layout: fixed;
 
@@ -826,7 +826,7 @@ button {
 
 .stock-adjustment-sync-table td:nth-child(1) {
 
-  width: 110px;
+  width: 90px;
 
 }
 
@@ -835,7 +835,7 @@ button {
 
 .stock-adjustment-sync-table td:nth-child(2) {
 
-  width: 430px;
+  width: 300px;
 
 }
 
@@ -844,7 +844,7 @@ button {
 
 .stock-adjustment-sync-table td:nth-child(3) {
 
-  width: 160px;
+  width: 140px;
 
 }
 
@@ -853,7 +853,7 @@ button {
 
 .stock-adjustment-sync-table td:nth-child(4) {
 
-  width: 120px;
+  width: 90px;
 
 }
 
@@ -862,10 +862,10 @@ button {
 
 .stock-adjustment-sync-table td:nth-child(5) {
 
-  width: 230px;
+  width: 200px;
 
 }
- 
+  
 .product-table th,
 
 .product-table td {
