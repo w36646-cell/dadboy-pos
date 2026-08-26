@@ -266,6 +266,87 @@ const dragOverProductIdRef =
 
     useRef(null);
 
+  const productTableScrollRef =
+
+  useRef(null);
+
+
+const productStickyScrollRef =
+
+  useRef(null);
+
+  function syncFromProductTable(
+
+  event
+
+) {
+
+  const sticky =
+
+    productStickyScrollRef.current;
+
+  if (!sticky) {
+
+    return;
+
+  }
+
+  if (
+
+    Math.abs(
+
+      sticky.scrollLeft -
+
+      event.currentTarget.scrollLeft
+
+    ) > 1
+
+  ) {
+
+    sticky.scrollLeft =
+
+      event.currentTarget.scrollLeft;
+
+  }
+
+}
+
+
+function syncFromStickyHeader(
+
+  event
+
+) {
+
+  const table =
+
+    productTableScrollRef.current;
+
+  if (!table) {
+
+    return;
+
+  }
+
+  if (
+
+    Math.abs(
+
+      table.scrollLeft -
+
+      event.currentTarget.scrollLeft
+
+    ) > 1
+
+  ) {
+
+    table.scrollLeft =
+
+      event.currentTarget.scrollLeft;
+
+  }
+
+}
 
   useEffect(() => {
 
@@ -2180,9 +2261,87 @@ option.id ===
 </div>
   
 <div className="product-manager-layout">
-<div className="product-table-wrap">
+<div className="product-table-column">
+<div
+
+  className="product-table-sticky-wrap"
+
+  ref={productStickyScrollRef}
+
+  onScroll={syncFromStickyHeader}
+>
+<table className="product-table">
+<thead>
+<tr>
+<th
+
+  style={{
+
+    width: "44px",
+
+    textAlign: "center",
+
+  }}
+>
+
+  ลาก
+</th>
+<th>
+
+  รูป
+</th>
+<th>
+
+  ชื่อสินค้า
+</th>
+<th>
+
+  ราคาขาย
+</th>
+<th>
+
+  บรรจุ/แพ็ก
+</th>
+<th>
+
+  ราคาแพ็ก
+</th>
+<th>
+
+  ต้นทุน
+</th>
+<th>
+
+  คงเหลือ
+</th>
+<th>
+
+  Min
+</th>
+<th>
+
+  Tracking
+</th>
+<th>
+
+  จัดการ
+</th>
+</tr>
+</thead>
+</table>
+</div>
+
+<div
+
+  className="product-table-wrap"
+
+  ref={productTableScrollRef}
+
+  onScroll={syncFromProductTable}
+>
 <table className="product-table">
 <thead className="sticky-table-header">
+ 
 <tr>
 <th
 
@@ -2626,6 +2785,8 @@ item.id
               )}
 </tbody>
 </table>
+</div>
+  
 </div>
 <aside
 
