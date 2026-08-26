@@ -53,7 +53,14 @@ function CartPanel({
 
                 className="cart-item"
 
-                key={`${item.id}-${item.option}-${item.saleType || "unit"}`}
+                key={
+
+  item.cartLineId ||
+
+  `${item.id}-${item.option}-${item.saleType || "unit"}-${index}`
+
+}
+ 
 >
 <div className="cart-item-header">
 <div>
