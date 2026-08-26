@@ -638,17 +638,21 @@ button {
 
   width: 100%;
 
+  max-height: calc(100dvh - 120px);
+
   overflow-x: auto;
 
-  overflow-y: visible;
+  overflow-y: auto;
 
   -webkit-overflow-scrolling: touch;
+
+  overscroll-behavior: contain;
 
   border-radius: 12px;
 
   background: white;
 
-} 
+}
   
 .product-table {
 
