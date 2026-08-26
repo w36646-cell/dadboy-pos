@@ -6,7 +6,11 @@ function PackPopup({
 
   stockUse,
 
+  specialMode = "normal",
+
   onChangeQuantity,
+
+  onChangeSpecialMode,
 
   onConfirm,
 
@@ -20,53 +24,43 @@ function PackPopup({
 
   }
 
-  const packQty =
+  const packQty = Math.max(
 
-    Math.max(
+    2,
 
-      2,
+    Number(product.packQty) || 2
 
-      Number(
+  );
 
-        product.packQty
+  const packPrice = Math.max(
 
-      ) || 2
+    0,
 
-    );
+    Number(product.packPrice) || 0
 
-  const packPrice =
+  );
 
-    Math.max(
+  const safeQuantity = Math.max(
 
-      0,
+    1,
 
-      Number(
+    Number(quantity) || 1
 
-        product.packPrice
+  );
 
-      ) || 0
+  const isSelfUse =
 
-    );
-
-  const safeQuantity =
-
-    Math.max(
-
-      1,
-
-      Number(
-
-        quantity
-
-      ) || 1
-
-    );
+    specialMode === "selfUse";
 
   const total =
 
     packPrice *
 
     safeQuantity;
+
+  const payableTotal =
+
+    isSelfUse ? 0 : total;
 
   function decreaseQuantity() {
 
@@ -100,25 +94,15 @@ function PackPopup({
 
   ) {
 
-    const nextValue =
+    const nextValue = Math.max(
 
-      Math.max(
+      1,
 
-        1,
-
-        Number(
-
-          event.target.value
-
-        ) || 1
-
-      );
-
-    onChangeQuantity(
-
-      nextValue
+      Number(event.target.value) || 1
 
     );
+
+    onChangeQuantity(nextValue);
 
   }
 
@@ -127,49 +111,30 @@ function PackPopup({
 
       className="popup-overlay"
 
-      onClick={
-
-        onClose
-
-      }
+      onClick={onClose}
 >
 <div
 
         className="popup"
 
-        onClick={(
-
-          event
-
-        ) =>
+        onClick={(event) =>
 
           event.stopPropagation()
 
         }
 >
-<h2>
-
-          {product.name}
-</h2>
+<h2>{product.name}</h2>
 <div
 
           style={{
 
-            marginBottom:
+            marginBottom: "14px",
 
-              "14px",
+            padding: "12px",
 
-            padding:
+            borderRadius: "10px",
 
-              "12px",
-
-            borderRadius:
-
-              "10px",
-
-            background:
-
-              "#f8fafc",
+            background: "#f8fafc",
 
             border:
 
@@ -181,17 +146,11 @@ function PackPopup({
 
             style={{
 
-              fontSize:
+              fontSize: "13px",
 
-                "13px",
+              color: "#667085",
 
-              color:
-
-                "#667085",
-
-              marginBottom:
-
-                "4px",
+              marginBottom: "4px",
 
             }}
 >
@@ -200,23 +159,15 @@ function PackPopup({
 </div>
 <strong>
 
-            1 แพ็ก ={" "}
-
-            {packQty}{" "}
-
-            ชิ้น
+            1 แพ็ก = {packQty} ชิ้น
 </strong>
 <div
 
             style={{
 
-              marginTop:
+              marginTop: "5px",
 
-                "5px",
-
-              fontSize:
-
-                "14px",
+              fontSize: "14px",
 
             }}
 >
@@ -233,11 +184,7 @@ function PackPopup({
 
             type="button"
 
-            onClick={
-
-              decreaseQuantity
-
-            }
+            onClick={decreaseQuantity}
 >
 
             −
@@ -250,11 +197,7 @@ function PackPopup({
 
             min="1"
 
-            value={
-
-              safeQuantity
-
-            }
+            value={safeQuantity}
 
             onChange={
 
@@ -267,11 +210,7 @@ function PackPopup({
 
             type="button"
 
-            onClick={
-
-              increaseQuantity
-
-            }
+            onClick={increaseQuantity}
 >
 
             +
@@ -281,48 +220,116 @@ function PackPopup({
 
           style={{
 
-            marginTop:
+            marginTop: "12px",
 
-              "12px",
+            padding: "10px",
 
-            padding:
+            borderRadius: "8px",
 
-              "10px",
+            background: "#fff7ed",
 
-            borderRadius:
+            color: "#9a3412",
 
-              "8px",
+            fontSize: "13px",
 
-            background:
-
-              "#fff7ed",
-
-            color:
-
-              "#9a3412",
-
-            fontSize:
-
-              "13px",
-
-            fontWeight:
-
-              "700",
+            fontWeight: "700",
 
           }}
 >
 
-          ใช้สต๊อก{" "}
+          ใช้สต๊อก {stockUse} ชิ้น
+</div>
+<div
 
-          {stockUse}{" "}
+          style={{
 
-          ชิ้น
+            marginTop: "14px",
+
+            padding: "12px",
+
+            borderRadius: "10px",
+
+            border:
+
+              "1px solid #e4e7ec",
+
+            background: isSelfUse
+
+              ? "#fff7ed"
+
+              : "#f8fafc",
+
+          }}
+>
+<label
+
+            style={{
+
+              display: "flex",
+
+              alignItems: "center",
+
+              gap: "9px",
+
+              cursor: "pointer",
+
+              fontWeight: "700",
+
+            }}
+>
+<input
+
+              type="checkbox"
+
+              checked={isSelfUse}
+
+              onChange={(event) =>
+
+                onChangeSpecialMode(
+
+                  event.target.checked
+
+                    ? "selfUse"
+
+                    : "normal"
+
+                )
+
+              }
+
+            />
+
+            กินเอง
+</label>
+
+          {isSelfUse && (
+<div
+
+              style={{
+
+                marginTop: "6px",
+
+                fontSize: "12px",
+
+                color: "#9a3412",
+
+              }}
+>
+
+              ตัดสต๊อก แต่ไม่คิดเป็นยอดขาย
+</div>
+
+          )}
 </div>
 <div className="popup-total">
 
-          รวม{" "}
+          {isSelfUse
 
-          {total.toLocaleString()}{" "}
+            ? "ยอดขาย"
+
+            : "รวม"}{" "}
+
+          {payableTotal.toLocaleString()}{" "}
 
           บาท
 </div>
@@ -332,14 +339,14 @@ function PackPopup({
 
           type="button"
 
-          onClick={
-
-            onConfirm
-
-          }
+          onClick={onConfirm}
 >
 
-          เพิ่มแพ็กลงตะกร้า
+          {isSelfUse
+
+            ? "ยืนยันกินเอง"
+
+            : "เพิ่มแพ็กลงตะกร้า"}
 </button>
 <button
 
@@ -347,11 +354,7 @@ function PackPopup({
 
           type="button"
 
-          onClick={
-
-            onClose
-
-          }
+          onClick={onClose}
 >
 
           ยกเลิก
