@@ -661,6 +661,113 @@ button {
   border-spacing: 0;
 
 }
+
+.product-manager-sync-table {
+
+  min-width: 1109px;
+
+  table-layout: fixed;
+
+}
+
+
+.product-manager-sync-table th:nth-child(1),
+
+.product-manager-sync-table td:nth-child(1) {
+
+  width: 44px;
+
+}
+
+
+.product-manager-sync-table th:nth-child(2),
+
+.product-manager-sync-table td:nth-child(2) {
+
+  width: 90px;
+
+}
+
+
+.product-manager-sync-table th:nth-child(3),
+
+.product-manager-sync-table td:nth-child(3) {
+
+  width: 220px;
+
+}
+
+
+.product-manager-sync-table th:nth-child(4),
+
+.product-manager-sync-table td:nth-child(4) {
+
+  width: 100px;
+
+}
+
+
+.product-manager-sync-table th:nth-child(5),
+
+.product-manager-sync-table td:nth-child(5) {
+
+  width: 105px;
+
+}
+
+
+.product-manager-sync-table th:nth-child(6),
+
+.product-manager-sync-table td:nth-child(6) {
+
+  width: 105px;
+
+}
+
+
+.product-manager-sync-table th:nth-child(7),
+
+.product-manager-sync-table td:nth-child(7) {
+
+  width: 100px;
+
+}
+
+
+.product-manager-sync-table th:nth-child(8),
+
+.product-manager-sync-table td:nth-child(8) {
+
+  width: 85px;
+
+}
+
+
+.product-manager-sync-table th:nth-child(9),
+
+.product-manager-sync-table td:nth-child(9) {
+
+  width: 70px;
+
+}
+
+
+.product-manager-sync-table th:nth-child(10),
+
+.product-manager-sync-table td:nth-child(10) {
+
+  width: 95px;
+
+}
+
+
+.product-manager-sync-table th:nth-child(11),
+
+.product-manager-sync-table td:nth-child(11) {
+
+  width: 95px;
+
+}
  
 .product-table th,
 
