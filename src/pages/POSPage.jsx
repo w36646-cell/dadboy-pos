@@ -101,7 +101,7 @@ function POSPage({
 
   ] = useState(null);
 
-  const [
+ const [
 
     popupQty,
 
@@ -111,8 +111,16 @@ function POSPage({
 
   const [
 
-    packProduct,
+    popupSpecialMode,
 
+    setPopupSpecialMode,
+
+  ] = useState("normal");
+
+  const [
+
+    packProduct,
+ 
     setPackProduct,
 
   ] = useState(null);
@@ -125,8 +133,16 @@ function POSPage({
 
   ] = useState(1);
 
-  const [cartPulse, setCartPulse] = useState(false);
+  const [
 
+    packSpecialMode,
+
+    setPackSpecialMode,
+
+  ] = useState("normal");
+
+  const [cartPulse, setCartPulse] = useState(false);
+ 
   const searchInputRef =
 
     useRef(null);
@@ -529,19 +545,47 @@ function POSPage({
 
   }
 
-  function addAndAnimate(product, option, qty) {
+ function addAndAnimate(
 
-    onAddToCart(product, option, qty);
+    product,
 
-    flyToCart(product);
+    option,
+
+    qty,
+
+    specialMode = "normal"
+
+  ) {
+
+    onAddToCart(
+
+      product,
+
+      option,
+
+      qty,
+
+      specialMode
+
+    );
+
+    if (
+
+      specialMode !== "selfUse"
+
+    ) {
+
+      flyToCart(product);
+
+    }
 
   }
 
+ function openProduct(
 
+    product,
 
-  function openProduct(
-
-    product
+    forcePopup = false
 
   ) {
 
@@ -555,6 +599,42 @@ function POSPage({
 
         true;
 
+    const normalUnitOption = {
+
+      id: "normal",
+
+      name: "ชิ้น",
+
+      price:
+
+        product.price,
+
+      saleType:
+
+        "unit",
+
+      stockPerUnit:
+
+        1,
+
+    };
+
+    /*
+
+      สินค้าไม่มีตัวเลือก
+
+      แตะปกติ:
+
+      เพิ่มลงตะกร้าเหมือนเดิม
+
+      กดค้าง:
+
+      forcePopup = true
+
+      เปิด Popup เพื่อให้เลือกกินเอง
+
+    */
+
     if (
 
       !hasOption ||
@@ -563,31 +643,45 @@ function POSPage({
 
     ) {
 
-      addAndAnimate(
+      if (
 
-        product,
+        !forcePopup
 
-        {
+      ) {
 
-          id: "normal",
+        addAndAnimate(
 
-          name: "ชิ้น",
+          product,
 
-          price:
+          normalUnitOption,
 
-            product.price,
+          1,
 
-          saleType:
+          "normal"
 
-            "unit",
+        );
 
-          stockPerUnit:
+        return;
 
-            1,
+      }
 
-        },
+      setSelectedProduct(
 
-        1
+        product
+
+      );
+
+      setSelectedOption(
+
+        normalUnitOption
+
+      );
+
+      setPopupQty(1);
+
+      setPopupSpecialMode(
+
+        "normal"
 
       );
 
@@ -618,16 +712,26 @@ option.id ===
 
       ...normalOption,
 
-      saleType: "unit",
+      saleType:
 
-      stockPerUnit: 1,
+        "unit",
+
+      stockPerUnit:
+
+        1,
 
     });
 
     setPopupQty(1);
 
-  }
+    setPopupSpecialMode(
 
+      "normal"
+
+    );
+
+  }
+ 
   function openPackPopup(
 
     product
@@ -652,6 +756,12 @@ option.id ===
 
     setPackPopupQty(1);
 
+    setPackSpecialMode(
+
+      "normal"
+
+    );
+
   }
 
   function closePopup() {
@@ -670,6 +780,12 @@ option.id ===
 
     setPopupQty(1);
 
+    setPopupSpecialMode(
+
+      "normal"
+
+    );
+
   }
 
   function closePackPopup() {
@@ -681,6 +797,12 @@ option.id ===
     );
 
     setPackPopupQty(1);
+
+    setPackSpecialMode(
+
+      "normal"
+
+    );
 
   }
 
@@ -704,7 +826,9 @@ option.id ===
 
       selectedOption,
 
-      popupQty
+      popupQty,
+
+      popupSpecialMode
 
     );
 
@@ -776,7 +900,9 @@ option.id ===
 
       },
 
-      packPopupQty
+      packPopupQty,
+
+      packSpecialMode
 
     );
 
@@ -808,14 +934,6 @@ option.id ===
 
     if (
 
-      !hasPack(product)
-
-    ) {
-
-      return;
-
-    }
-
     holdTimerRef.current =
 
       setTimeout(
@@ -826,11 +944,29 @@ option.id ===
 
             true;
 
-          openPackPopup(
+          if (
 
-            product
+            hasPack(product)
 
-          );
+          ) {
+
+            openPackPopup(
+
+              product
+
+            );
+
+          } else {
+
+            openProduct(
+
+              product,
+
+              true
+
+            );
+
+          }
 
           holdTimerRef.current =
 
@@ -1357,6 +1493,18 @@ product.id
 
         }
 
+  specialMode={
+
+          popupSpecialMode
+
+        }
+
+        onChangeSpecialMode={
+
+          setPopupSpecialMode
+
+        }
+
         onConfirm={
 
           confirmPopup
@@ -1393,6 +1541,18 @@ product.id
         onChangeQuantity={
 
           setPackPopupQty
+
+        }
+
+  specialMode={
+
+          packSpecialMode
+
+        }
+
+        onChangeSpecialMode={
+
+          setPackSpecialMode
 
         }
 
