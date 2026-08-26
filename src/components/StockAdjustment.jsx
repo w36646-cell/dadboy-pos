@@ -1341,8 +1341,6 @@ product.id
 
 <input
 
-               <input
-
                 ref={actualStockInputRef}
 
                 className="manager-input"
