@@ -962,8 +962,6 @@ product.id;
                   return (
 <tr
 
-                      <tr
-
                       key={
 product.id
 
