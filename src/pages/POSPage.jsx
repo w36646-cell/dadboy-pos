@@ -932,8 +932,6 @@ option.id ===
 
     }
 
-    if (
-
     holdTimerRef.current =
 
       setTimeout(
