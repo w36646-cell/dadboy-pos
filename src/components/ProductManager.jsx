@@ -2270,8 +2270,9 @@ option.id ===
 
   onScroll={syncFromStickyHeader}
 >
-<table className="product-table">
+<table className="product-table product-manager-sync-table">
 <thead>
+ 
 <tr>
 <th
 
@@ -2339,7 +2340,7 @@ option.id ===
 
   onScroll={syncFromProductTable}
 >
-<table className="product-table">
+<table className="product-table product-manager-sync-table">
 <thead className="sticky-table-header">
  
 <tr>
