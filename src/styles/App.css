@@ -768,6 +768,50 @@ button {
   width: 95px;
 
 }
+
+.stock-receive-sync-table {
+
+  min-width: 1050px;
+
+  table-layout: fixed;
+
+}
+
+
+.stock-receive-sync-table th:nth-child(1),
+
+.stock-receive-sync-table td:nth-child(1) {
+
+  width: 110px;
+
+}
+
+
+.stock-receive-sync-table th:nth-child(2),
+
+.stock-receive-sync-table td:nth-child(2) {
+
+  width: 480px;
+
+}
+
+
+.stock-receive-sync-table th:nth-child(3),
+
+.stock-receive-sync-table td:nth-child(3) {
+
+  width: 180px;
+
+}
+
+
+.stock-receive-sync-table th:nth-child(4),
+
+.stock-receive-sync-table td:nth-child(4) {
+
+  width: 280px;
+
+}
  
 .product-table th,
 
