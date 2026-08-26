@@ -79,7 +79,10 @@ const PRODUCTS_KEY =
 const CART_KEY =
 
   "dadboy_active_cart_v1";
- 
+
+const CART_MERGE_WINDOW_MS =
+
+  2 * 60 * 1000; 
 
 const PENDING_STOCK_KEY =
 
@@ -2744,55 +2747,137 @@ item.id
 
       (currentCart) => {
 
-        const found =
+        const now =
 
-          currentCart.find(
+          Date.now();
 
-            (item) =>
+        let mergeIndex =
 
-              String(
+          -1;
+
+        /*
+
+          ไล่จากบรรทัดล่าสุดย้อนขึ้นไป
+
+          สินค้าจะรวมกันเมื่อ:
+
+          - Product เดียวกัน
+
+          - ตัวเลือกเดียวกัน
+
+          - แบบขายเดียวกัน
+
+          - เพิ่มล่าสุดไม่เกิน 2 นาที
+
+        */
+
+        for (
+
+          let index =
+
+            currentCart.length - 1;
+
+          index >= 0;
+
+          index -= 1
+
+        ) {
+
+          const item =
+
+            currentCart[index];
+
+          const sameItem =
+
+            String(
 item.id
 
-              ) ===
+            ) ===
 
-                String(
+              String(
 product.id
 
-                ) &&
+              ) &&
 
-              item.option ===
+            item.option ===
 
-                optionName &&
+              optionName &&
 
-              item.saleType ===
+            item.saleType ===
 
-                saleType
+              saleType;
 
-          );
+          if (
 
-        if (found) {
+            !sameItem
+
+          ) {
+
+            continue;
+
+          }
+
+          const lastAddedAt =
+
+            Number(
+
+              item.lastAddedAt || 0
+
+            );
+
+          const withinWindow =
+
+            lastAddedAt > 0 &&
+
+            now -
+
+              lastAddedAt <=
+
+              CART_MERGE_WINDOW_MS;
+
+          if (
+
+            withinWindow
+
+          ) {
+
+            mergeIndex =
+
+              index;
+
+            break;
+
+          }
+
+        }
+
+        /*
+
+          เจอบรรทัดเดียวกันภายใน 2 นาที
+
+          เพิ่มจำนวนเฉพาะบรรทัดนั้น
+
+        */
+
+        if (
+
+          mergeIndex >= 0
+
+        ) {
 
           return currentCart.map(
 
-            (item) =>
+            (
 
-              String(
-item.id
+              item,
 
-              ) ===
+              itemIndex
 
-                  String(
-product.id
+            ) =>
 
-                  ) &&
+              itemIndex ===
 
-                item.option ===
-
-                  optionName &&
-
-                item.saleType ===
-
-                  saleType
+              mergeIndex
 
                 ? {
 
@@ -2820,6 +2905,10 @@ product.id
 
                       safeQty,
 
+                    lastAddedAt:
+
+                      now,
+
                   }
 
                 : item
@@ -2828,11 +2917,32 @@ product.id
 
         }
 
+        /*
+
+          ไม่มีบรรทัดล่าสุด
+
+          หรือบรรทัดเดิมเกิน 2 นาทีแล้ว
+
+          สร้างบรรทัดใหม่
+
+        */
+
         return [
 
           ...currentCart,
 
           {
+
+            cartLineId:
+
+              `${String(
+product.id
+
+              )}-${now}-${Math.random()
+
+                .toString(36)
+
+                .slice(2, 8)}`,
 
             id:
 product.id,
@@ -2857,6 +2967,10 @@ product.id,
 
             stockPerUnit,
 
+            lastAddedAt:
+
+              now,
+
           },
 
         ];
@@ -2866,7 +2980,7 @@ product.id,
     );
 
   }
-
+ 
   function changeCartQty(
 
     index,
