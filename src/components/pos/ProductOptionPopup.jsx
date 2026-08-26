@@ -6,9 +6,13 @@ function ProductOptionPopup({
 
   quantity,
 
+  specialMode = "normal",
+
   onSelectOption,
 
   onChangeQuantity,
+
+  onChangeSpecialMode,
 
   onConfirm,
 
@@ -16,43 +20,51 @@ function ProductOptionPopup({
 
 }) {
 
-  if (
-
-    !product ||
-
-    !selectedOption
-
-  ) {
+  if (!product || !selectedOption) {
 
     return null;
 
   }
 
-  const safeQuantity =
+  const safeQuantity = Math.max(
 
-    Math.max(
+    1,
 
-      1,
+    Number(quantity) || 1
 
-      Number(
+  );
 
-        quantity
+  /*
 
-      ) || 1
+    สินค้าที่ไม่มี options
 
-    );
+    แต่เปิด Popup จากการกดค้าง
+
+    ให้ใช้ selectedOption เป็นตัวเลือก "ชิ้น"
+
+  */
+
+  const displayOptions =
+
+    product.options?.length
+
+      ? product.options
+
+      : [selectedOption];
+
+  const isSelfUse =
+
+    specialMode === "selfUse";
 
   const total =
 
-    Number(
-
-      selectedOption.price ||
-
-        0
-
-    ) *
+    Number(selectedOption.price || 0) *
 
     safeQuantity;
+
+  const payableTotal =
+
+    isSelfUse ? 0 : total;
 
   function decreaseQuantity() {
 
@@ -80,11 +92,7 @@ function ProductOptionPopup({
 
   }
 
-  function handleQuantityChange(
-
-    event
-
-  ) {
+  function handleQuantityChange(event) {
 
     onChangeQuantity(
 
@@ -92,11 +100,7 @@ function ProductOptionPopup({
 
         1,
 
-        Number(
-
-          event.target.value
-
-        ) || 1
+        Number(event.target.value) || 1
 
       )
 
@@ -109,33 +113,22 @@ function ProductOptionPopup({
 
       className="popup-overlay"
 
-      onClick={
-
-        onClose
-
-      }
+      onClick={onClose}
 >
 <div
 
         className="popup"
 
-        onClick={(
-
-          event
-
-        ) =>
+        onClick={(event) =>
 
           event.stopPropagation()
 
         }
 >
-<h2>
-
-          {product.name}
-</h2>
+<h2>{product.name}</h2>
 <div className="option-list">
 
-          {(product.options || []).map(
+          {displayOptions.map(
 
             (option) => (
 <label
@@ -150,10 +143,7 @@ option.id
 
                 }
 
-                key={
-option.id
-
-                }
+                key={option.id}
 >
 <span>
 <input
@@ -174,13 +164,9 @@ option.id
 
                         ...option,
 
-                        saleType:
+                        saleType: "unit",
 
-                          "unit",
-
-                        stockPerUnit:
-
-                          1,
+                        stockPerUnit: 1,
 
                       })
 
@@ -194,9 +180,7 @@ option.id
 
                   {Number(
 
-                    option.price ||
-
-                      0
+                    option.price || 0
 
                   ).toLocaleString()}{" "}
 
@@ -213,11 +197,7 @@ option.id
 
             type="button"
 
-            onClick={
-
-              decreaseQuantity
-
-            }
+            onClick={decreaseQuantity}
 >
 
             −
@@ -230,11 +210,7 @@ option.id
 
             min="1"
 
-            value={
-
-              safeQuantity
-
-            }
+            value={safeQuantity}
 
             onChange={
 
@@ -247,21 +223,103 @@ option.id
 
             type="button"
 
-            onClick={
-
-              increaseQuantity
-
-            }
+            onClick={increaseQuantity}
 >
 
             +
 </button>
 </div>
+<div
+
+          style={{
+
+            marginTop: "14px",
+
+            padding: "12px",
+
+            borderRadius: "10px",
+
+            border:
+
+              "1px solid #e4e7ec",
+
+            background: isSelfUse
+
+              ? "#fff7ed"
+
+              : "#f8fafc",
+
+          }}
+>
+<label
+
+            style={{
+
+              display: "flex",
+
+              alignItems: "center",
+
+              gap: "9px",
+
+              cursor: "pointer",
+
+              fontWeight: "700",
+
+            }}
+>
+<input
+
+              type="checkbox"
+
+              checked={isSelfUse}
+
+              onChange={(event) =>
+
+                onChangeSpecialMode(
+
+                  event.target.checked
+
+                    ? "selfUse"
+
+                    : "normal"
+
+                )
+
+              }
+
+            />
+
+            กินเอง
+</label>
+
+          {isSelfUse && (
+<div
+
+              style={{
+
+                marginTop: "6px",
+
+                fontSize: "12px",
+
+                color: "#9a3412",
+
+              }}
+>
+
+              ตัดสต๊อก แต่ไม่คิดเป็นยอดขาย
+</div>
+
+          )}
+</div>
 <div className="popup-total">
 
-          รวม{" "}
+          {isSelfUse
 
-          {total.toLocaleString()}{" "}
+            ? "ยอดขาย"
+
+            : "รวม"}{" "}
+
+          {payableTotal.toLocaleString()}{" "}
 
           บาท
 </div>
@@ -271,14 +329,14 @@ option.id
 
           type="button"
 
-          onClick={
-
-            onConfirm
-
-          }
+          onClick={onConfirm}
 >
 
-          เพิ่มลงตะกร้า
+          {isSelfUse
+
+            ? "ยืนยันกินเอง"
+
+            : "เพิ่มลงตะกร้า"}
 </button>
 <button
 
@@ -286,11 +344,7 @@ option.id
 
           type="button"
 
-          onClick={
-
-            onClose
-
-          }
+          onClick={onClose}
 >
 
           ยกเลิก
