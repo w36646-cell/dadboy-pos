@@ -98,12 +98,94 @@ function StockManager({
 
   ] = useState("");
 
-  const searchInputRef = useRef(null);
- 
+ const searchInputRef = useRef(null);
+
+  const stockTableScrollRef =
+
+    useRef(null);
+
+  const stockStickyScrollRef =
+
+    useRef(null);
+
+
+  function syncFromStockTable(
+
+    event
+
+  ) {
+
+    const sticky =
+
+      stockStickyScrollRef.current;
+
+    if (!sticky) {
+
+      return;
+
+    }
+
+    if (
+
+      Math.abs(
+
+        sticky.scrollLeft -
+
+        event.currentTarget.scrollLeft
+
+      ) > 1
+
+    ) {
+
+      sticky.scrollLeft =
+
+        event.currentTarget.scrollLeft;
+
+    }
+
+  }
+
+
+  function syncFromStockStickyHeader(
+
+    event
+
+  ) {
+
+    const table =
+
+      stockTableScrollRef.current;
+
+    if (!table) {
+
+      return;
+
+    }
+
+    if (
+
+      Math.abs(
+
+        table.scrollLeft -
+
+        event.currentTarget.scrollLeft
+
+      ) > 1
+
+    ) {
+
+      table.scrollLeft =
+
+        event.currentTarget.scrollLeft;
+
+    }
+
+  }
+
   const [
 
     selectedProduct,
-
+ 
     setSelectedProduct,
 
   ] = useState(null);
@@ -595,9 +677,49 @@ selectedProduct.id
 </div>
   
 <div className="stock-layout">
-<div className="product-table-wrap">
+<div className="product-table-column">
+<div
+
+  className="product-table-sticky-wrap"
+
+  ref={stockStickyScrollRef}
+
+  onScroll={syncFromStockStickyHeader}
+>
 <table className="product-table">
 <thead>
+<tr>
+<th>
+
+  รูป
+</th>
+<th>
+
+  ชื่อสินค้า
+</th>
+<th>
+
+  คงเหลือ
+</th>
+<th>
+
+  บรรจุ / แพ็ก
+</th>
+</tr>
+</thead>
+</table>
+</div>
+
+<div
+
+  className="product-table-wrap"
+
+  ref={stockTableScrollRef}
+
+  onScroll={syncFromStockTable}
+>
+<table className="product-table">
+<thead className="sticky-table-header">
 <tr>
 <th>
 
@@ -617,7 +739,7 @@ selectedProduct.id
 </th>
 </tr>
 </thead>
-
+ 
 <tbody>
 
               {filteredProducts.map(
@@ -782,6 +904,8 @@ product.id
               )}
 </tbody>
 </table>
+</div>
+
 </div>
 
 <aside 
