@@ -644,12 +644,14 @@ button {
 
   -webkit-overflow-scrolling: touch;
 
-  overscroll-behavior: contain;
+  overscroll-behavior-x: contain;
+
+  overscroll-behavior-y: auto;
 
   background: white;
 
 }
-  
+   
 .product-table {
 
   width: 100%;
