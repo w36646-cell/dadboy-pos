@@ -686,8 +686,9 @@ selectedProduct.id
 
   onScroll={syncFromStockStickyHeader}
 >
-<table className="product-table">
+<table className="product-table stock-receive-sync-table">
 <thead>
+ 
 <tr>
 <th>
 
@@ -718,8 +719,9 @@ selectedProduct.id
 
   onScroll={syncFromStockTable}
 >
-<table className="product-table">
+<table className="product-table stock-receive-sync-table">
 <thead className="sticky-table-header">
+ 
 <tr>
 <th>
 
