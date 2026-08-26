@@ -2793,10 +2793,130 @@ item.id
 
 ref={editorRef}
 
+<aside
+
+ref={editorRef}
+
 className="product-edit-panel"
+
+style={{
+
+  position: "relative",
+
+}}
 >
 
+          {editingProduct && (
+<button
+
+    type="button"
+
+    aria-label="ปิดหน้าต่างแก้ไขสินค้า"
+
+    onClick={() => {
+
+      const currentId =
+
+        !isCreating
+
+          ? editingProduct?.id
+
+          : null;
+
+      closeEditor();
+
+      if (!currentId) {
+
+        return;
+
+      }
+
+      requestAnimationFrame(() => {
+
+        const currentRow =
+
+          document.querySelector(
+
+            `tr[data-product-id="${currentId}"]`
+
+          );
+
+        const nextRow =
+
+          currentRow?.nextElementSibling;
+
+        if (nextRow) {
+
+          nextRow.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "start",
+
+          });
+
+        } else {
+
+          currentRow?.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "start",
+
+          });
+
+        }
+
+      });
+
+    }}
+
+    style={{
+
+      position: "absolute",
+
+      top: "10px",
+
+      right: "10px",
+
+      width: "38px",
+
+      height: "38px",
+
+      padding: 0,
+
+      border: "none",
+
+      borderRadius: "50%",
+
+      background: "#e5e7eb",
+
+      color: "#475467",
+
+      fontSize: "24px",
+
+      fontWeight: "700",
+
+      display: "flex",
+
+      alignItems: "center",
+
+      justifyContent: "center",
+
+      cursor: "pointer",
+
+      zIndex: 10,
+
+    }}
+>
+
+    ×
+</button>
+
+)}
+
           {!editingProduct ? (
+ 
 <div className="product-edit-empty">
 
               กด “+ เพิ่มสินค้า”
