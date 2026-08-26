@@ -2793,8 +2793,6 @@ item.id
 
 ref={editorRef}
 
-ref={editorRef}
-
 className="product-edit-panel"
 
 style={{
