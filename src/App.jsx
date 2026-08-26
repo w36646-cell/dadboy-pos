@@ -2700,13 +2700,25 @@ item.id
 
         : 1;
 
-    const cost =
+    const baseCost =
 
       Number(
 
         product.cost || 0
 
       );
+
+    const cost =
+
+      option?.id === "cup"
+
+        ? baseCost + 4
+
+        : option?.id === "ownCup"
+
+          ? baseCost + 2
+
+          : baseCost;
 
     setCart(
 
