@@ -3543,7 +3543,13 @@ item.id
 
       checkoutCart.map(
 
-        (item) => {
+        (
+
+          item,
+
+          index
+
+        ) => {
 
           const quantity =
 
@@ -3609,7 +3615,24 @@ item.id
 
               : "unit";
 
+          const lineId =
+
+            item.cartLineId ||
+
+            `sale-line-${String(
+item.id
+
+            )}-${index}-${String(
+
+              item.lastAddedAt ||
+
+                Date.now()
+
+            )}`;
+
           return {
+
+            lineId,
 
             productId:
 item.id,
