@@ -46,6 +46,10 @@ import {
 
   updateSoldCloudStocks,
 
+  applyCloudStockDeltaOnce,
+
+  setCloudStockAbsoluteOnce,
+
 } from "./services/productService";
 
 import {
@@ -89,6 +93,10 @@ const CART_MERGE_WINDOW_MS =
 const PENDING_STOCK_KEY =
 
   "dadboy_pending_stock_sync_v2";
+
+const PENDING_STOCK_OPS_KEY =
+
+  "dadboy_pending_stock_ops_v1";
 
 const PENDING_SALES_KEY =
 
@@ -465,6 +473,143 @@ function pendingStocksCount() {
     getPendingStocks()
 
   ).length;
+
+}
+
+/* =========================
+
+   Pending Atomic Stock Ops
+
+========================= */
+
+function getPendingStockOperations() {
+
+  const result =
+
+    readStorage(
+
+      PENDING_STOCK_OPS_KEY,
+
+      []
+
+    );
+
+  return Array.isArray(result)
+
+    ? result
+
+    : [];
+
+}
+
+
+function savePendingStockOperation(
+
+  operation
+
+) {
+
+  if (
+
+    !operation?.operationId
+
+  ) {
+
+    return false;
+
+  }
+
+  const current =
+
+    getPendingStockOperations();
+
+  const withoutOld =
+
+    current.filter(
+
+      (item) =>
+
+        item.operationId !==
+
+        operation.operationId
+
+    );
+
+  try {
+
+    localStorage.setItem(
+
+      PENDING_STOCK_OPS_KEY,
+
+      JSON.stringify([
+
+        ...withoutOld,
+
+        operation,
+
+      ])
+
+    );
+
+    return true;
+
+  } catch (error) {
+
+    console.warn(
+
+      "Pending atomic stock operation save skipped:",
+
+      error
+
+    );
+
+    return false;
+
+  }
+
+}
+
+
+function removePendingStockOperation(
+
+  operationId
+
+) {
+
+  const remaining =
+
+    getPendingStockOperations()
+
+      .filter(
+
+        (item) =>
+
+          item.operationId !==
+
+          operationId
+
+      );
+
+  localStorage.setItem(
+
+    PENDING_STOCK_OPS_KEY,
+
+    JSON.stringify(
+
+      remaining
+
+    )
+
+  );
+
+}
+
+
+function pendingStockOperationsCount() {
+
+  return getPendingStockOperations()
+
+    .length;
 
 }
 
@@ -1106,31 +1251,138 @@ useEffect(() => {
 
   }
 
-  function isSyncClean() {
+ function isSyncClean() {
 
-    return (
+  return (
 
-      pendingStocksCount() ===
+    pendingStocksCount() ===
 
-        0 &&
+      0 &&
 
-      getPendingSales()
+    pendingStockOperationsCount() ===
 
-        .length === 0 &&
+      0 &&
 
-      pendingAdjustmentsCount() ===
+    getPendingSales()
 
-        0
+      .length === 0 &&
 
-    );
+    pendingAdjustmentsCount() ===
 
-  }
+      0
+
+  );
+
+}
 
   /* =========================
 
      Pending Sync
 
   ========================= */
+
+  async function retryPendingStockOperations() {
+
+  const operations =
+
+    getPendingStockOperations();
+
+  if (
+
+    operations.length === 0
+
+  ) {
+
+    return true;
+
+  }
+
+  let allSuccess = true;
+
+  for (
+
+    const operation of
+
+    operations
+
+  ) {
+
+    try {
+
+      let result;
+
+      if (
+
+        operation.type ===
+
+        "set"
+
+      ) {
+
+        result =
+
+          await setCloudStockAbsoluteOnce(
+
+            operation.operationId,
+
+            operation.productId,
+
+            operation.value
+
+          );
+
+      } else {
+
+        result =
+
+          await applyCloudStockDeltaOnce(
+
+            operation.operationId,
+
+            operation.productId,
+
+            operation.value
+
+          );
+
+      }
+
+      setLocalStockValue(
+result.id,
+
+        result.stock
+
+      );
+
+      removePendingStockOperation(
+
+        operation.operationId
+
+      );
+
+    } catch (error) {
+
+      allSuccess = false;
+
+      console.error(
+
+        "Pending atomic stock sync error:",
+
+        operation,
+
+        error
+
+      );
+
+    }
+
+  }
+
+  notifySyncStateChanged();
+
+  return allSuccess;
+
+}
 
   async function retryPendingStocks() {
 
@@ -1372,25 +1624,29 @@ useEffect(() => {
 
     }
 
-    const [
+   const [
 
-      stockOk,
+  stockOk,
 
-      salesOk,
+  atomicStockOk,
 
-      adjustmentOk,
+  salesOk,
 
-    ] =
+  adjustmentOk,
 
-      await Promise.all([
+] =
 
-        retryPendingStocks(),
+  await Promise.all([
 
-        retryPendingSales(),
+    retryPendingStocks(),
 
-        retryPendingAdjustments(),
+    retryPendingStockOperations(),
 
-      ]);
+    retryPendingSales(),
+
+    retryPendingAdjustments(),
+
+  ]);
 
     const clean =
 
@@ -2026,6 +2282,151 @@ cloudProduct.id
   }
 
 }
+
+function setLocalStockValue(
+
+  productId,
+
+  stock
+
+) {
+
+  const safeStock =
+
+    Number(stock);
+
+  if (
+
+    !Number.isFinite(
+
+      safeStock
+
+    )
+
+  ) {
+
+    return;
+
+  }
+
+  setInventory(
+
+    (current) => {
+
+      const next = {
+
+        ...current,
+
+        [productId]:
+
+          safeStock,
+
+      };
+
+      try {
+
+        localStorage.setItem(
+
+          STOCK_KEY,
+
+          JSON.stringify(
+
+            next
+
+          )
+
+        );
+
+      } catch (error) {
+
+        console.warn(
+
+          "Inventory local cache skipped:",
+
+          error
+
+        );
+
+      }
+
+      return next;
+
+    }
+
+  );
+
+}
+
+
+function applyLocalStockDelta(
+
+  productId,
+
+  delta
+
+) {
+
+  setInventory(
+
+    (current) => {
+
+      const nextStock =
+
+        Number(
+
+          current[
+
+            productId
+
+          ] ?? 0
+
+        ) +
+
+        Number(delta || 0);
+
+      const next = {
+
+        ...current,
+
+        [productId]:
+
+          nextStock,
+
+      };
+
+      try {
+
+        localStorage.setItem(
+
+          STOCK_KEY,
+
+          JSON.stringify(
+
+            next
+
+          )
+
+        );
+
+      } catch (error) {
+
+        console.warn(
+
+          "Inventory local cache skipped:",
+
+          error
+
+        );
+
+      }
+
+      return next;
+
+    }
+
+  );
+
+}
  
   function getStock(
 
@@ -2045,95 +2446,186 @@ cloudProduct.id
 
   }
 
-  function addStock(
+ function addStock(
 
-    productId,
+  productId,
 
-    quantity
+  quantity
+
+) {
+
+  const safeQty =
+
+    Number(quantity);
+
+  if (
+
+    !Number.isSafeInteger(
+
+      safeQty
+
+    ) ||
+
+    safeQty <= 0
 
   ) {
 
-    const safeQty =
+    return;
 
-      Number(quantity);
+  }
 
-    if (
 
-      !Number.isFinite(
+  const operationId =
 
-        safeQty
+    `receive-${String(
 
-      ) ||
+      productId
 
-      safeQty <= 0
+    )}-${Date.now()}-${Math.random()
 
-    ) {
+      .toString(36)
 
-      return;
+      .slice(2, 8)}`;
 
-    }
 
-    const newStock =
+  const operation = {
 
-      getStock(
+    operationId,
 
-        productId
+    productId:
 
-      ) +
+      String(productId),
 
-      safeQty;
+    type: "delta",
 
-    const newInventory = {
+    value:
 
-      ...inventory,
+      safeQty,
 
-      [productId]:
+    createdAt:
 
-        newStock,
+      new Date()
 
-    };
+        .toISOString(),
 
-    saveInventoryLocal(
+  };
 
-      newInventory
+
+  /*
+
+    บันทึก Pending ก่อน
+
+    ถ้า Cloud สำเร็จแต่ Response หาย
+
+    operationId เดิมจะถูก Retry
+
+    และ Database จะไม่บวกซ้ำ
+
+  */
+
+  const pendingSaved =
+
+    savePendingStockOperation(
+
+      operation
 
     );
 
-    const pendingSaved =
 
-  savePendingStock(
+  if (!pendingSaved) {
+
+    window.alert(
+
+      "ไม่สามารถบันทึกคิวรับสินค้าในเครื่องได้\nกรุณาลองใหม่"
+
+    );
+
+    return;
+
+  }
+
+
+  /*
+
+    ให้หน้าจอเห็นจำนวนที่รับเข้า
+
+    ทันทีแบบ Optimistic
+
+  */
+
+  applyLocalStockDelta(
 
     productId,
 
-    newStock
+    safeQty
 
   );
 
-if (!pendingSaved) {
 
-  console.warn(
+  notifySyncStateChanged();
 
-    "Stock pending could not be saved locally"
 
-  );
+  /*
 
-}
+    Offline:
 
-notifySyncStateChanged();
+    เก็บ Delta ไว้
 
-updateCloudStock(
- 
-      productId,
+    ไม่ส่งยอดคงเหลือทั้งก้อน
 
-      newStock
+  */
 
-    )
+  if (
 
-      .then(() => {
+    typeof navigator !==
 
-        removePendingStock(
+      "undefined" &&
 
-          productId
+    navigator.onLine ===
+
+      false
+
+  ) {
+
+    setCloudReady(false);
+
+    return;
+
+  }
+
+
+  applyCloudStockDeltaOnce(
+
+    operationId,
+
+    productId,
+
+    safeQty
+
+  )
+
+    .then(
+
+      (result) => {
+
+        /*
+
+          ใช้ Stock ที่ Cloud คำนวณจริง
+
+          เป็นค่าหลัก
+
+        */
+
+        setLocalStockValue(
+result.id,
+
+          result.stock
+
+        );
+
+        removePendingStockOperation(
+
+          operationId
 
         );
 
@@ -2145,32 +2637,38 @@ updateCloudStock(
 
         );
 
-      })
+      }
 
-      .catch(
+    )
 
-        (error) => {
+    .catch(
 
-          console.error(
+      (error) => {
 
-            "Supabase stock background error:",
+        console.error(
 
-            error
+          "Atomic receive stock error:",
 
-          );
+          error
 
-          setCloudReady(
+        );
 
-            false
+        /*
 
-          );
+          ห้ามลบ Pending
 
-        }
+          เพื่อให้ Retry ด้วย operationId เดิม
 
-      );
+        */
 
-  }
+        setCloudReady(false);
 
+      }
+
+    );
+
+}
+ 
   /*
 
     ปรับ Stock จากการตรวจนับ
@@ -3969,18 +4467,18 @@ item.id,
 
         setCloudReady(
 
-          stockOk &&
+  stockOk &&
 
-            saleOk &&
+    atomicStockOk &&
 
-            isSyncClean()
+    salesOk &&
 
-        );
+    adjustmentOk &&
 
-      }
+    clean
 
-    );
-
+);
+ 
   }
 
   /* =========================
