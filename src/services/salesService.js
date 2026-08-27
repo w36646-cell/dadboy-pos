@@ -595,7 +595,7 @@ async function loadSaleItemRows() {
 
             id,
 
-            line_id
+            line_id,
 
             sale_id,
 
@@ -690,7 +690,7 @@ async function loadSaleItemsBySaleIds(
 
             id,
 
-            line_id
+            line_id,
 
             sale_id,
 
@@ -2178,7 +2178,7 @@ export async function getCloudSaleByBillId(
 
         id,
 
-        line_id
+        line_id,
 
         sale_id,
 
