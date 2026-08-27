@@ -97,6 +97,12 @@ function fromSaleItemRow(row) {
 
     id: row.id,
 
+    lineId:
+
+      row.line_id ||
+
+      `legacy-${row.id}`,
+
     productId:
 
       row.product_id,
@@ -323,7 +329,16 @@ function createItemPayload(
 
     items || []
 
-  ).map((item) => {
+ ).map(
+
+    (
+
+      item,
+
+      index
+
+    ) => {
+ 
 
     const quantity =
 
@@ -377,9 +392,27 @@ function createItemPayload(
 
     return {
 
+     return {
+
       sale_id:
 
         saleId,
+
+      line_id:
+
+        String(
+
+          item.lineId ||
+
+          item.cartLineId ||
+
+          `legacy-${String(
+
+            item.productId
+
+          )}-${index}`
+
+        ),
 
       product_id:
 
@@ -497,6 +530,8 @@ async function loadSaleRows() {
 
             id,
 
+            line_id
+
             bill_id,
 
             sold_at,
@@ -563,6 +598,8 @@ async function loadSaleItemRows() {
           .select(`
 
             id,
+
+            line_id
 
             sale_id,
 
@@ -656,6 +693,8 @@ async function loadSaleItemsBySaleIds(
           .select(`
 
             id,
+
+            line_id
 
             sale_id,
 
@@ -857,6 +896,8 @@ export async function getCloudSalesPage(
 
         id,
 
+        line_id
+
         bill_id,
 
         sold_at,
@@ -1003,6 +1044,8 @@ export async function getCloudTodaySales(
           .select(`
 
             id,
+
+            line_id
 
             bill_id,
 
@@ -1221,6 +1264,8 @@ export async function getCloudSalesRange(
             .select(`
 
               id,
+
+              line_id
 
               bill_id,
 
@@ -1519,6 +1564,8 @@ export async function getCloudDashboardSales(
 
               id,
 
+              line_id
+
               bill_id,
 
               sold_at,
@@ -1668,6 +1715,8 @@ export async function getCloudDashboardSales(
               .select(`
 
                 id,
+
+                line_id
 
                 bill_id,
 
@@ -1967,7 +2016,7 @@ saleRow.id,
 
             onConflict:
 
-              "sale_id,product_id,option_name",
+              "sale_id,line_id",
 
           }
 
@@ -2087,6 +2136,8 @@ export async function getCloudSaleByBillId(
 
         id,
 
+        line_id
+
         bill_id,
 
         sold_at,
@@ -2142,6 +2193,8 @@ export async function getCloudSaleByBillId(
       .select(`
 
         id,
+
+        line_id
 
         sale_id,
 
