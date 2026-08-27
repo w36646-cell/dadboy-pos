@@ -4353,10 +4353,14 @@ item.id,
 
         totalCost,
 
+      stockSyncMode:
+
+        "atomic",
+
       items:
 
         saleItems,
-
+ 
     };
 
 
@@ -4409,32 +4413,20 @@ item.id,
 
     );
 
-    Object.keys(
+    /*
 
-      soldByProduct
+      บิล Atomic ไม่สร้าง
 
-    ).forEach(
+      Pending Stock แบบยอดคงเหลือทั้งก้อน
 
-      (productId) => {
+      Stock จะถูกตัดพร้อมบิล
 
-        savePendingStock(
+      ใน Database Transaction เดียว
 
-          productId,
-
-          newInventory[
-
-            productId
-
-          ]
-
-        );
-
-      }
-
-    );
+    */
 
     notifySyncStateChanged();
-
+ 
     setCart([]);
 
     setPaymentOpen(
@@ -4449,29 +4441,112 @@ item.id,
 
     );
 
-    const stockJob =
+    /*
 
-      updateSoldCloudStocks(
+      Offline:
 
-        soldByProduct,
+      เก็บ sale ที่มี
 
-        newInventory
+      stockSyncMode = atomic
 
-      )
+      ไว้ใน Pending
 
-        .then(() => {
+      เมื่อกลับมา Online
 
-          Object.keys(
+      retryPendingSales()
 
-            soldByProduct
+      จะส่งบิล + ตัด Stock
+
+      ใน Transaction เดียว
+
+    */
+
+    if (
+
+      typeof navigator !==
+
+        "undefined" &&
+
+      navigator.onLine ===
+
+        false
+
+    ) {
+
+      setCloudReady(
+
+        false
+
+      );
+
+      return;
+
+    }
+
+
+    /*
+
+      Online:
+
+      บันทึกพร้อมกัน:
+
+      - sales
+
+      - sale_items
+
+      - products.stock
+
+      - stock_operations
+
+      ถ้าส่วนใด Error
+
+      Database Rollback ทั้งหมด
+
+    */
+
+    saveCloudSaleWithStock(
+
+      sale
+
+    )
+
+      .then(
+
+        (result) => {
+
+          /*
+
+            ใช้ Stock ที่ Cloud
+
+            คำนวณจากยอดล่าสุดจริง
+
+            ห้ามใช้ยอด Local
+
+            เป็นค่าหลักหลัง Sync
+
+          */
+
+          Object.entries(
+
+            result.cloudStocks ||
+
+              {}
 
           ).forEach(
 
-            (productId) => {
+            ([
 
-              removePendingStock(
+              productId,
 
-                productId
+              stock,
+
+            ]) => {
+
+              setLocalStockValue(
+
+                productId,
+
+                stock
 
               );
 
@@ -4479,45 +4554,6 @@ item.id,
 
           );
 
-          notifySyncStateChanged();
-
-          return true;
-
-        })
-
-        .catch(
-
-          (error) => {
-
-            console.error(
-
-              "Supabase stock sync error:",
-
-              error
-
-            );
-
-            setCloudReady(
-
-              false
-
-            );
-
-            return false;
-
-          }
-
-        );
-
-   const saleJob =
-
-      saveCloudSale(
-
-        sale
-
-      )
-
-        .then(() => {
 
           removePendingSale(
 
@@ -4525,46 +4561,68 @@ item.id,
 
           );
 
+
           notifySyncStateChanged();
+
 
           /*
 
-            หลังคิดเงินและบิลขึ้น Cloud แล้ว
+            บิลขึ้น Cloud แล้ว
 
-            โหลดยอดขายวันนี้ใหม่ทันที
+            Refresh ยอดขายวันนี้
 
           */
 
           refreshHeaderSales();
 
-          return true;
 
-        })
+          setCloudReady(
 
-        .catch(
+            isSyncClean()
 
-          (error) => {
+          );
 
-            console.error(
+        }
 
-              "Supabase sale sync error:",
+      )
 
-              error
+      .catch(
 
-            );
+        (error) => {
 
-            setCloudReady(
+          console.error(
 
-              false
+            "Atomic sale sync error:",
 
-            );
+            error
 
-            return false;
+          );
 
-          }
 
-        );
+          /*
 
+            ห้ามลบ Pending Sale
+
+            ถ้า Request สำเร็จที่ Cloud
+
+            แต่ Response กลับมาไม่ถึงเครื่อง
+
+            Retry billId เดิมจะไม่ตัด
+
+            Stock ซ้ำ
+
+          */
+
+          setCloudReady(
+
+            false
+
+          );
+
+        }
+
+      );
+ 
     Promise.all([
 
   stockJob,
