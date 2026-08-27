@@ -56,6 +56,8 @@ import {
 
   saveCloudSale,
 
+  saveCloudSaleWithStock,
+
   getCloudTodaySales,
 
 } from "./services/salesService";
@@ -1462,37 +1464,117 @@ result.id,
 
   }
 
-  async function retryPendingSales() {
+ async function retryPendingSales() {
 
-    const pendingSales =
+  const pendingSales =
 
-      getPendingSales();
+    getPendingSales();
 
-    if (
 
-      pendingSales.length ===
+  if (
 
-      0
+    pendingSales.length === 0
 
-    ) {
+  ) {
 
-      return true;
+    return true;
 
-    }
+  }
 
-    let allSuccess =
 
-      true;
+  let allSuccess = true;
 
-    for (
 
-      const sale of
+  for (
 
-      pendingSales
+    const sale of
 
-    ) {
+    pendingSales
 
-      try {
+  ) {
+
+    try {
+
+      /*
+
+        บิลรุ่น Atomic ใหม่
+
+        บันทึก:
+
+        - บิล
+
+        - รายการ
+
+        - ตัด Stock
+
+        ใน Transaction เดียว
+
+      */
+
+      if (
+
+        sale.stockSyncMode ===
+
+        "atomic"
+
+      ) {
+
+        const result =
+
+          await saveCloudSaleWithStock(
+
+            sale
+
+          );
+
+
+        /*
+
+          Stock ที่ Database คำนวณจริง
+
+          ต้องเป็นค่าหลักของเครื่องนี้
+
+        */
+
+        Object.entries(
+
+          result.cloudStocks || {}
+
+        ).forEach(
+
+          ([
+
+            productId,
+
+            stock,
+
+          ]) => {
+
+            setLocalStockValue(
+
+              productId,
+
+              stock
+
+            );
+
+          }
+
+        );
+
+      } else {
+
+        /*
+
+          Pending รุ่นเก่า
+
+          ห้ามเปลี่ยนเป็น Atomic
+
+          เพราะ Stock รุ่นเก่า
+
+          อาจถูกตัดไปแล้ว
+
+        */
 
         await saveCloudSale(
 
@@ -1500,38 +1582,41 @@ result.id,
 
         );
 
-        removePendingSale(
-
-          sale.billId
-
-        );
-
-      } catch (error) {
-
-        allSuccess =
-
-          false;
-
-        console.error(
-
-          "Pending sale sync error:",
-
-          sale.billId,
-
-          error
-
-        );
-
       }
+
+
+      removePendingSale(
+
+        sale.billId
+
+      );
+
+
+    } catch (error) {
+
+      allSuccess = false;
+
+      console.error(
+
+        "Pending sale sync error:",
+
+        sale.billId,
+
+        error
+
+      );
 
     }
 
-    notifySyncStateChanged();
-
-    return allSuccess;
-
   }
 
+
+  notifySyncStateChanged();
+
+  return allSuccess;
+
+}
+ 
   async function retryPendingAdjustments() {
 
     const pending =
@@ -1624,35 +1709,64 @@ result.id,
 
     }
 
-   const [
+   /*
 
-  stockOk,
+  ต้องจัดลำดับ
 
-  atomicStockOk,
+  1. Pending Stock รุ่นเก่าให้หมดก่อน
 
-  salesOk,
+  2. Atomic Receive / Stock Ops
 
-  adjustmentOk,
+  3. Sales
 
-] =
+  4. Adjustment History
 
-  await Promise.all([
+  ห้ามให้ Absolute Stock รุ่นเก่า
 
-    retryPendingStocks(),
+  ทำพร้อมกับ Atomic Stock
 
-    retryPendingStockOperations(),
+*/
 
-    retryPendingSales(),
+const stockOk =
 
-    retryPendingAdjustments(),
+  await retryPendingStocks();
 
-  ]);
 
-    const clean =
+const atomicStockOk =
 
-      isSyncClean();
+  stockOk
 
-    setCloudReady(
+    ? await retryPendingStockOperations()
+
+    : false;
+
+
+const salesOk =
+
+  stockOk &&
+
+  atomicStockOk
+
+    ? await retryPendingSales()
+
+    : false;
+
+
+const adjustmentOk =
+
+  stockOk
+
+    ? await retryPendingAdjustments()
+
+    : false;
+
+
+const clean =
+
+  isSyncClean();
+
+
+setCloudReady(
 
   stockOk &&
 
