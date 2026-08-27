@@ -42,6 +42,183 @@ function getAdjustmentId(
 
 }
 
+export async function applySelfUseOnce(
+
+  operationId,
+
+  productId,
+
+  stockQuantity,
+
+  note = null,
+
+  adjustedAt = null
+
+) {
+
+  const safeOperationId =
+
+    String(
+
+      operationId || ""
+
+    ).trim();
+
+  const safeProductId =
+
+    String(
+
+      productId || ""
+
+    ).trim();
+
+  const safeStockQuantity =
+
+    Number(
+
+      stockQuantity
+
+    );
+
+
+  if (!safeOperationId) {
+
+    throw new Error(
+
+      "Self-use operationId is required"
+
+    );
+
+  }
+
+
+  if (!safeProductId) {
+
+    throw new Error(
+
+      "Self-use productId is required"
+
+    );
+
+  }
+
+
+  if (
+
+    !Number.isSafeInteger(
+
+      safeStockQuantity
+
+    ) ||
+
+    safeStockQuantity <= 0
+
+  ) {
+
+    throw new Error(
+
+      `Invalid self-use stock quantity: ${stockQuantity}`
+
+    );
+
+  }
+
+
+  const {
+
+    data,
+
+    error,
+
+  } = await supabase
+
+    .rpc(
+
+      "apply_self_use_once",
+
+      {
+
+        p_operation_id:
+
+          safeOperationId,
+
+        p_product_id:
+
+          safeProductId,
+
+        p_stock_quantity:
+
+          safeStockQuantity,
+
+        p_note:
+
+          note || null,
+
+        p_adjusted_at:
+
+          adjustedAt ||
+
+          new Date().toISOString(),
+
+      }
+
+    )
+
+    .single();
+
+
+  if (error) {
+
+    throw error;
+
+  }
+
+
+  if (!data) {
+
+    throw new Error(
+
+      `Self-use returned no data: ${safeOperationId}`
+
+    );
+
+  }
+
+
+  return {
+
+    id:
+
+      String(
+
+        data.product_id
+
+      ),
+
+    previousStock:
+
+      Number(
+
+        data.previous_stock
+
+      ),
+
+    stock:
+
+      Number(
+
+        data.new_stock
+
+      ),
+
+    alreadyApplied:
+
+      data.already_applied === true,
+
+  };
+
+}
+
 export async function saveStockAdjustment(
 
   adjustment
