@@ -1907,6 +1907,8 @@ sale.id
 
   =========================================
 
+*/
+
 export async function cancelCloudSaleWithStock(
 
   billId
@@ -2016,7 +2018,6 @@ export async function cancelCloudSaleWithStock(
 
 }
 
-*/
 export async function cancelCloudSaleItemWithStock(
 
   billId,
