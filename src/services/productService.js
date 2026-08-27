@@ -858,6 +858,373 @@ data.id
 
   =====================================
 
+  Atomic Stock Delta
+
+  ใช้สำหรับ:
+
+  + รับสินค้าเข้า
+
+  - ขายสินค้า
+
+  - กินเอง
+
+  + คืนสินค้า
+
+  operationId เดิมยิงซ้ำได้
+
+  Database จะทำเพียงครั้งเดียว
+
+  =====================================
+
+*/
+
+export async function applyCloudStockDeltaOnce(
+
+  operationId,
+
+  productId,
+
+  delta
+
+) {
+
+  const safeOperationId =
+
+    String(
+
+      operationId || ""
+
+    ).trim();
+
+  const id =
+
+    String(
+
+      productId ?? ""
+
+    ).trim();
+
+  const safeDelta =
+
+    Number(delta);
+
+
+  if (!safeOperationId) {
+
+    throw new Error(
+
+      "Stock operationId is required"
+
+    );
+
+  }
+
+
+  if (!id) {
+
+    throw new Error(
+
+      "Stock productId is required"
+
+    );
+
+  }
+
+
+  if (
+
+    !Number.isSafeInteger(
+
+      safeDelta
+
+    ) ||
+
+    safeDelta === 0
+
+  ) {
+
+    throw new Error(
+
+      `Invalid stock delta: ${delta}`
+
+    );
+
+  }
+
+
+  const {
+
+    data,
+
+    error,
+
+  } =
+
+    await supabase
+
+      .rpc(
+
+        "apply_stock_delta_once",
+
+        {
+
+          p_operation_id:
+
+            safeOperationId,
+
+          p_product_id:
+
+            id,
+
+          p_delta:
+
+            safeDelta,
+
+        }
+
+      )
+
+      .maybeSingle();
+
+
+  if (error) {
+
+    throw error;
+
+  }
+
+
+  if (!data) {
+
+    throw new Error(
+
+      `Atomic stock delta returned no data: ${id}`
+
+    );
+
+  }
+
+
+  return {
+
+    id:
+
+      normalizeId(
+
+        data.product_id
+
+      ),
+
+    previousStock:
+
+      Number(
+
+        data.previous_stock ?? 0
+
+      ),
+
+    stock:
+
+      Number(
+
+        data.new_stock ?? 0
+
+      ),
+
+    alreadyApplied:
+
+      data.already_applied ===
+
+      true,
+
+  };
+
+}
+
+
+/*
+
+  =====================================
+
+  Atomic Set Stock
+
+  ใช้เฉพาะการตั้งยอดจริง เช่น
+
+  หน้า "ปรับสต๊อก"
+
+  ไม่ใช้สำหรับขายหรือรับสินค้า
+
+  =====================================
+
+*/
+
+export async function setCloudStockAbsoluteOnce(
+
+  operationId,
+
+  productId,
+
+  newStock
+
+) {
+
+  const safeOperationId =
+
+    String(
+
+      operationId || ""
+
+    ).trim();
+
+  const id =
+
+    String(
+
+      productId ?? ""
+
+    ).trim();
+
+  const safeStock =
+
+    Number(newStock);
+
+
+  if (!safeOperationId) {
+
+    throw new Error(
+
+      "Stock operationId is required"
+
+    );
+
+  }
+
+
+  if (!id) {
+
+    throw new Error(
+
+      "Stock productId is required"
+
+    );
+
+  }
+
+
+  if (
+
+    !Number.isSafeInteger(
+
+      safeStock
+
+    ) ||
+
+    safeStock < 0
+
+  ) {
+
+    throw new Error(
+
+      `Invalid absolute stock: ${newStock}`
+
+    );
+
+  }
+
+
+  const {
+
+    data,
+
+    error,
+
+  } =
+
+    await supabase
+
+      .rpc(
+
+        "set_stock_absolute_once",
+
+        {
+
+          p_operation_id:
+
+            safeOperationId,
+
+          p_product_id:
+
+            id,
+
+          p_new_stock:
+
+            safeStock,
+
+        }
+
+      )
+
+      .maybeSingle();
+
+
+  if (error) {
+
+    throw error;
+
+  }
+
+
+  if (!data) {
+
+    throw new Error(
+
+      `Atomic stock set returned no data: ${id}`
+
+    );
+
+  }
+
+
+  return {
+
+    id:
+
+      normalizeId(
+
+        data.product_id
+
+      ),
+
+    previousStock:
+
+      Number(
+
+        data.previous_stock ?? 0
+
+      ),
+
+    stock:
+
+      Number(
+
+        data.new_stock ?? 0
+
+      ),
+
+    alreadyApplied:
+
+      data.already_applied ===
+
+      true,
+
+  };
+
+}
+ 
+/*
+
+  =====================================
+
   Update Stock หลังขาย
 
   =====================================
