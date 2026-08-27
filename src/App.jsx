@@ -1654,16 +1654,18 @@ result.id,
 
     setCloudReady(
 
-      stockOk &&
+  stockOk &&
 
-        salesOk &&
+    atomicStockOk &&
 
-        adjustmentOk &&
+    salesOk &&
 
-        clean
+    adjustmentOk &&
 
-    );
+    clean
 
+);
+ 
     return clean;
 
   }
@@ -4451,36 +4453,40 @@ item.id,
 
     Promise.all([
 
-      stockJob,
+  stockJob,
 
-      saleJob,
+  saleJob,
 
-    ]).then(
+]).then(
 
-      ([
+  ([
 
-        stockOk,
+    stockOk,
 
-        saleOk,
+    saleOk,
 
-      ]) => {
+  ]) => {
 
-        setCloudReady(
+    setCloudReady(
 
-  stockOk &&
+      stockOk &&
 
-    atomicStockOk &&
+        saleOk &&
 
-    salesOk &&
+        isSyncClean()
 
-    adjustmentOk &&
+    );
 
-    clean
-
-);
- 
   }
 
+);
+
+}
+
+/* =========================
+
+   Owner Mode
+ 
   /* =========================
 
      Owner Mode
