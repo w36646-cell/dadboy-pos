@@ -30,6 +30,8 @@ import ReportPage from "./pages/ReportPage";
 
 import BillsPage from "./pages/BillsPage";
 
+import StorageSettingsPage from "./pages/StorageSettingsPage";
+
 import createBillId from "./utils/createBillId";
 
 import {
@@ -4403,86 +4405,50 @@ const todaySalesAmount =
     ) {
 
       return (
-<div className="owner-placeholder-page">
-<h1>
+<StorageSettingsPage
 
-            ตั้งค่า
-</h1>
-<p>
+          isOnline={
 
-            Internet:{" "}
+            isOnline
 
-            {isOnline
+          }
 
-              ? "ออนไลน์"
+          cloudReady={
 
-              : "ออฟไลน์"}
-</p>
-<p>
+            cloudReady
 
-            Cloud:{" "}
+          }
 
-            {cloudReady
+          pendingSaleCount={
 
-              ? "Sync เรียบร้อย"
+            pendingSaleCount
 
-              : "มีข้อมูลรอ Sync"}
-</p>
-<p>
+          }
 
-            บิลรอ Sync:{" "}
+          pendingStockCount={
 
-            {
+            pendingStockCount
 
-              pendingSaleCount
+          }
 
-            }{" "}
+          pendingAdjustmentCount={
 
-            บิล
-</p>
-<p>
+            pendingAdjustmentCount
 
-            Stock รอ Sync:{" "}
+          }
 
-            {
+          onSync={
 
-              pendingStockCount
+            retryAllPending
 
-            }{" "}
+          }
 
-            รายการ
-</p>
-<p>
-
-            ปรับ Stock รอ Sync:{" "}
-
-            {
-
-              pendingAdjustmentCount
-
-            }{" "}
-
-            รายการ
-</p>
-<button
-
-            type="button"
-
-            onClick={() => {
-
-              retryAllPending();
-
-            }}
->
-
-            Sync ตอนนี้
-</button>
-</div>
+        />
 
       );
 
     }
-
+ 
     return renderPOS();
 
   }
