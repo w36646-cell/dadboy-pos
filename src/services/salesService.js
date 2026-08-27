@@ -392,8 +392,6 @@ function createItemPayload(
 
     return {
 
-     return {
-
       sale_id:
 
         saleId,
@@ -529,8 +527,6 @@ async function loadSaleRows() {
           .select(`
 
             id,
-
-            line_id
 
             bill_id,
 
@@ -896,8 +892,6 @@ export async function getCloudSalesPage(
 
         id,
 
-        line_id
-
         bill_id,
 
         sold_at,
@@ -1044,8 +1038,6 @@ export async function getCloudTodaySales(
           .select(`
 
             id,
-
-            line_id
 
             bill_id,
 
@@ -1264,8 +1256,6 @@ export async function getCloudSalesRange(
             .select(`
 
               id,
-
-              line_id
 
               bill_id,
 
@@ -1564,8 +1554,6 @@ export async function getCloudDashboardSales(
 
               id,
 
-              line_id
-
               bill_id,
 
               sold_at,
@@ -1715,8 +1703,6 @@ export async function getCloudDashboardSales(
               .select(`
 
                 id,
-
-                line_id
 
                 bill_id,
 
@@ -2135,8 +2121,6 @@ export async function getCloudSaleByBillId(
       .select(`
 
         id,
-
-        line_id
 
         bill_id,
 
