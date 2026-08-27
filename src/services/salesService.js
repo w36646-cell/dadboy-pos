@@ -1908,9 +1908,11 @@ sale.id
   =========================================
 
 */
-export async function cancelCloudSaleWithStock(
+export async function cancelCloudSaleItemWithStock(
 
-  billId
+  billId,
+
+  lineId
 
 ) {
 
@@ -1923,11 +1925,31 @@ export async function cancelCloudSaleWithStock(
     ).trim();
 
 
+  const safeLineId =
+
+    String(
+
+      lineId || ""
+
+    ).trim();
+
+
   if (!safeBillId) {
 
     throw new Error(
 
-      "Cancel billId is required"
+      "Cancel item billId is required"
+
+    );
+
+  }
+
+
+  if (!safeLineId) {
+
+    throw new Error(
+
+      "Cancel item lineId is required"
 
     );
 
@@ -1950,13 +1972,17 @@ export async function cancelCloudSaleWithStock(
 
           .rpc(
 
-            "cancel_sale_with_stock_once",
+            "cancel_sale_item_with_stock_once",
 
             {
 
               p_bill_id:
 
                 safeBillId,
+
+              p_line_id:
+
+                safeLineId,
 
             }
 
@@ -1974,7 +2000,7 @@ export async function cancelCloudSaleWithStock(
 
         throw new Error(
 
-          `Atomic cancel returned no data: ${safeBillId}`
+          `Atomic item cancel returned no data: ${safeBillId} / ${safeLineId}`
 
         );
 
@@ -1989,6 +2015,42 @@ export async function cancelCloudSaleWithStock(
 
           safeBillId,
 
+        saleId:
+
+          Number(
+
+            data.saleId || 0
+
+          ),
+
+        lineId:
+
+          data.lineId ||
+
+          safeLineId,
+
+        productId:
+
+          data.productId
+
+            ? String(
+
+                data.productId
+
+              )
+
+            : null,
+
+        returnedStockQuantity:
+
+          Number(
+
+            data.returnedStockQuantity ||
+
+            0
+
+          ),
+
         cloudStocks:
 
           data.stocks &&
@@ -2001,11 +2063,49 @@ export async function cancelCloudSaleWithStock(
 
             : {},
 
+        totalQty:
+
+          Number(
+
+            data.totalQty || 0
+
+          ),
+
+        totalAmount:
+
+          Number(
+
+            data.totalAmount || 0
+
+          ),
+
+        totalCost:
+
+          Number(
+
+            data.totalCost || 0
+
+          ),
+
+        totalProfit:
+
+          Number(
+
+            data.totalProfit || 0
+
+          ),
+
         alreadyApplied:
 
           data.alreadyApplied ===
 
           true,
+
+        saleExists:
+
+          data.saleExists !==
+
+          false,
 
       };
 
@@ -2016,7 +2116,7 @@ export async function cancelCloudSaleWithStock(
   );
 
 }
- 
+  
 export async function saveCloudSaleWithStock(
 
   sale
