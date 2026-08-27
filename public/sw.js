@@ -1,6 +1,14 @@
+const CACHE_PREFIX =
+
+  "dadboy-pos-";
+
+const CACHE_VERSION =
+
+  "__DADBOY_CACHE_VERSION__";
+
 const CACHE_NAME =
 
-  "dadboy-pos-v2";
+  `${CACHE_PREFIX}${CACHE_VERSION}`;
 
 const APP_SCOPE =
 
@@ -114,13 +122,20 @@ self.addEventListener(
 
                 .filter(
 
-                  (name) =>
+  (name) =>
 
-                    name !==
+    name.startsWith(
 
-                    CACHE_NAME
+      CACHE_PREFIX
 
-                )
+    ) &&
+
+    name !==
+
+      CACHE_NAME
+
+)
+ 
 
                 .map(
 
