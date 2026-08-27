@@ -1317,8 +1317,6 @@ useEffect(() => {
 
       if (
 
-        if (
-
   operation.type ===
 
   "selfUse"
