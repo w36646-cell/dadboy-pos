@@ -66,8 +66,10 @@ import {
 
   saveStockAdjustment,
 
-} from "./services/stockAdjustmentService";
+  applySelfUseOnce,
 
+} from "./services/stockAdjustmentService";
+ 
 import "./styles/App.css";
 
 import "./components/PaymentPopup.css";
@@ -1315,40 +1317,80 @@ useEffect(() => {
 
       if (
 
-        operation.type ===
+        if (
 
-        "set"
+  operation.type ===
 
-      ) {
+  "selfUse"
 
-        result =
+) {
 
-          await setCloudStockAbsoluteOnce(
+  result =
 
-            operation.operationId,
+    await applySelfUseOnce(
 
-            operation.productId,
+      operation.operationId,
 
-            operation.value
+      operation.productId,
 
-          );
+      Number(
 
-      } else {
+        operation.stockQuantity ||
 
-        result =
+        Math.abs(
 
-          await applyCloudStockDeltaOnce(
+          Number(operation.value || 0)
 
-            operation.operationId,
+        )
 
-            operation.productId,
+      ),
 
-            operation.value
+      operation.note || null,
 
-          );
+      operation.adjustedAt ||
 
-      }
+        operation.createdAt ||
 
+        new Date().toISOString()
+
+    );
+
+} else if (
+
+  operation.type ===
+
+  "set"
+
+) {
+
+  result =
+
+    await setCloudStockAbsoluteOnce(
+
+      operation.operationId,
+
+      operation.productId,
+
+      operation.value
+
+    );
+
+} else {
+
+  result =
+
+    await applyCloudStockDeltaOnce(
+
+      operation.operationId,
+
+      operation.productId,
+
+      operation.value
+
+    );
+
+}
+ 
       setLocalStockValue(
 result.id,
 
@@ -3389,95 +3431,331 @@ item.id
 
     if (
 
-      normalizedSpecialMode ===
+  normalizedSpecialMode ===
 
-      "selfUse"
+  "selfUse"
 
-    ) {
+) {
 
-      const stockQuantity =
+  const stockQuantity =
 
-        safeQty *
+    safeQty *
 
-        stockPerUnit;
+    stockPerUnit;
 
-      const previousStock =
 
-        getStock(
+  const previousStock =
+
+    getStock(
 product.id
+
+    );
+
+
+  const optimisticStock =
+
+    previousStock -
+
+    stockQuantity;
+
+
+  if (
+
+    optimisticStock < 0
+
+  ) {
+
+    window.alert(
+
+      `Stock ไม่พอ\nคงเหลือ ${previousStock} ชิ้น\nต้องใช้ ${stockQuantity} ชิ้น`
+
+    );
+
+    return;
+
+  }
+
+
+  const totalSelfUseCost =
+
+    cost *
+
+    stockQuantity;
+
+
+  const adjustedAt =
+
+    new Date()
+
+      .toISOString();
+
+
+  const operationId =
+
+    `selfuse-${String(
+product.id
+
+    )}-${Date.now()}-${Math.random()
+
+      .toString(36)
+
+      .slice(2, 8)}`;
+
+
+  const note =
+
+    `${optionName} | ` +
+
+    `จำนวน ${safeQty}${isPack ? " แพ็ก" : " ชิ้น"} | ` +
+
+    `ใช้สต๊อก ${stockQuantity} ชิ้น | ` +
+
+    `ต้นทุนรวม ${Number(
+
+      totalSelfUseCost
+
+    ).toFixed(2)} บาท`;
+
+
+  const operation = {
+
+    operationId,
+
+    productId:
+
+      String(product.id),
+
+    type:
+
+      "selfUse",
+
+    /*
+
+      เก็บเป็น Delta จริง
+
+      กินเอง 1 ชิ้น = -1
+
+      กินเอง 12 ชิ้น = -12
+
+    */
+
+    value:
+
+      -stockQuantity,
+
+    stockQuantity,
+
+    note,
+
+    adjustedAt,
+
+    createdAt:
+
+      adjustedAt,
+
+  };
+
+
+  /*
+
+    ต้องบันทึก Pending ก่อน
+
+    ถ้า Cloud สำเร็จแต่
+
+    response กลับมาไม่ถึงเครื่อง
+
+    เราจะ Retry operationId เดิม
+
+    และไม่ตัดซ้ำ
+
+  */
+
+  const pendingSaved =
+
+    savePendingStockOperation(
+
+      operation
+
+    );
+
+
+  if (!pendingSaved) {
+
+    window.alert(
+
+      "ไม่สามารถบันทึกคิวกินเองในเครื่องได้\nกรุณาลองใหม่"
+
+    );
+
+    return;
+
+  }
+
+
+  /*
+
+    หน้าจอลดทันทีแบบ Optimistic
+
+    เป็น -delta
+
+    ไม่ใช่เอายอดใหม่ไปทับ Cloud
+
+  */
+
+  applyLocalStockDelta(
+product.id,
+
+    -stockQuantity
+
+  );
+
+
+  notifySyncStateChanged();
+
+
+  /*
+
+    Offline:
+
+    เก็บ -delta ไว้ก่อน
+
+  */
+
+  if (
+
+    typeof navigator !==
+
+      "undefined" &&
+
+    navigator.onLine ===
+
+      false
+
+  ) {
+
+    setCloudReady(false);
+
+    window.alert(
+
+      "บันทึกกินเองในเครื่องแล้ว\nข้อมูลจะ Sync เมื่อกลับมาออนไลน์"
+
+    );
+
+    return;
+
+  }
+
+
+  /*
+
+    Online:
+
+    Supabase จะเป็นคนอ่าน
+
+    Stock Cloud ล่าสุดแล้ว -จำนวนเอง
+
+  */
+
+  applySelfUseOnce(
+
+    operationId,
+product.id,
+
+    stockQuantity,
+
+    note,
+
+    adjustedAt
+
+  )
+
+    .then(
+
+      (result) => {
+
+        /*
+
+          ใช้ยอดที่ Cloud
+
+          คำนวณจริงกลับมา
+
+        */
+
+        setLocalStockValue(
+result.id,
+
+          result.stock
 
         );
 
-      const actualStock =
 
-        previousStock -
+        removePendingStockOperation(
 
-        stockQuantity;
+          operationId
 
-      if (
+        );
 
-        actualStock < 0
 
-      ) {
+        notifySyncStateChanged();
+
+
+        setCloudReady(
+
+          isSyncClean()
+
+        );
+
 
         window.alert(
 
-          `Stock ไม่พอ\nคงเหลือ ${previousStock} ชิ้น\nต้องใช้ ${stockQuantity} ชิ้น`
+          "บันทึกกินเองเรียบร้อย"
 
         );
 
-        return;
+      }
+
+    )
+
+    .catch(
+
+      (error) => {
+
+        console.error(
+
+          "Atomic self-use error:",
+
+          error
+
+        );
+
+
+        /*
+
+          ห้ามลบ Pending
+
+          เผื่อ Cloud ทำสำเร็จแล้ว
+
+          แต่ response หาย
+
+        */
+
+        setCloudReady(false);
+
+
+        window.alert(
+
+          "บันทึกกินเองในเครื่องแล้ว\nข้อมูลยังรอ Sync"
+
+        );
 
       }
 
-      const totalSelfUseCost =
+    );
 
-        cost *
 
-        stockQuantity;
+  return;
 
-      adjustStock({
-
-        productId:
-product.id,
-
-        productName:
-
-          product.name,
-
-        previousStock,
-
-        actualStock,
-
-        reason:
-
-          "กินเอง",
-
-        note:
-
-          `${optionName} | ` +
-
-          `จำนวน ${safeQty}${isPack ? " แพ็ก" : " ชิ้น"} | ` +
-
-          `ใช้สต๊อก ${stockQuantity} ชิ้น | ` +
-
-          `ต้นทุนรวม ${Number(
-
-            totalSelfUseCost
-
-          ).toFixed(2)} บาท`,
-
-        adjustedAt:
-
-          new Date()
-
-            .toISOString(),
-
-      });
-
-      return;
-
-    }
+}
  
     setCart(
 
