@@ -1907,6 +1907,115 @@ sale.id
 
   =========================================
 
+export async function cancelCloudSaleWithStock(
+
+  billId
+
+) {
+
+  const safeBillId =
+
+    String(
+
+      billId || ""
+
+    ).trim();
+
+
+  if (!safeBillId) {
+
+    throw new Error(
+
+      "Cancel billId is required"
+
+    );
+
+  }
+
+
+  return withRetry(
+
+    async () => {
+
+      const {
+
+        data,
+
+        error,
+
+      } =
+
+        await supabase
+
+          .rpc(
+
+            "cancel_sale_with_stock_once",
+
+            {
+
+              p_bill_id:
+
+                safeBillId,
+
+            }
+
+          );
+
+
+      if (error) {
+
+        throw error;
+
+      }
+
+
+      if (!data) {
+
+        throw new Error(
+
+          `Atomic cancel returned no data: ${safeBillId}`
+
+        );
+
+      }
+
+
+      return {
+
+        billId:
+
+          data.billId ||
+
+          safeBillId,
+
+        cloudStocks:
+
+          data.stocks &&
+
+          typeof data.stocks ===
+
+            "object"
+
+            ? data.stocks
+
+            : {},
+
+        alreadyApplied:
+
+          data.alreadyApplied ===
+
+          true,
+
+      };
+
+    },
+
+    2
+
+  );
+
+}
+
 */
 export async function cancelCloudSaleItemWithStock(
 
