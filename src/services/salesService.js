@@ -1884,6 +1884,164 @@ sale.id
   );
 
 }
+
+/*
+
+  =========================================
+
+  Atomic Sale
+
+  บันทึกพร้อมกันใน Transaction เดียว:
+
+  - sales
+
+  - sale_items
+
+  - products.stock
+
+  - stock_operations
+
+  Bill เดิม Retry ซ้ำได้
+
+  Stock จะไม่ถูกตัดซ้ำ
+
+  =========================================
+
+*/
+
+export async function saveCloudSaleWithStock(
+
+  sale
+
+) {
+
+  if (!sale?.billId) {
+
+    throw new Error(
+
+      "Sale billId is required"
+
+    );
+
+  }
+
+
+  return withRetry(
+
+    async () => {
+
+      const {
+
+        data,
+
+        error,
+
+      } =
+
+        await supabase
+
+          .rpc(
+
+            "save_sale_with_stock_once",
+
+            {
+
+              p_sale:
+
+                sale,
+
+            }
+
+          );
+
+
+      if (error) {
+
+        throw error;
+
+      }
+
+
+      if (!data) {
+
+        throw new Error(
+
+          `Atomic sale returned no data: ${sale.billId}`
+
+        );
+
+      }
+
+
+      const saleId =
+
+        Number(
+
+          data.saleId || 0
+
+        );
+
+
+      if (
+
+        !Number.isFinite(
+
+          saleId
+
+        ) ||
+
+        saleId <= 0
+
+      ) {
+
+        throw new Error(
+
+          `Atomic sale returned invalid saleId: ${sale.billId}`
+
+        );
+
+      }
+
+
+      return {
+
+        ...sale,
+
+        id:
+
+          saleId,
+
+        cloudId:
+
+          saleId,
+
+        cloudStocks:
+
+          data.stocks &&
+
+          typeof data.stocks ===
+
+            "object"
+
+            ? data.stocks
+
+            : {},
+
+        alreadyApplied:
+
+          data.alreadyApplied ===
+
+          true,
+
+      };
+
+    },
+
+    2
+
+  );
+
+}
  
  export async function saveCloudSale(
 
