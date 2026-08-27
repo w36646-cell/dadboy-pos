@@ -96,6 +96,16 @@ function OwnerSidebar({
 
     },
 
+    {
+
+      id: "settings",
+
+      icon: "🧹",
+
+      label: "พื้นที่ในเครื่อง",
+
+    },
+
   ];
 
   function selectPage(
