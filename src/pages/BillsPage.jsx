@@ -12,14 +12,14 @@ import {
 
 import {
 
-  deleteCloudSale,
+  cancelCloudSaleWithStock,
 
   getCloudSalesPage,
 
   updateCloudSaleAfterItemDelete,
 
 } from "../services/salesService";
-   
+    
 import {
 
   restoreCloudStocksFromItems,
@@ -1293,376 +1293,250 @@ function openBillDetail(
 
 }
  
-
   async function cancelBill(
 
-    sale
+  sale
+
+) {
+
+  if (
+
+    !sale ||
+
+    cancelling
 
   ) {
 
-    if (
+    return;
 
-      !sale ||
+  }
 
-      cancelling
 
-    ) {
+  /*
 
-      return;
+    ยกเลิกบิลต้อง Online เท่านั้น
 
-    }
+    เพราะ Stock + การลบบิล
+
+    ต้องสำเร็จพร้อมกันใน Cloud
+
+  */
+
+  if (!isOnline) {
+
+    window.alert(
+
+      "ไม่สามารถยกเลิกบิลขณะ Offline ได้\nกรุณาเชื่อมต่ออินเทอร์เน็ตก่อนยกเลิกบิล"
+
+    );
+
+    return;
+
+  }
+
+
+  /*
+
+    บิลที่ยังไม่มี Cloud id
+
+    ห้ามใช้วิธีคืน Local แล้วส่งยอด absolute
+
+    รอให้ Atomic Sale Sync ก่อน
+
+  */
+
+  if (!sale.id) {
+
+    window.alert(
+
+      "บิลนี้ยังรอ Sync ขึ้น Cloud\nกรุณารอสักครู่แล้วลองยกเลิกอีกครั้ง"
+
+    );
+
+    return;
+
+  }
+
+
+  const confirmed =
+
+    window.confirm(
+
+      `ยกเลิกบิล ${sale.billId} ใช่หรือไม่?\nสต๊อกสินค้าจะถูกคืนกลับ`
+
+    );
+
+
+  if (!confirmed) {
+
+    return;
+
+  }
+
+
+  setCancelling(true);
+
+
+  try {
 
     /*
 
       ==================================
 
-      กติกาใหม่:
+      Atomic Cancel
 
-      Offline ห้ามยกเลิกบิลทุกกรณี
+      Database ทำพร้อมกัน:
+
+      1. อ่าน sale_items จริง
+
+      2. คืน Stock ด้วย +delta
+
+      3. สร้าง cancel operation
+
+      4. ลบ sale_items
+
+      5. ลบ sales
+
+      ถ้ามีข้อใด Error
+
+      Rollback ทั้งหมด
 
       ==================================
 
     */
 
-    if (!isOnline) {
+    const result =
 
-      window.alert(
-
-        "ไม่สามารถยกเลิกบิลขณะ Offline ได้\nกรุณาเชื่อมต่ออินเทอร์เน็ตก่อนยกเลิกบิล"
-
-      );
-
-      return;
-
-    }
-
-    const confirmed =
-
-      window.confirm(
-
-        `ยกเลิกบิล ${sale.billId} ใช่หรือไม่?\nสต๊อกสินค้าจะถูกคืนกลับ`
-
-      );
-
-    if (!confirmed) {
-
-      return;
-
-    }
-
-    setCancelling(true);
-
-    try {
-
-      /*
-
-        ==================================
-
-        CASE 1
-
-        บิลอยู่บน Cloud แล้ว
-
-        ==================================
-
-      */
-
-      if (sale.id) {
-
-        /*
-
-          คืน Stock บน Supabase
-
-        */
-
-        const restoredStocks =
-
-          await restoreCloudStocksFromItems(
-
-            sale.items || []
-
-          );
-
-        /*
-
-          เอา Stock ใหม่มาเขียน Local
-
-        */
-
-        const localInventory =
-
-          readStorage(
-
-            STOCK_KEY,
-
-            {}
-
-          );
-
-        const updatedInventory = {
-
-          ...localInventory,
-
-          ...restoredStocks,
-
-        };
-
-        writeStorage(
-
-          STOCK_KEY,
-
-          updatedInventory
-
-        );
-
-        /*
-
-          อัปเดต React State
-
-          เพื่อให้หน้า POS เปลี่ยนทันที
-
-        */
-
-        updateAppInventory(
-
-          updatedInventory
-
-        );
-
-        /*
-
-          Stock เหล่านี้ Sync Cloud แล้ว
-
-          เอาออกจาก Pending
-
-        */
-
-        Object.keys(
-
-          restoredStocks || {}
-
-        ).forEach(
-
-          (productId) => {
-
-            removePendingStock(
-
-              productId
-
-            );
-
-          }
-
-        );
-
-        /*
-
-          ลบ sale_items + sales
-
-          จาก Supabase
-
-        */
-
-        await deleteCloudSale(
-sale.id
-
-        );
-
-        /*
-
-          ป้องกันบิลนี้ค้างใน Pending Sale
-
-        */
-
-        removePendingSale(
-
-          sale.billId
-
-        );
-
-        /*
-
-          ลบบิลออกจาก Local
-
-        */
-
-        const updatedSales =
-
-          removeLocalBill(
-
-            sales,
-
-            sale.billId
-
-          );
-
-        setSales(
-
-          updatedSales
-
-        );
-
-        setSelectedBill(null);
-
-        window.alert(
-
-          "ยกเลิกบิลเรียบร้อย\nคืนสต๊อกทั้ง POS และ Cloud แล้ว"
-
-        );
-
-        return;
-
-      }
-
-      /*
-
-        ==================================
-
-        CASE 2
-
-        บิล Local ที่ยังไม่ขึ้น Cloud
-
-        ถึงแม้เป็น Local
-
-        ก็เข้ามาตรงนี้ได้เฉพาะตอน Online
-
-        ==================================
-
-      */
-
-      const updatedInventory =
-
-        restoreLocalStock(
-
-          sale
-
-        );
-
-      /*
-
-        ให้หน้า POS เห็น Stock ใหม่ทันที
-
-      */
-
-      updateAppInventory(
-
-        updatedInventory
-
-      );
-
-      /*
-
-        บิลถูกยกเลิกแล้ว
-
-        ห้าม Sync ขึ้น Cloud
-
-      */
-
-      removePendingSale(
+      await cancelCloudSaleWithStock(
 
         sale.billId
 
       );
 
-      /*
 
-        Stock ที่คืนแล้วต้อง Sync
+    /*
 
-        ขึ้น Cloud
+      ใช้ Stock ที่ Cloud คำนวณจริง
 
-      */
+      เป็นค่าหลักของเครื่องนี้
 
-      (sale.items || []).forEach(
+    */
 
-        (item) => {
+    const localInventory =
 
-          const productId =
+      readStorage(
 
-            item.productId;
+        STOCK_KEY,
 
-          if (
-
-            productId ===
-
-              undefined ||
-
-            productId === null
-
-          ) {
-
-            return;
-
-          }
-
-          savePendingStock(
-
-            productId,
-
-            updatedInventory[
-
-              productId
-
-            ]
-
-          );
-
-        }
+        {}
 
       );
 
-      /*
 
-        ลบบิล Local
+    const updatedInventory = {
 
-      */
+      ...localInventory,
 
-      const updatedSales =
+      ...(result.cloudStocks || {}),
 
-        removeLocalBill(
+    };
 
-          sales,
 
-          sale.billId
+    writeStorage(
 
-        );
+      STOCK_KEY,
 
-      setSales(
+      updatedInventory
 
-        updatedSales
+    );
+
+
+    updateAppInventory(
+
+      updatedInventory
+
+    );
+
+
+    /*
+
+      เผื่อบิลนี้ยังค้างใน
+
+      Pending Sale ของ Browser
+
+    */
+
+    removePendingSale(
+
+      sale.billId
+
+    );
+
+
+    /*
+
+      ลบบิลออกจากหน้า Bills
+
+    */
+
+    const updatedSales =
+
+      removeLocalBill(
+
+        sales,
+
+        sale.billId
 
       );
 
-      setSelectedBill(null);
 
-      window.alert(
+    setSales(
 
-        "ยกเลิกบิลและคืนสต๊อกเรียบร้อย\nStock จะ Sync ขึ้น Cloud อัตโนมัติ"
+      updatedSales
 
-      );
+    );
 
-    } catch (error) {
 
-      console.error(
+    setSelectedBill(null);
 
-        "Cancel bill error:",
 
-        error
+    window.alert(
 
-      );
+      result.alreadyApplied
 
-      window.alert(
+        ? "บิลนี้ถูกยกเลิกและคืนสต๊อกไว้แล้ว"
 
-        "ยกเลิกบิลไม่สำเร็จ\nกรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่"
+        : "ยกเลิกบิลเรียบร้อย\nคืนสต๊อกแบบ Atomic แล้ว"
 
-      );
+    );
 
-    } finally {
 
-      setCancelling(false);
+  } catch (error) {
 
-    }
+    console.error(
+
+      "Atomic cancel bill error:",
+
+      error
+
+    );
+
+
+    window.alert(
+
+      "ยกเลิกบิลไม่สำเร็จ\nระบบไม่ได้คืนสต๊อกบางส่วน\nกรุณาลองใหม่"
+
+    );
+
+
+  } finally {
+
+    setCancelling(false);
 
   }
 
+}
+ 
   return (
 <div className="bills-page">
 <header className="bills-header">
