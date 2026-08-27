@@ -4622,36 +4622,6 @@ item.id,
         }
 
       );
- 
-    Promise.all([
-
-  stockJob,
-
-  saleJob,
-
-]).then(
-
-  ([
-
-    stockOk,
-
-    saleOk,
-
-  ]) => {
-
-    setCloudReady(
-
-      stockOk &&
-
-        saleOk &&
-
-        isSyncClean()
-
-    );
-
-  }
-
-);
 
 }
 
