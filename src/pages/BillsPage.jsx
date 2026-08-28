@@ -14,18 +14,14 @@ import {
 
   cancelCloudSaleWithStock,
 
+  cancelCloudSaleItemWithStock,
+
   getCloudSalesPage,
 
   updateCloudSaleAfterItemDelete,
 
 } from "../services/salesService";
-    
-import {
-
-  restoreCloudStocksFromItems,
-
-} from "../services/productService";
-
+     
 import "./BillsPage.css";
 
 const SALES_KEY =
