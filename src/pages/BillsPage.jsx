@@ -14,8 +14,6 @@ import {
 
   cancelCloudSaleWithStock,
 
-  cancelCloudSaleItemWithStock,
-
   getCloudSalesPage,
 
   updateCloudSaleAfterItemDelete,
@@ -1182,20 +1180,10 @@ const localInventory =
     {}
 
   );
-
-const updatedInventory = {
-
-  ...localInventory,
-
-  ...(result.cloudStocks || {}),
-
-};
  
     const updatedInventory = {
 
       ...localInventory,
-
-      ...restoredStocks,
 
     };
 
@@ -1213,12 +1201,6 @@ const updatedInventory = {
 
     );
 
-    Object.keys(
-
-      restoredStocks || {}
-
-    ).forEach(
-
       (productId) => {
 
         removePendingStock(
@@ -1235,10 +1217,8 @@ const updatedInventory = {
 
       await updateCloudSaleAfterItemDelete(
 
-        sale,
-
-        item
-
+        sale.billId
+        
       );
 
     const updatedSales =
@@ -1427,52 +1407,6 @@ const updatedInventory = {
       เป็นค่าหลักของเครื่องนี้
 
     */
-
-    const result =
-
-  await cancelCloudSaleItemWithStock(
-
-    sale.billId,
-
-    item.lineId
-
-  );
-
-
-const localInventory =
-
-  readStorage(
-
-    STOCK_KEY,
-
-    {}
-
-  );
-
-
-const updatedInventory = {
-
-  ...localInventory,
-
-  ...(result.cloudStocks || {}),
-
-};
-
-
-writeStorage(
-
-  STOCK_KEY,
-
-  updatedInventory
-
-);
-
-
-updateAppInventory(
-
-  updatedInventory
-
-);
 
       updatedSales
 
