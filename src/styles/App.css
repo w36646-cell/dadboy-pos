@@ -506,7 +506,7 @@ button {
 
   inset: 0;
 
-  z-index: 1000;
+  z-index: 99999;
 
   display: flex;
 
@@ -521,6 +521,18 @@ button {
 }
 
 .popup {
+
+ .popup {
+
+  position: relative;
+
+  z-index: 100000;
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+} 
 
   width: 100%;
 
