@@ -147,6 +147,8 @@ function createEmptyForm() {
 
     trackStock: true,
 
+    isActive: true,
+
     hasOption: false,
 
     normalPrice: 0,
@@ -1260,6 +1262,10 @@ option.id ===
 
         false,
 
+      isActive:
+
+  product.isActive !== false,
+
       hasOption,
 
       normalPrice:
@@ -1735,6 +1741,14 @@ option.id ===
           form.trackStock
 
         ),
+
+      isActive:
+
+  Boolean(
+
+    form.isActive
+
+  ),
 
       hasOption:
 
