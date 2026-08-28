@@ -1163,24 +1163,34 @@ function openBillDetail(
 
   try {
 
-    const restoredStocks =
+    const result =
 
-      await restoreCloudStocksFromItems(
+  await cancelCloudSaleItemWithStock(
 
-        [item]
+    sale.billId,
 
-      );
+    item.lineId
 
-    const localInventory =
+  );
 
-      readStorage(
+const localInventory =
 
-        STOCK_KEY,
+  readStorage(
 
-        {}
+    STOCK_KEY,
 
-      );
+    {}
 
+  );
+
+const updatedInventory = {
+
+  ...localInventory,
+
+  ...(result.cloudStocks || {}),
+
+};
+ 
     const updatedInventory = {
 
       ...localInventory,
@@ -1429,64 +1439,51 @@ function openBillDetail(
       );
 
 
-    const updatedInventory = {
+    const result =
 
-      ...localInventory,
+  await cancelCloudSaleItemWithStock(
 
-      ...(result.cloudStocks || {}),
+    sale.billId,
 
-    };
+    item.lineId
 
-
-    writeStorage(
-
-      STOCK_KEY,
-
-      updatedInventory
-
-    );
+  );
 
 
-    updateAppInventory(
+const localInventory =
 
-      updatedInventory
+  readStorage(
 
-    );
+    STOCK_KEY,
 
+    {}
 
-    /*
-
-      เผื่อบิลนี้ยังค้างใน
-
-      Pending Sale ของ Browser
-
-    */
-
-    removePendingSale(
-
-      sale.billId
-
-    );
+  );
 
 
-    /*
+const updatedInventory = {
 
-      ลบบิลออกจากหน้า Bills
+  ...localInventory,
 
-    */
+  ...(result.cloudStocks || {}),
 
-    const updatedSales =
-
-      removeLocalBill(
-
-        sales,
-
-        sale.billId
-
-      );
+};
 
 
-    setSales(
+writeStorage(
+
+  STOCK_KEY,
+
+  updatedInventory
+
+);
+
+
+updateAppInventory(
+
+  updatedInventory
+
+);
 
       updatedSales
 
