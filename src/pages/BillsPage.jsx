@@ -1428,17 +1428,6 @@ const updatedInventory = {
 
     */
 
-    const localInventory =
-
-      readStorage(
-
-        STOCK_KEY,
-
-        {}
-
-      );
-
-
     const result =
 
   await cancelCloudSaleItemWithStock(
