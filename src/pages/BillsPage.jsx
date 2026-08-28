@@ -1398,11 +1398,6 @@ const localInventory =
 
     */
 
-      updatedSales
-
-    );
-
-
     setSelectedBill(null);
 
 
