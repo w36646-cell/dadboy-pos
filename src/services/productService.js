@@ -419,6 +419,8 @@ row.id
 
         row.track_stock === true,
 
+      isActive: row.is_active !== false,
+
     })
 
   );
