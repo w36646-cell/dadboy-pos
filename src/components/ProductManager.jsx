@@ -3461,6 +3461,45 @@ style={{
                 }
 
               />
+
+<hr />
+<h3>
+
+  สถานะการขาย
+</h3>
+<label className="manager-checkbox">
+<input
+
+    type="checkbox"
+
+    checked={
+
+      form.isActive
+
+    }
+
+    onChange={(event) =>
+
+      updateField(
+
+        "isActive",
+
+        event.target.checked
+
+      )
+
+    }
+
+  />
+
+  เปิดขายหน้าร้าน
+</label>
+<hr />
+<h3>
+
+  การติดตามสต๊อก
+</h3>  
+  
 <hr />
 <h3>
 
