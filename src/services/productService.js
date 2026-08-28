@@ -62,6 +62,10 @@ function fromDatabase(row) {
 
       row.track_stock === true,
 
+    isActive:
+
+  row.is_active !== false,
+
     hasOption:
 
       row.has_option === true,
