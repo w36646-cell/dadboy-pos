@@ -14,6 +14,8 @@ import {
 
   cancelCloudSaleWithStock,
 
+  cancelCloudSaleItemWithStock,
+
   getCloudSalesPage,
 
   updateCloudSaleAfterItemDelete,
@@ -1198,18 +1200,6 @@ const localInventory =
     updateAppInventory(
 
       updatedInventory
-
-    );
-
-      (productId) => {
-
-        removePendingStock(
-
-          productId
-
-        );
-
-      }
 
     );
 
