@@ -2394,6 +2394,9 @@ option.id ===
   Tracking
 </th>
 <th>
+  สถานะขาย
+</th>
+<th>
 
   จัดการ
 </th>
@@ -2463,6 +2466,13 @@ option.id ===
 
                   Tracking
 </th>
+
+<th>
+
+                  สถานะขาย
+
+</th>
+  
 <th>
 
                   จัดการ
@@ -2820,6 +2830,17 @@ item.id
 
                           : "ปิด"}
 </td>
+
+<td>
+
+  {item.isActive !== false
+
+    ? "เปิดขาย"
+
+    : "ปิดขาย"}
+</td>
+ 
+  
 <td>
 <button
 
