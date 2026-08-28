@@ -176,6 +176,10 @@ function toDatabase(
 
       true,
 
+    is_active:
+
+  product.isActive !== false,
+
     has_option:
 
       product.hasOption ===
