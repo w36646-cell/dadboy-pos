@@ -165,6 +165,8 @@ function createEmptyForm() {
 
     packPrice: 0,
 
+    isActive: true,
+
   };
 
 }
