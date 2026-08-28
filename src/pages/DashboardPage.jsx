@@ -798,6 +798,24 @@ const reloadSales =
 
     );
 
+  function selectYesterday() {
+
+  const yesterday = new Date();
+
+  yesterday.setDate(
+
+    yesterday.getDate() - 1
+
+  );
+
+  setSelectedDate(
+
+    formatDateKey(yesterday)
+
+  );
+
+}
+
   function goToStock() {
 
     if (
@@ -834,6 +852,19 @@ const reloadSales =
 </p>
 </div>
 <div className="db-header-right">
+
+<button
+
+  type="button"
+
+  className="db-date-button"
+
+  onClick={selectYesterday}
+>
+
+  เมื่อวาน
+</button>
+  
 <input
 
             className="db-date-picker"
