@@ -146,20 +146,7 @@ function ProductCard({
       }}
 
 
-      onClick={(event)=>{
-
-        if(movedRef.current){
-
-          event.preventDefault();
-
-          return;
-
-        }
-
-
-        onClick();
-
-      }}
+      onClick={onClick}
 
 
       onMouseDown={onLongPressStart}
