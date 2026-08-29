@@ -252,31 +252,39 @@ function POSPage({
 
           .toLowerCase();
 
-      if (!keyword) {
+     if (!keyword) {
 
-        return products;
+  return products.filter(
 
-      }
+    (product) =>
 
-      return products.filter(
+      product.isActive !== false
 
-        (product) =>
+  );
 
-          String(
+}
 
-            product.name || ""
+     return products.filter(
 
-          )
+  (product) =>
 
-            .toLowerCase()
+    product.isActive !== false &&
 
-            .includes(
+    String(
 
-              keyword
+      product.name || ""
 
-            )
+    )
 
-      );
+      .toLowerCase()
+
+      .includes(
+
+        keyword
+
+      )
+
+);
 
     }, [
 
