@@ -1998,6 +1998,14 @@ option.id ===
 
       buildProduct();
 
+    console.log(
+
+  "SAVE PRODUCT",
+
+  updatedProduct
+
+);
+
     setSaving(
 
       true
