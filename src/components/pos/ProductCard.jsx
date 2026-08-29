@@ -1,3 +1,6 @@
+import { useRef } from "react";
+
+
 function getProductTheme(index) {
 
   const themes = [
@@ -25,7 +28,6 @@ function getProductTheme(index) {
 }
 
 
-
 function getProductImageSettings(value) {
 
   const defaults = {
@@ -40,13 +42,16 @@ function getProductImageSettings(value) {
 
   };
 
+
   if (!value) return defaults;
+
 
   if (typeof value !== "string") {
 
     return defaults;
 
   }
+
 
   if (!value.trim().startsWith("{")) {
 
@@ -59,6 +64,7 @@ function getProductImageSettings(value) {
     };
 
   }
+
 
   try {
 
@@ -100,7 +106,7 @@ function ProductCard({
   packEnabled,
 
   normalPrice,
-  
+
   lowStock,
 
   onClick,
@@ -111,6 +117,7 @@ function ProductCard({
 
 }) {
 
+
   const imageSettings =
 
     getProductImageSettings(
@@ -118,6 +125,12 @@ function ProductCard({
       product.image
 
     );
+
+
+  const movedRef = useRef(false);
+
+  const startYRef = useRef(0);
+
 
   return (
 <button
@@ -132,7 +145,22 @@ function ProductCard({
 
       }}
 
-      onClick={onClick}
+
+      onClick={(event)=>{
+
+        if(movedRef.current){
+
+          event.preventDefault();
+
+          return;
+
+        }
+
+
+        onClick();
+
+      }}
+
 
       onMouseDown={onLongPressStart}
 
@@ -140,15 +168,71 @@ function ProductCard({
 
       onMouseLeave={onLongPressCancel}
 
-      onTouchStart={onLongPressStart}
 
-      onTouchEnd={onLongPressCancel}
+      onTouchStart={(event)=>{
+
+
+        movedRef.current = false;
+
+
+        startYRef.current =
+
+          event.touches[0].clientY;
+
+
+        onLongPressStart(event);
+
+
+      }}
+
+
+      onTouchMove={(event)=>{
+
+
+        const distance =
+
+          Math.abs(
+
+            event.touches[0].clientY -
+
+            startYRef.current
+
+          );
+
+
+        if(distance > 10){
+
+          movedRef.current = true;
+
+          onLongPressCancel();
+
+        }
+
+
+      }}
+
+
+      onTouchEnd={(event)=>{
+
+
+        if(!movedRef.current){
+
+          onLongPressCancel();
+
+        }
+
+
+      }}
+
 
       onTouchCancel={onLongPressCancel}
 
-      onContextMenu={(event) => event.preventDefault()}
+
+      onContextMenu={(event)=>event.preventDefault()}
 >
+
 <div className="pos-card-image-area">
+
 
         {imageSettings.src ? (
 <img
@@ -161,33 +245,46 @@ function ProductCard({
 
             decoding="async"
 
+
             style={{
+
 
               "--product-image-scale":
 
                 imageSettings.scale,
 
+
               "--product-image-x":
 
                 `${imageSettings.x}%`,
+
 
               "--product-image-y":
 
                 `${imageSettings.y}%`,
 
+
             }}
+
 
           />
 
+
         ) : (
+
 <div className="pos-card-no-image">
 
             ไม่มีรูป
 </div>
 
+
         )}
+
 </div>
+
 <div className="pos-card-shade" />
+
+
 
       {packEnabled && (
 <div className="pos-pack-badge">
@@ -196,7 +293,10 @@ function ProductCard({
 </div>
 
       )}
+
+
 <div className="pos-card-info">
+
 <div
 
   className={
@@ -212,6 +312,8 @@ function ProductCard({
 
   {product.name}
 </div>
+
+
 <div
 
   className={
@@ -225,9 +327,13 @@ function ProductCard({
   }
 >
 
+
   {Number(normalPrice || 0).toLocaleString()} บาท
+
 </div>
- 
+
+
+
         {packEnabled && (
 <div className="pos-card-pack-text">
 
@@ -235,11 +341,15 @@ function ProductCard({
 </div>
 
         )}
+
 </div>
+
 </button>
 
   );
 
 }
 
+
 export default ProductCard;
+ 
