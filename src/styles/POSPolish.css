@@ -377,7 +377,7 @@
 
     transparent;
 
-  touch-action: manipulation;
+  touch-action: pan-y;
 
   user-select: none;
 
