@@ -358,19 +358,21 @@ const reloadSales =
 
   const topProducts = useMemo(() => {
 
- const result = {};
+  const result = {};
 
- selectedSales
+  selectedSales
 
- .filter(
+    .filter(
 
-   (sale) =>
+      (sale) =>
 
-     sale.status !== "cancelled"
+        sale.status !== "cancelled"
 
- )
+    )
 
- .forEach((sale) => {
+    .forEach((sale) => {
+
+      sale.items?.forEach((item) => {
 
         const key =
 
@@ -408,13 +410,19 @@ const reloadSales =
 
     });
 
-    return Object.values(result)
+  return Object.values(result)
 
-      .sort((a, b) => b.quantity - a.quantity)
+    .sort(
 
-      .slice(0, 5);
+      (a, b) =>
 
-  }, [selectedSales]);
+        b.quantity - a.quantity
+
+    )
+
+    .slice(0, 5);
+
+}, [selectedSales]);
 
   /*
 
@@ -733,22 +741,6 @@ const reloadSales =
       const key =
 
         formatDateKey(date);
-
-      const daySales =
-
- sales.filter(
-
-   (sale) =>
-
-     sale.status !== "cancelled" &&
-
-     String(
-
-       sale.soldDate || ""
-
-     ).slice(0,10) === key
-
- );
 
    (sale) =>
 
