@@ -4963,6 +4963,8 @@ const todaySales =
 
     (sale) =>
 
+      sale.status !== "Cancelled" &&
+
       isSaleInDailyWindow(
 
         sale,
