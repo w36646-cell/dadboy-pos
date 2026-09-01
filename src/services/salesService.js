@@ -186,6 +186,9 @@ function fromSaleRow(row) {
 
     id:
 row.id,
+    
+    status:
+      row.status || "completed",
 
     billId:
 
@@ -1555,6 +1558,8 @@ export async function getCloudDashboardSales(
               id,
 
               bill_id,
+
+              status,
 
               sold_at,
 
