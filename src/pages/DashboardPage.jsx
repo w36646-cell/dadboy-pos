@@ -738,8 +738,6 @@ const reloadSales =
 
       }
 
-      const key =
-
        const key =
 
   formatDateKey(date);
