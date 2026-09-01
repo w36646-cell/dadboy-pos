@@ -537,7 +537,7 @@ async function loadSaleRows() {
 
             bill_id,
 
-            ststus
+            status,
 
             sold_at,
 
@@ -1049,6 +1049,8 @@ export async function getCloudTodaySales(
             id,
 
             bill_id,
+
+            status,
 
             sold_at,
 
