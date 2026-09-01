@@ -533,6 +533,8 @@ async function loadSaleRows() {
 
             bill_id,
 
+            ststus
+
             sold_at,
 
             sold_date,
@@ -1096,22 +1098,32 @@ export async function getCloudTodaySales(
 
       return (
 
-        data || []
+  data || []
 
-      ).map(
+)
 
-        (row) =>
+.filter(
 
-          fromSaleRow({
+  (row) =>
 
-            ...row,
+    row.status !== "cancelled"
 
-            sale_items: [],
+)
 
-          })
+.map(
 
-      );
+  (row) =>
 
+    fromSaleRow({
+
+      ...row,
+
+      sale_items: [],
+
+    })
+
+);
+ 
     }
 
   );
