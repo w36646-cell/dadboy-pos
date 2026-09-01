@@ -20,7 +20,17 @@ function formatDateKey(date) {
 
 function summarize(saleList) {
 
-  return saleList.reduce(
+  return saleList
+
+    .filter(
+
+      (sale) =>
+
+        sale.status !== "cancelled"
+
+    )
+
+    .reduce(
 
     (result, sale) => {
 
@@ -332,11 +342,19 @@ const reloadSales =
 
   const topProducts = useMemo(() => {
 
-    const result = {};
+ const result = {};
 
-    selectedSales.forEach((sale) => {
+ selectedSales
 
-      sale.items?.forEach((item) => {
+ .filter(
+
+   (sale) =>
+
+     sale.status !== "cancelled"
+
+ )
+
+ .forEach((sale) => {
 
         const key =
 
@@ -516,8 +534,18 @@ const reloadSales =
 
     );
 
-    selectedSales.forEach((sale) => {
+    selectedSales
 
+.filter(
+
+  (sale) =>
+
+    sale.status !== "cancelled"
+
+)
+
+.forEach((sale) => {
+ 
       let hour = null;
 
       if (sale.soldTime) {
@@ -692,7 +720,31 @@ const reloadSales =
 
       const daySales =
 
-        sales.filter(
+ sales.filter(
+
+   (sale) =>
+
+     sale.status !== "cancelled" &&
+
+     String(
+
+       sale.soldDate || ""
+
+     ).slice(0,10) === key
+
+ );
+
+   (sale) =>
+
+     sale.status !== "cancelled" &&
+
+     String(
+
+       sale.soldDate || ""
+
+     ).slice(0,10) === key
+
+ );
 
           (sale) =>
 
@@ -1047,10 +1099,19 @@ const reloadSales =
 </span>
 <strong>
 
-            {selectedSales.length}{" "}
+{
 
-            บิล
+ selectedSales.filter(
+
+   (sale) =>
+
+     sale.status !== "cancelled"
+
+ ).length
+
+}
 </strong>
+ 
 <small>
 
             เฉลี่ย{" "}
