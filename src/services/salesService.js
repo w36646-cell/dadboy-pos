@@ -271,6 +271,10 @@ function createSalePayload(
 
       sale.billId,
 
+    status:
+
+  sale.status || "completed",
+
     sold_at:
 
       sale.soldAt,
