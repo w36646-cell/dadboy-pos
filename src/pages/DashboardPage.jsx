@@ -32,36 +32,52 @@ function summarize(saleList) {
 
     .reduce(
 
-    (result, sale) => {
+      (result, sale) => {
 
-      result.totalAmount += Number(sale.totalAmount || 0);
+        result.totalAmount += Number(
 
-      result.totalCost += Number(sale.totalCost || 0);
+          sale.totalAmount || 0
 
-      result.totalProfit += Number(sale.totalProfit || 0);
+        );
 
-      result.totalQty += Number(sale.totalQty || 0);
+        result.totalCost += Number(
 
-      return result;
+          sale.totalCost || 0
 
-    },
+        );
 
-    {
+        result.totalProfit += Number(
 
-      totalAmount: 0,
+          sale.totalProfit || 0
 
-      totalCost: 0,
+        );
 
-      totalProfit: 0,
+        result.totalQty += Number(
 
-      totalQty: 0,
+          sale.totalQty || 0
 
-    }
+        );
 
-  );
+        return result;
+
+      },
+
+      {
+
+        totalAmount: 0,
+
+        totalCost: 0,
+
+        totalProfit: 0,
+
+        totalQty: 0,
+
+      }
+
+    );
 
 }
-
+ 
 function DashboardPage({ onOpenStock }) {
 
   const [sales, setSales] = useState([]);
