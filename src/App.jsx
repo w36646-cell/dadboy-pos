@@ -1114,6 +1114,10 @@ async function refreshHeaderSales() {
 
         (sale) =>
 
+          sale.status !== "cancelled" &&
+
+          sale.status !== "Cancelled" &&
+
           isSaleInDailyWindow(
 
             sale,
