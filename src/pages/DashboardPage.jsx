@@ -740,30 +740,24 @@ const reloadSales =
 
       const key =
 
-        formatDateKey(date);
+       const key =
 
-   (sale) =>
+  formatDateKey(date);
 
-     sale.status !== "cancelled" &&
+const daySales = sales.filter(
 
-     String(
+  (sale) =>
 
-       sale.soldDate || ""
+    sale.status !== "cancelled" &&
 
-     ).slice(0,10) === key
+    String(
 
- );
+      sale.soldDate || ""
 
-          (sale) =>
+    ).slice(0, 10) === key
 
-            String(
-
-              sale.soldDate || ""
-
-            ).slice(0, 10) === key
-
-        );
-
+);
+ 
       const daySummary =
 
         summarize(daySales);
