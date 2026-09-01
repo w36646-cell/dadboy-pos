@@ -240,21 +240,57 @@ setTodayBills(
 
   const summary = useMemo(() => {
 
-    return filteredSales.reduce((result, sale) => {
+  return filteredSales
 
-      result.amount += Number(sale.totalAmount || 0);
+    .filter(
 
-      result.cost += Number(sale.totalCost || 0);
+      (sale) =>
 
-      result.profit += Number(sale.totalProfit || 0);
+        sale.status !== "cancelled"
 
-      result.qty += Number(sale.totalQty || 0);
+    )
+
+    .reduce((result, sale) => {
+
+      result.amount += Number(
+
+        sale.totalAmount || 0
+
+      );
+
+      result.cost += Number(
+
+        sale.totalCost || 0
+
+      );
+
+      result.profit += Number(
+
+        sale.totalProfit || 0
+
+      );
+
+      result.qty += Number(
+
+        sale.totalQty || 0
+
+      );
 
       return result;
 
-    }, { amount: 0, cost: 0, profit: 0, qty: 0 });
+    }, {
 
-  }, [filteredSales]);
+      amount: 0,
+
+      cost: 0,
+
+      profit: 0,
+
+      qty: 0
+
+    });
+
+}, [filteredSales]);
 
   const topProducts = useMemo(() => {
 
