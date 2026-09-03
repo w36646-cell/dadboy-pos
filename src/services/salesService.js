@@ -3044,3 +3044,132 @@ sale.id
   };
 
 }
+
+/* =========================================================
+
+   REPORT MONTHLY SUMMARY
+
+   โหลดเฉพาะหัวบิล ไม่โหลด sale_items
+
+   ใช้สำหรับกราฟรายเดือน
+
+========================================================= */
+
+export async function getCloudSalesSummaryRange(
+
+  startDate,
+
+  endDate
+
+) {
+
+  return withRetry(
+
+    async () => {
+
+      const {
+
+        data,
+
+        error,
+
+      } =
+
+        await supabase
+
+          .from("sales")
+
+          .select(`
+
+            id,
+
+            bill_id,
+
+            status,
+
+            sold_at,
+
+            sold_date,
+
+            sold_time,
+
+            total_qty,
+
+            total_amount,
+
+            total_cost,
+
+            total_profit
+
+          `)
+
+          .gte(
+
+            "sold_date",
+
+            startDate
+
+          )
+
+          .lte(
+
+            "sold_date",
+
+            endDate
+
+          )
+
+          .order(
+
+            "sold_date",
+
+            {
+
+              ascending: true,
+
+            }
+
+          );
+
+      if (error) {
+
+        throw error;
+
+      }
+
+      return (
+
+        data || []
+
+      )
+
+        .filter(
+
+          (row) =>
+
+            row.status !==
+
+            "cancelled"
+
+        )
+
+        .map(
+
+          (row) =>
+
+            fromSaleRow({
+
+              ...row,
+
+              sale_items: [],
+
+            })
+
+        );
+
+    }
+
+  );
+
+}
+ 
