@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 
-const OWNER_PIN_KEY = "dadboy_owner_pin";
+const OWNER_PIN = "8000";
 
 function getOwnerPin() {
 
-  return localStorage.getItem(OWNER_PIN_KEY) || "1234";
+  return OWNER_PIN;
 
 }
 
@@ -284,12 +284,6 @@ function OwnerLogin({
 
           ยกเลิก
 </button>
-<div className="owner-default-pin">
-
-          PIN เริ่มต้น: 1234
-</div>
-</form>
-</div>
 
   );
 
