@@ -620,29 +620,135 @@ const displayedMonthlyChartData =
 
     /*
 
-      ปีปัจจุบัน:
+      ปีปัจจุบัน
 
-      แสดงถึงเดือนปัจจุบันเท่านั้น
+      แสดง:
 
-      ปีย้อนหลัง:
+      - เดือนที่ผ่านมา
+
+      - เดือนปัจจุบัน
+
+      - เดือนหน้าอีก 1 เดือน
+
+      เดือนหน้าใช้เป็นช่องว่าง
+
+      ระหว่าง Current Month กับ YTD
+
+    */
+
+    if (
+
+      Number(reportYear) ===
+
+      currentYear
+
+    ) {
+
+      return monthlyChartData.slice(
+
+        0,
+
+        Math.min(
+
+          currentMonth + 2,
+
+          12
+
+        )
+
+      );
+
+    }
+
+
+    /*
+
+      ปีย้อนหลัง
 
       แสดงครบ 12 เดือน
 
     */
 
-    return Number(reportYear) ===
+    return monthlyChartData;
+
+  }, [
+
+    monthlyChartData,
+
+    reportYear,
+
+  ]);
+
+
+/*
+
+  =========================================
+
+  เดือนที่ใช้คำนวณ YTD
+
+  สำคัญ:
+
+  ไม่เอา "เดือนหน้า"
+
+  มารวมใน YTD
+
+  =========================================
+
+*/
+
+const ytdMonthlyData =
+
+  useMemo(() => {
+
+    const now =
+
+      new Date();
+
+    const currentYear =
+
+      now.getFullYear();
+
+    const currentMonth =
+
+      now.getMonth();
+
+
+    /*
+
+      ปีปัจจุบัน:
+
+      ม.ค. ถึงเดือนปัจจุบันเท่านั้น
+
+    */
+
+    if (
+
+      Number(reportYear) ===
 
       currentYear
 
-      ? monthlyChartData.slice(
+    ) {
 
-          0,
+      return monthlyChartData.slice(
 
-          currentMonth + 1
+        0,
 
-        )
+        currentMonth + 1
 
-      : monthlyChartData;
+      );
+
+    }
+
+
+    /*
+
+      ปีย้อนหลัง:
+
+      รวมทั้งปี
+
+    */
+
+    return monthlyChartData;
 
   }, [
 
@@ -659,8 +765,6 @@ const displayedMonthlyChartData =
 
   YTD
 
-  รวมข้อมูลเดือนที่กำลังแสดง
-
   =========================================
 
 */
@@ -669,7 +773,7 @@ const ytdData =
 
   useMemo(() => {
 
-    return displayedMonthlyChartData.reduce(
+    return ytdMonthlyData.reduce(
 
       (result, item) => {
 
@@ -705,25 +809,10 @@ const ytdData =
 
   }, [
 
-    displayedMonthlyChartData,
+    ytdMonthlyData,
 
   ]);
-
-
-/*
-
-  =========================================
-
-  SCALE ซ้าย
-
-  ใช้เฉพาะรายเดือน
-
-  YTD ห้ามเข้ามาคำนวณ
-
-  =========================================
-
-*/
-
+ 
 const monthlyChartMax =
 
   Math.max(
@@ -892,66 +981,6 @@ const ytdChartMax =
 <article className="report-summary-card"><span>จำนวนสินค้า</span><strong>{summary.qty} ชิ้น</strong></article>
 <article className="report-summary-card"><span>เฉลี่ยต่อบิล</span><strong>{numberText(averageBill)} บาท</strong></article>
 </section>
-<section className="report-box report-chart-box">
-<div className="report-chart-title">
-<div>
-<h2>ยอดขายและกำไรรายวัน</h2>
-<p>{startDate} ถึง {endDate}</p>
-</div>
-<div className="report-chart-legend">
-<span><i className="sales-dot" />ยอดขาย</span>
-<span><i className="profit-dot" />กำไร</span>
-</div>
-</div>
-
-            {chartData.length === 0 ? (
-<div className="report-empty">ไม่มีข้อมูลกราฟ</div>
-
-            ) : (
-<div className="report-chart-shell">
-<div className="report-chart-y">
-
-                  {chartTicks.map((value, index) => <span key={index}>{numberText(value)}</span>)}
-</div>
-<div className="report-chart-scroll">
-<div className="report-chart-canvas" style={{ minWidth: chartData.length <= 7 ? "100%" : `${chartWidth}px` }}>
-<svg className="report-chart-svg" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
-
-                      {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
-
-                        const y = topPad + usableHeight * ratio;
-
-                        return <line key={ratio} className="report-grid-line" x1="0" x2={chartWidth} y1={y} y2={y} />;
-
-                      })}
-<path className="report-sales-line" d={salesPath} fill="none" vectorEffect="non-scaling-stroke" />
-<path className="report-profit-line" d={profitPath} fill="none" vectorEffect="non-scaling-stroke" />
-
-                      {chartData.map((item, index) => (
-<g key={item.key}>
-<circle className="report-sales-point" cx={xFor(index)} cy={yFor(item.amount)} r="5" vectorEffect="non-scaling-stroke" />
-<circle className="report-profit-point" cx={xFor(index)} cy={yFor(item.profit)} r="5" vectorEffect="non-scaling-stroke" />
-</g>
-
-                      ))}
-</svg>
-<div className="report-chart-labels" style={{ gridTemplateColumns: `repeat(${chartData.length}, minmax(0, 1fr))` }}>
-
-                      {chartData.map((item) => (
-<div className="report-chart-label" key={item.key}>
-<strong>{item.label}</strong>
-<span>{item.dateLabel}</span>
-<small>{numberText(item.amount)}</small>
-</div>
-
-                      ))}
-</div>
-</div>
-</div>
-</div>
-
-            )}
-
 <section className="report-box report-monthly-box">
 <div className="report-chart-title">
 <div>
@@ -961,13 +990,12 @@ const ytdChartMax =
 </h2>
 <p>
 
-        มกราคม - ธันวาคม
-
-        {" "}
+        มกราคม - ธันวาคม{" "}
 
         {reportYear}
 </p>
 </div>
+
 <div className="report-monthly-actions">
 <select
 
@@ -1021,6 +1049,7 @@ const ytdChartMax =
 
         )}
 </select>
+
 <div className="report-chart-legend">
 <span>
 <i className="sales-dot" />
@@ -1040,301 +1069,302 @@ const ytdChartMax =
   {monthlyLoading ? (
 <div className="report-empty">
 
-    กำลังโหลดข้อมูลรายเดือน...
+      กำลังโหลดข้อมูลรายเดือน...
 </div>
 
-) : (
+  ) : (
 <div className="report-monthly-scroll">
 <div className="report-monthly-dual-chart">
 
 
-      {/* =========================================
+        {/* =====================================
 
-          MONTHLY
+            MONTHLY
 
-          ใช้ SCALE รายเดือน
+            SCALE ซ้าย
 
-          ========================================= */}
+            ===================================== */}
 <div
 
-        className="report-monthly-chart"
+          className="report-monthly-chart"
 
-        style={{
+          style={{
 
-          gridTemplateColumns:
+            gridTemplateColumns:
 
-            `repeat(${displayedMonthlyChartData.length}, minmax(70px, 1fr))`,
+              `repeat(${displayedMonthlyChartData.length}, minmax(70px, 1fr))`,
 
-        }}
+          }}
 >
 
-        {displayedMonthlyChartData.map(
+          {displayedMonthlyChartData.map(
 
-          (item) => {
+            (item) => {
 
-            const amountHeight =
+              const amountHeight =
 
-              (
+                (
 
-                item.amount /
+                  item.amount /
 
-                monthlyChartMax
+                  monthlyChartMax
 
-              ) * 100;
+                ) * 100;
 
-            const profitHeight =
+              const profitHeight =
 
-              (
+                (
 
-                item.profit /
+                  item.profit /
 
-                monthlyChartMax
+                  monthlyChartMax
 
-              ) * 100;
+                ) * 100;
 
-            return (
+
+              return (
 <div
 
-                className="report-month-column"
+                  className="report-month-column"
 
-                key={item.month}
+                  key={item.month}
 >
 <div className="report-month-bars">
 <div
 
-                    className="report-month-bar report-month-sales"
+                      className="report-month-bar report-month-sales"
 
-                    style={{
+                      style={{
 
-                      height:
+                        height:
 
-                        `${amountHeight}%`,
+                          `${amountHeight}%`,
 
-                    }}
+                      }}
 
-                    title={
+                      title={
 
-                      `ยอดขาย ${numberText(
-
-                        item.amount
-
-                      )} บาท`
-
-                    }
->
-
-                    {item.amount > 0 && (
-<span>
-
-                        {numberText(
+                        `ยอดขาย ${numberText(
 
                           item.amount
 
-                        )}
+                        )} บาท`
+
+                      }
+>
+
+                      {item.amount > 0 && (
+<span>
+
+                          {numberText(
+
+                            item.amount
+
+                          )}
 </span>
 
-                    )}
+                      )}
 </div>
 
 <div
 
-                    className="report-month-bar report-month-profit"
+                      className="report-month-bar report-month-profit"
 
-                    style={{
+                      style={{
 
-                      height:
+                        height:
 
-                        `${profitHeight}%`,
+                          `${profitHeight}%`,
 
-                    }}
+                      }}
 
-                    title={
+                      title={
 
-                      `กำไร ${numberText(
-
-                        item.profit
-
-                      )} บาท`
-
-                    }
->
-
-                    {item.profit > 0 && (
-<span>
-
-                        {numberText(
+                        `กำไร ${numberText(
 
                           item.profit
 
-                        )}
+                        )} บาท`
+
+                      }
+>
+
+                      {item.profit > 0 && (
+<span>
+
+                          {numberText(
+
+                            item.profit
+
+                          )}
 </span>
 
-                    )}
+                      )}
 </div>
 </div>
 
 <strong>
 
-                  {item.label}
+                    {item.label}
 </strong>
 <small>
 
-                  ขาย{" "}
+                    ขาย{" "}
 
-                  {numberText(
+                    {numberText(
 
-                    item.amount
+                      item.amount
 
-                  )}
+                    )}
 </small>
 <small>
 
-                  กำไร{" "}
+                    กำไร{" "}
 
-                  {numberText(
+                    {numberText(
 
-                    item.profit
+                      item.profit
 
-                  )}
+                    )}
 </small>
 </div>
 
-            );
+              );
 
-          }
+            }
 
-        )}
+          )}
 </div>
 
 
-      {/* =========================================
+        {/* =====================================
 
-          YTD
+            YTD
 
-          ใช้ SCALE ของ YTD เอง
+            SCALE ขวา
 
-          ========================================= */}
+            ===================================== */}
 <div className="report-ytd-column">
 <div className="report-ytd-title">
 
-          YTD
+            YTD
 </div>
 
 <div className="report-ytd-bars">
 <div
 
-            className="report-month-bar report-month-sales report-ytd-sales"
+              className="report-month-bar report-month-sales report-ytd-sales"
 
-            style={{
+              style={{
 
-              height:
+                height:
 
-                `${(
+                  `${(
 
-                  ytdData.amount /
+                    ytdData.amount /
 
-                  ytdChartMax
+                    ytdChartMax
 
-                ) * 100}%`,
+                  ) * 100}%`,
 
-            }}
+              }}
 
-            title={
+              title={
 
-              `ยอดขาย YTD ${numberText(
-
-                ytdData.amount
-
-              )} บาท`
-
-            }
->
-
-            {ytdData.amount > 0 && (
-<span>
-
-                {numberText(
+                `ยอดขาย YTD ${numberText(
 
                   ytdData.amount
 
-                )}
+                )} บาท`
+
+              }
+>
+
+              {ytdData.amount > 0 && (
+<span>
+
+                  {numberText(
+
+                    ytdData.amount
+
+                  )}
 </span>
 
-            )}
+              )}
 </div>
 
 <div
 
-            className="report-month-bar report-month-profit report-ytd-profit"
+              className="report-month-bar report-month-profit report-ytd-profit"
 
-            style={{
+              style={{
 
-              height:
+                height:
 
-                `${(
+                  `${(
 
-                  ytdData.profit /
+                    ytdData.profit /
 
-                  ytdChartMax
+                    ytdChartMax
 
-                ) * 100}%`,
+                  ) * 100}%`,
 
-            }}
+              }}
 
-            title={
+              title={
 
-              `กำไร YTD ${numberText(
-
-                ytdData.profit
-
-              )} บาท`
-
-            }
->
-
-            {ytdData.profit > 0 && (
-<span>
-
-                {numberText(
+                `กำไร YTD ${numberText(
 
                   ytdData.profit
 
-                )}
+                )} บาท`
+
+              }
+>
+
+              {ytdData.profit > 0 && (
+<span>
+
+                  {numberText(
+
+                    ytdData.profit
+
+                  )}
 </span>
 
-            )}
+              )}
 </div>
 </div>
 
 <strong>
 
-          YTD
+            YTD
 </strong>
 <small>
 
-          ขาย{" "}
+            ขาย{" "}
 
-          {numberText(
+            {numberText(
 
-            ytdData.amount
+              ytdData.amount
 
-          )}
+            )}
 </small>
 <small>
 
-          กำไร{" "}
+            กำไร{" "}
 
-          {numberText(
+            {numberText(
 
-            ytdData.profit
+              ytdData.profit
 
-          )}
+            )}
 </small>
 </div>
 </div>
 </div>
 
-)}
+  )}
 </section>
 <div className="report-layout">
 <section className="report-box">
