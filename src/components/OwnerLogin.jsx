@@ -1,10 +1,26 @@
 import { useEffect, useRef, useState } from "react";
 
-const OWNER_PIN = "8000";
+const OWNER_PIN_KEY =
+
+  "dadboy_owner_pin";
+
+const DEFAULT_OWNER_PIN =
+
+  "8000";
 
 function getOwnerPin() {
 
-  return OWNER_PIN;
+  return (
+
+    localStorage.getItem(
+
+      OWNER_PIN_KEY
+
+    ) ||
+
+    DEFAULT_OWNER_PIN
+
+  );
 
 }
 
