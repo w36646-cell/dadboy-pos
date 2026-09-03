@@ -6,13 +6,7 @@ import {
 
 import "./OwnerSidebar.css";
 
-const OWNER_PIN_KEY =
-
-  "dadboy_owner_pin";
-
-const DEFAULT_OWNER_PIN =
-
-  "8000";
+import { supabase } from "../lib/supabase";
 
 function OwnerSidebar({
 
@@ -148,18 +142,7 @@ function OwnerSidebar({
 
   }
 
-function changeOwnerPin() {
-
-  const currentPin =
-
-    localStorage.getItem(
-
-      OWNER_PIN_KEY
-
-    ) ||
-
-    DEFAULT_OWNER_PIN;
-
+async function changeOwnerPin() {
 
   const oldPin =
 
@@ -169,7 +152,6 @@ function changeOwnerPin() {
 
     );
 
-
   if (oldPin === null) {
 
     return;
@@ -177,11 +159,15 @@ function changeOwnerPin() {
   }
 
 
-  if (oldPin !== currentPin) {
+  if (
+
+    !/^\d{4}$/.test(oldPin)
+
+  ) {
 
     window.alert(
 
-      "PIN ปัจจุบันไม่ถูกต้อง"
+      "PIN ปัจจุบันต้องเป็นตัวเลข 4 หลัก"
 
     );
 
@@ -198,7 +184,6 @@ function changeOwnerPin() {
 
     );
 
-
   if (newPin === null) {
 
     return;
@@ -208,11 +193,7 @@ function changeOwnerPin() {
 
   if (
 
-    !/^\d{4}$/.test(
-
-      newPin
-
-    )
+    !/^\d{4}$/.test(newPin)
 
   ) {
 
@@ -227,11 +208,7 @@ function changeOwnerPin() {
   }
 
 
-  if (
-
-    newPin === currentPin
-
-  ) {
+  if (newPin === oldPin) {
 
     window.alert(
 
@@ -251,7 +228,6 @@ function changeOwnerPin() {
       "กรุณายืนยัน PIN ใหม่อีกครั้ง"
 
     );
-
 
   if (confirmPin === null) {
 
@@ -277,20 +253,94 @@ function changeOwnerPin() {
   }
 
 
-  localStorage.setItem(
+  try {
 
-    OWNER_PIN_KEY,
+    const {
 
-    newPin
+      data,
 
-  );
+      error,
+
+    } =
+
+      await supabase.rpc(
+
+        "change_owner_pin",
+
+        {
+
+          p_current_pin:
+
+            oldPin,
+
+          p_new_pin:
+
+            newPin,
+
+        }
+
+      );
 
 
-  window.alert(
+    if (error) {
 
-    "เปลี่ยน PIN เรียบร้อยแล้ว"
+      throw error;
 
-  );
+    }
+
+
+    if (data !== true) {
+
+      window.alert(
+
+        "PIN ปัจจุบันไม่ถูกต้อง"
+
+      );
+
+      return;
+
+    }
+
+
+    /*
+
+      ลบ PIN รุ่นเก่า
+
+      ที่เคยเก็บไว้ในเครื่อง
+
+    */
+
+    localStorage.removeItem(
+
+      "dadboy_owner_pin"
+
+    );
+
+
+    window.alert(
+
+      "เปลี่ยน PIN เรียบร้อยแล้ว\nPIN ใหม่จะใช้กับทุกเครื่อง"
+
+    );
+
+
+  } catch (error) {
+
+    console.error(
+
+      "Change owner PIN error:",
+
+      error
+
+    );
+
+    window.alert(
+
+      "เปลี่ยน PIN ไม่สำเร็จ\nกรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่"
+
+    );
+
+  }
 
 }
   
