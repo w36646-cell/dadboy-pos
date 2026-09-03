@@ -981,6 +981,248 @@ const ytdChartMax =
 <article className="report-summary-card"><span>จำนวนสินค้า</span><strong>{summary.qty} ชิ้น</strong></article>
 <article className="report-summary-card"><span>เฉลี่ยต่อบิล</span><strong>{numberText(averageBill)} บาท</strong></article>
 </section>
+
+</section>
+
+<section className="report-box report-chart-box">
+<div className="report-chart-title">
+<div>
+<h2>
+
+        ยอดขายและกำไรรายวัน
+</h2>
+<p>
+
+        {startDate} ถึง {endDate}
+</p>
+</div>
+
+<div className="report-chart-legend">
+<span>
+<i className="sales-dot" />
+
+        ยอดขาย
+</span>
+<span>
+<i className="profit-dot" />
+
+        กำไร
+</span>
+</div>
+</div>
+
+
+  {chartData.length === 0 ? (
+<div className="report-empty">
+
+      ไม่มีข้อมูลกราฟ
+</div>
+
+  ) : (
+<div className="report-chart-shell">
+<div className="report-chart-y">
+
+        {chartTicks.map(
+
+          (value, index) => (
+<span key={index}>
+
+              {numberText(value)}
+</span>
+
+          )
+
+        )}
+</div>
+
+<div className="report-chart-scroll">
+<div
+
+          className="report-chart-canvas"
+
+          style={{
+
+            minWidth:
+
+              chartData.length <= 7
+
+                ? "100%"
+
+                : `${chartWidth}px`,
+
+          }}
+>
+<svg
+
+            className="report-chart-svg"
+
+            viewBox={
+
+              `0 0 ${chartWidth} ${chartHeight}`
+
+            }
+
+            preserveAspectRatio="none"
+>
+
+            {[0, 0.25, 0.5, 0.75, 1].map(
+
+              (ratio) => {
+
+                const y =
+
+                  topPad +
+
+                  usableHeight *
+
+                    ratio;
+
+                return (
+<line
+
+                    key={ratio}
+
+                    className="report-grid-line"
+
+                    x1="0"
+
+                    x2={chartWidth}
+
+                    y1={y}
+
+                    y2={y}
+
+                  />
+
+                );
+
+              }
+
+            )}
+
+<path
+
+              className="report-sales-line"
+
+              d={salesPath}
+
+              fill="none"
+
+              vectorEffect="non-scaling-stroke"
+
+            />
+
+<path
+
+              className="report-profit-line"
+
+              d={profitPath}
+
+              fill="none"
+
+              vectorEffect="non-scaling-stroke"
+
+            />
+
+
+            {chartData.map(
+
+              (item, index) => (
+<g key={item.key}>
+<circle
+
+                    className="report-sales-point"
+
+                    cx={xFor(index)}
+
+                    cy={yFor(
+
+                      item.amount
+
+                    )}
+
+                    r="5"
+
+                    vectorEffect="non-scaling-stroke"
+
+                  />
+<circle
+
+                    className="report-profit-point"
+
+                    cx={xFor(index)}
+
+                    cy={yFor(
+
+                      item.profit
+
+                    )}
+
+                    r="5"
+
+                    vectorEffect="non-scaling-stroke"
+
+                  />
+</g>
+
+              )
+
+            )}
+</svg>
+
+<div
+
+            className="report-chart-labels"
+
+            style={{
+
+              gridTemplateColumns:
+
+                `repeat(${chartData.length}, minmax(0, 1fr))`,
+
+            }}
+>
+
+            {chartData.map(
+
+              (item) => (
+<div
+
+                  className="report-chart-label"
+
+                  key={item.key}
+>
+<strong>
+
+                    {item.label}
+</strong>
+<span>
+
+                    {item.dateLabel}
+</span>
+<small>
+
+                    {numberText(
+
+                      item.amount
+
+                    )}
+</small>
+</div>
+
+              )
+
+            )}
+</div>
+</div>
+</div>
+</div>
+
+  )}
+</section>
+
+<section className="report-box report-monthly-box">
+  
 <section className="report-box report-monthly-box">
 <div className="report-chart-title">
 <div>
@@ -1245,10 +1487,6 @@ const ytdChartMax =
 
             ===================================== */}
 <div className="report-ytd-column">
-<div className="report-ytd-title">
-
-            YTD
-</div>
 
 <div className="report-ytd-bars">
 <div
