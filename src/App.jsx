@@ -1213,15 +1213,32 @@ useEffect(() => {
 
   /*
 
-    Refresh หน้า / เปิด App
+    เปิด App / Refresh หน้า
+
+    โหลดข้อมูลทันทีเสมอ
+
+    ไม่สนว่าร้านเปิดหรือปิด
 
   */
 
   refreshHeaderSales();
 
+
   /*
 
-    โหลดใหม่ทุก 10 นาที
+    Auto Refresh ทุก 10 นาที
+
+    ร้านเปิด:
+
+    15:00 - 23:59
+
+    ร้านปิด:
+
+    00:00 - 14:59
+
+    ช่วงร้านปิด
+
+    ไม่ยิง Cloud ทุก 10 นาที
 
   */
 
@@ -1229,11 +1246,41 @@ useEffect(() => {
 
     window.setInterval(
 
-      refreshHeaderSales,
+      () => {
+
+        const now =
+
+          new Date();
+
+        const hour =
+
+          now.getHours();
+
+
+        /*
+
+          ทำ Auto Refresh
+
+          เฉพาะตั้งแต่ 15:00 เป็นต้นไป
+
+        */
+
+        if (
+
+          hour >= 15
+
+        ) {
+
+          refreshHeaderSales();
+
+        }
+
+      },
 
       600000
 
     );
+
 
   return () => {
 
@@ -1246,7 +1293,7 @@ useEffect(() => {
   };
 
 }, []);
- 
+  
   function notifySyncStateChanged() {
 
     setSyncVersion(
