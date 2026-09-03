@@ -290,13 +290,48 @@ const reloadSales =
 
     firstLoad();
 
-    const timer = window.setInterval(() => {
+   const timer =
 
-      reloadStockData();
+  window.setInterval(
 
-      reloadSales();
+    () => {
 
-    }, 600000);
+      const now =
+
+        new Date();
+
+      const hour =
+
+        now.getHours();
+
+
+      /*
+
+        Auto Refresh Dashboard
+
+        เฉพาะเวลาร้านเปิด
+
+        15:00 - 23:59
+
+      */
+
+      if (
+
+        hour >= 15
+
+      ) {
+
+        reloadStockData();
+
+        reloadSales();
+
+      }
+
+    },
+
+    600000
+
+  );
 
     return () => {
 
