@@ -355,4 +355,42 @@
   }
 
 }
+
+.owner-sidebar-change-pin{
+
+  width:100%;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:flex-start;
+
+  gap:10px;
+
+  margin-bottom:8px;
+
+  padding:12px 14px;
+
+  border:1px solid #d0d5dd;
+
+  border-radius:10px;
+
+  background:#ffffff;
+
+  color:#344054;
+
+  font-size:14px;
+
+  font-weight:700;
+
+  cursor:pointer;
+
+}
+
+.owner-sidebar-change-pin:hover{
+
+  background:#f9fafb;
+
+}
  
