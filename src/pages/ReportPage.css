@@ -1161,3 +1161,27 @@
 
 }
  
+/* =========================================
+
+   YTD NUMBER SPACE
+
+========================================= */
+
+.report-ytd-bars{
+
+  padding-top:28px;
+
+  box-sizing:border-box;
+
+}
+
+.report-ytd-bars .report-month-bar span{
+
+  top:-20px;
+
+  font-size:9px;
+
+  font-weight:900;
+
+}
+ 
