@@ -1,28 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import {
 
-const OWNER_PIN_KEY =
+  useEffect,
 
-  "dadboy_owner_pin";
+  useRef,
 
-const DEFAULT_OWNER_PIN =
+  useState,
 
-  "8000";
+} from "react";
 
-function getOwnerPin() {
+import { supabase } from "../lib/supabase";
 
-  return (
-
-    localStorage.getItem(
-
-      OWNER_PIN_KEY
-
-    ) ||
-
-    DEFAULT_OWNER_PIN
-
-  );
-
-}
 
 function OwnerLogin({
 
@@ -34,11 +21,22 @@ function OwnerLogin({
 
 }) {
 
-  const [pin, setPin] = useState("");
+  const [pin, setPin] =
 
-  const [error, setError] = useState("");
+    useState("");
 
-  const inputRef = useRef(null);
+  const [error, setError] =
+
+    useState("");
+
+  const [submitting, setSubmitting] =
+
+    useState(false);
+
+  const inputRef =
+
+    useRef(null);
+
 
   useEffect(() => {
 
@@ -52,6 +50,8 @@ function OwnerLogin({
 
     setError("");
 
+    setSubmitting(false);
+
     setTimeout(() => {
 
       inputRef.current?.focus();
@@ -60,43 +60,130 @@ function OwnerLogin({
 
   }, [open]);
 
+
   if (!open) {
 
     return null;
 
   }
 
-  function submitPin(event) {
+
+  async function submitPin(event) {
 
     event.preventDefault();
 
-    if (pin === getOwnerPin()) {
+    if (
 
-      setPin("");
+      submitting ||
 
-      setError("");
+      pin.length !== 4
 
-      onSuccess();
+    ) {
 
       return;
 
     }
 
-    setPin("");
+    setSubmitting(true);
 
-    setError("PIN ไม่ถูกต้อง");
+    setError("");
 
-    inputRef.current?.focus();
+    try {
+
+      const {
+
+        data,
+
+        error: rpcError,
+
+      } =
+
+        await supabase.rpc(
+
+          "verify_owner_pin",
+
+          {
+
+            p_pin: pin,
+
+          }
+
+        );
+
+      if (rpcError) {
+
+        throw rpcError;
+
+      }
+
+      if (data === true) {
+
+        setPin("");
+
+        setError("");
+
+        onSuccess();
+
+        return;
+
+      }
+
+      setPin("");
+
+      setError(
+
+        "PIN ไม่ถูกต้อง"
+
+      );
+
+      setTimeout(() => {
+
+        inputRef.current?.focus();
+
+      }, 0);
+
+    } catch (rpcError) {
+
+      console.error(
+
+        "Owner PIN verification error:",
+
+        rpcError
+
+      );
+
+      setError(
+
+        "ตรวจสอบ PIN ไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ต"
+
+      );
+
+    } finally {
+
+      setSubmitting(false);
+
+    }
 
   }
 
+
   function pressNumber(number) {
+
+    if (submitting) {
+
+      return;
+
+    }
 
     setError("");
 
     setPin((currentPin) => {
 
-      if (currentPin.length >= 4) {
+      if (
+
+        currentPin.length >= 4
+
+      ) {
 
         return currentPin;
 
@@ -108,7 +195,14 @@ function OwnerLogin({
 
   }
 
+
   function removeNumber() {
+
+    if (submitting) {
+
+      return;
+
+    }
 
     setError("");
 
@@ -120,7 +214,14 @@ function OwnerLogin({
 
   }
 
+
   function clearPin() {
+
+    if (submitting) {
+
+      return;
+
+    }
 
     setPin("");
 
@@ -129,6 +230,7 @@ function OwnerLogin({
     inputRef.current?.focus();
 
   }
+
 
   return (
 <div
@@ -149,7 +251,10 @@ function OwnerLogin({
 
         }
 >
-<h2>โหมดเจ้าของร้าน</h2>
+<h2>
+
+          โหมดเจ้าของร้าน
+</h2>
 <p>
 
           กรุณาใส่ PIN 4 หลัก
@@ -167,6 +272,8 @@ function OwnerLogin({
           maxLength="4"
 
           value={pin}
+
+          disabled={submitting}
 
           onChange={(event) => {
 
@@ -195,25 +302,30 @@ function OwnerLogin({
         />
 <div className="owner-pin-dots">
 
-          {[0, 1, 2, 3].map((index) => (
+          {[0, 1, 2, 3].map(
+
+            (index) => (
 <span
 
-              key={index}
+                key={index}
 
-              className={
+                className={
 
-                pin.length > index
+                  pin.length > index
 
-                  ? "owner-pin-dot active"
+                    ? "owner-pin-dot active"
 
-                  : "owner-pin-dot"
+                    : "owner-pin-dot"
 
-              }
+                }
 
-            />
+              />
 
-          ))}
+            )
+
+          )}
 </div>
+
 
         {error && (
 <div className="owner-login-error">
@@ -222,35 +334,44 @@ function OwnerLogin({
 </div>
 
         )}
+
 <div className="owner-number-pad">
 
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(
+          {[
 
-            (number) => (
+            1, 2, 3,
+
+            4, 5, 6,
+
+            7, 8, 9,
+
+          ].map((number) => (
 <button
 
-                key={number}
+              key={number}
 
-                type="button"
+              type="button"
 
-                onClick={() =>
+              disabled={submitting}
 
-                  pressNumber(number)
+              onClick={() =>
 
-                }
+                pressNumber(number)
+
+              }
 >
 
-                {number}
+              {number}
 </button>
 
-            )
-
-          )}
+          ))}
 <button
 
             type="button"
 
             className="owner-clear-button"
+
+            disabled={submitting}
 
             onClick={clearPin}
 >
@@ -261,7 +382,13 @@ function OwnerLogin({
 
             type="button"
 
-            onClick={() => pressNumber(0)}
+            disabled={submitting}
+
+            onClick={() =>
+
+              pressNumber(0)
+
+            }
 >
 
             0
@@ -272,28 +399,44 @@ function OwnerLogin({
 
             className="owner-delete-button"
 
+            disabled={submitting}
+
             onClick={removeNumber}
 >
 
             ⌫
 </button>
 </div>
+
 <button
 
           className="owner-login-submit"
 
           type="submit"
 
-          disabled={pin.length !== 4}
+          disabled={
+
+            submitting ||
+
+            pin.length !== 4
+
+          }
 >
 
-          เข้าสู่โหมดเจ้าของ
+          {submitting
+
+            ? "กำลังตรวจสอบ..."
+
+            : "เข้าสู่โหมดเจ้าของ"}
 </button>
+
 <button
 
           className="owner-login-cancel"
 
           type="button"
+
+          disabled={submitting}
 
           onClick={onClose}
 >
@@ -306,6 +449,7 @@ function OwnerLogin({
   );
 
 }
+
 
 export default OwnerLogin;
  
