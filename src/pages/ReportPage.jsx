@@ -982,8 +982,6 @@ const ytdChartMax =
 <article className="report-summary-card"><span>เฉลี่ยต่อบิล</span><strong>{numberText(averageBill)} บาท</strong></article>
 </section>
 
-</section>
-
 <section className="report-box report-chart-box">
 <div className="report-chart-title">
 <div>
@@ -1223,7 +1221,6 @@ const ytdChartMax =
 
 <section className="report-box report-monthly-box">
   
-<section className="report-box report-monthly-box">
 <div className="report-chart-title">
 <div>
 <h2>
