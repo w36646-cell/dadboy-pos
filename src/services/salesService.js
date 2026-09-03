@@ -1729,6 +1729,8 @@ export async function getCloudDashboardSales(
 
                 bill_id,
 
+                status,
+
                 sold_at,
 
                 sold_date,
