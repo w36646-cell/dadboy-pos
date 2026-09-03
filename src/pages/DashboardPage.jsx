@@ -369,13 +369,27 @@ const reloadSales =
 
   }, [selectedSales]);
 
-  const averageBill =
+ const activeSelectedSales = useMemo(() => {
 
-    selectedSales.length > 0
+  return selectedSales.filter(
 
-      ? summary.totalAmount / selectedSales.length
+    (sale) =>
 
-      : 0;
+      sale.status !== "cancelled"
+
+  );
+
+}, [selectedSales]);
+
+const averageBill =
+
+  activeSelectedSales.length > 0
+
+    ? summary.totalAmount /
+
+      activeSelectedSales.length
+
+    : 0;
 
   const margin =
 
