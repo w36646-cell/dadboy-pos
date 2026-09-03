@@ -6,6 +6,14 @@ import {
 
 import "./OwnerSidebar.css";
 
+const OWNER_PIN_KEY =
+
+  "dadboy_owner_pin";
+
+const DEFAULT_OWNER_PIN =
+
+  "8000";
+
 function OwnerSidebar({
 
   currentPage,
@@ -140,6 +148,152 @@ function OwnerSidebar({
 
   }
 
+function changeOwnerPin() {
+
+  const currentPin =
+
+    localStorage.getItem(
+
+      OWNER_PIN_KEY
+
+    ) ||
+
+    DEFAULT_OWNER_PIN;
+
+
+  const oldPin =
+
+    window.prompt(
+
+      "กรุณาใส่ PIN ปัจจุบัน"
+
+    );
+
+
+  if (oldPin === null) {
+
+    return;
+
+  }
+
+
+  if (oldPin !== currentPin) {
+
+    window.alert(
+
+      "PIN ปัจจุบันไม่ถูกต้อง"
+
+    );
+
+    return;
+
+  }
+
+
+  const newPin =
+
+    window.prompt(
+
+      "กรุณาใส่ PIN ใหม่ 4 หลัก"
+
+    );
+
+
+  if (newPin === null) {
+
+    return;
+
+  }
+
+
+  if (
+
+    !/^\d{4}$/.test(
+
+      newPin
+
+    )
+
+  ) {
+
+    window.alert(
+
+      "PIN ใหม่ต้องเป็นตัวเลข 4 หลัก"
+
+    );
+
+    return;
+
+  }
+
+
+  if (
+
+    newPin === currentPin
+
+  ) {
+
+    window.alert(
+
+      "PIN ใหม่ต้องไม่เหมือน PIN เดิม"
+
+    );
+
+    return;
+
+  }
+
+
+  const confirmPin =
+
+    window.prompt(
+
+      "กรุณายืนยัน PIN ใหม่อีกครั้ง"
+
+    );
+
+
+  if (confirmPin === null) {
+
+    return;
+
+  }
+
+
+  if (
+
+    confirmPin !== newPin
+
+  ) {
+
+    window.alert(
+
+      "PIN ใหม่ทั้งสองครั้งไม่ตรงกัน"
+
+    );
+
+    return;
+
+  }
+
+
+  localStorage.setItem(
+
+    OWNER_PIN_KEY,
+
+    newPin
+
+  );
+
+
+  window.alert(
+
+    "เปลี่ยน PIN เรียบร้อยแล้ว"
+
+  );
+
+}
+  
   return (
 <>
 <button
@@ -264,9 +418,31 @@ function OwnerSidebar({
 <div className="owner-sidebar-bottom">
 <button
 
-            type="button"
+  type="button"
 
-            className="owner-sidebar-logout"
+  className="owner-sidebar-change-pin"
+
+  onClick={
+
+    changeOwnerPin
+
+  }
+>
+<span>
+
+    🔐
+</span>
+<span>
+
+    เปลี่ยน PIN
+</span>
+</button>
+
+<button
+
+  type="button"
+
+  className="owner-sidebar-logout"
 
             onClick={
 
