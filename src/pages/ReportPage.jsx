@@ -4,7 +4,9 @@ import {
 
   getCloudSalesRange,
 
-  getCloudTodaySales
+  getCloudTodaySales,
+
+  getCloudSalesSummaryRange,
 
 } from "../services/salesService";
  
@@ -46,9 +48,25 @@ function ReportPage() {
 
   const [sales, setSales] = useState([]);
 
-  const [todayBills, setTodayBills] = useState([]);
- 
-  const [loading, setLoading] = useState(true);
+const [todayBills, setTodayBills] = useState([]);
+
+const [monthlySales, setMonthlySales] =
+
+  useState([]);
+
+const [monthlyLoading, setMonthlyLoading] =
+
+  useState(true);
+
+const [reportYear, setReportYear] =
+
+  useState(
+
+    new Date().getFullYear()
+
+  );
+
+const [loading, setLoading] = useState(true);
 
   const [cloudError, setCloudError] = useState(false);
 
@@ -225,6 +243,88 @@ setTodayBills(
   endDate,
 
 ]);
+
+  useEffect(() => {
+
+  let active = true;
+
+  async function loadMonthlySales() {
+
+    setMonthlyLoading(true);
+
+    try {
+
+      const yearStart =
+
+        `${reportYear}-01-01`;
+
+      const yearEnd =
+
+        `${reportYear}-12-31`;
+
+      const data =
+
+        await getCloudSalesSummaryRange(
+
+          yearStart,
+
+          yearEnd
+
+        );
+
+      if (!active) {
+
+        return;
+
+      }
+
+      setMonthlySales(
+
+        Array.isArray(data)
+
+          ? data
+
+          : []
+
+      );
+
+    } catch (error) {
+
+      console.error(
+
+        "Monthly report error:",
+
+        error
+
+      );
+
+      if (active) {
+
+        setMonthlySales([]);
+
+      }
+
+    } finally {
+
+      if (active) {
+
+        setMonthlyLoading(false);
+
+      }
+
+    }
+
+  }
+
+  loadMonthlySales();
+
+  return () => {
+
+    active = false;
+
+  };
+
+}, [reportYear]);
   
   const filteredSales = useMemo(() => {
 
@@ -363,6 +463,165 @@ setTodayBills(
     return result;
 
   }, [sales, startDate, endDate]);
+
+  const monthlyChartData =
+
+  useMemo(() => {
+
+    const months = [
+
+      "ม.ค.",
+
+      "ก.พ.",
+
+      "มี.ค.",
+
+      "เม.ย.",
+
+      "พ.ค.",
+
+      "มิ.ย.",
+
+      "ก.ค.",
+
+      "ส.ค.",
+
+      "ก.ย.",
+
+      "ต.ค.",
+
+      "พ.ย.",
+
+      "ธ.ค.",
+
+    ];
+
+    const result =
+
+      months.map(
+
+        (label, index) => ({
+
+          month: index,
+
+          label,
+
+          amount: 0,
+
+          profit: 0,
+
+        })
+
+      );
+
+    monthlySales.forEach(
+
+      (sale) => {
+
+        const soldDate =
+
+          String(
+
+            sale.soldDate || ""
+
+          );
+
+        if (!soldDate) {
+
+          return;
+
+        }
+
+        const date =
+
+          new Date(
+
+            `${soldDate}T00:00:00`
+
+          );
+
+        if (
+
+          Number.isNaN(
+
+            date.getTime()
+
+          )
+
+        ) {
+
+          return;
+
+        }
+
+        if (
+
+          date.getFullYear() !==
+
+          Number(reportYear)
+
+        ) {
+
+          return;
+
+        }
+
+        const month =
+
+          date.getMonth();
+
+        result[month].amount +=
+
+          Number(
+
+            sale.totalAmount || 0
+
+          );
+
+        result[month].profit +=
+
+          Number(
+
+            sale.totalProfit || 0
+
+          );
+
+      }
+
+    );
+
+    return result;
+
+  }, [
+
+    monthlySales,
+
+    reportYear,
+
+  ]);
+
+
+const monthlyChartMax =
+
+  Math.max(
+
+    1,
+
+    ...monthlyChartData.map(
+
+      (item) =>
+
+        Math.max(
+
+          item.amount,
+
+          item.profit
+
+        )
+
+    )
+
+  );
 
   const chartMax = Math.max(1, ...chartData.map((item) => Math.max(item.amount, item.profit)));
 
@@ -544,6 +803,242 @@ setTodayBills(
 </div>
 
             )}
+
+<section className="report-box report-monthly-box">
+<div className="report-chart-title">
+<div>
+<h2>
+
+        ยอดขายและกำไรรายเดือน
+</h2>
+<p>
+
+        มกราคม - ธันวาคม
+
+        {" "}
+
+        {reportYear}
+</p>
+</div>
+<div className="report-monthly-actions">
+<select
+
+        value={reportYear}
+
+        onChange={(event) =>
+
+          setReportYear(
+
+            Number(
+
+              event.target.value
+
+            )
+
+          )
+
+        }
+>
+
+        {Array.from(
+
+          {
+
+            length: 5,
+
+          },
+
+          (_, index) =>
+
+            new Date()
+
+              .getFullYear() -
+
+            index
+
+        ).map(
+
+          (year) => (
+<option
+
+              key={year}
+
+              value={year}
+>
+
+              ปี {year}
+</option>
+
+          )
+
+        )}
+</select>
+<div className="report-chart-legend">
+<span>
+<i className="sales-dot" />
+
+          ยอดขาย
+</span>
+<span>
+<i className="profit-dot" />
+
+          กำไร
+</span>
+</div>
+</div>
+</div>
+
+
+  {monthlyLoading ? (
+<div className="report-empty">
+
+      กำลังโหลดข้อมูลรายเดือน...
+</div>
+
+  ) : (
+<div className="report-monthly-scroll">
+<div className="report-monthly-chart">
+
+        {monthlyChartData.map(
+
+          (item) => {
+
+            const amountHeight =
+
+              (
+
+                item.amount /
+
+                monthlyChartMax
+
+              ) * 100;
+
+            const profitHeight =
+
+              (
+
+                item.profit /
+
+                monthlyChartMax
+
+              ) * 100;
+
+            return (
+<div
+
+                className="report-month-column"
+
+                key={item.month}
+>
+<div className="report-month-bars">
+<div
+
+                    className="report-month-bar report-month-sales"
+
+                    style={{
+
+                      height:
+
+                        `${amountHeight}%`,
+
+                    }}
+
+                    title={
+
+                      `ยอดขาย ${numberText(
+
+                        item.amount
+
+                      )} บาท`
+
+                    }
+>
+
+                    {item.amount > 0 && (
+<span>
+
+                        {numberText(
+
+                          item.amount
+
+                        )}
+</span>
+
+                    )}
+</div>
+<div
+
+                    className="report-month-bar report-month-profit"
+
+                    style={{
+
+                      height:
+
+                        `${profitHeight}%`,
+
+                    }}
+
+                    title={
+
+                      `กำไร ${numberText(
+
+                        item.profit
+
+                      )} บาท`
+
+                    }
+>
+
+                    {item.profit > 0 && (
+<span>
+
+                        {numberText(
+
+                          item.profit
+
+                        )}
+</span>
+
+                    )}
+</div>
+</div>
+<strong>
+
+                  {item.label}
+</strong>
+<small>
+
+                  ขาย{" "}
+
+                  {numberText(
+
+                    item.amount
+
+                  )}
+</small>
+<small>
+
+                  กำไร{" "}
+
+                  {numberText(
+
+                    item.profit
+
+                  )}
+</small>
+</div>
+
+            );
+
+          }
+
+        )}
+</div>
+</div>
+
+  )}
+</section>
+  
 </section>
 <div className="report-layout">
 <section className="report-box">
