@@ -53,6 +53,7 @@
   width: 230px;
 
   height: 100vh;
+  height: 100dvh;
 
   display: flex;
 
@@ -206,9 +207,27 @@
 
 .owner-sidebar-bottom {
 
-  padding: 12px;
+  padding:
 
-  border-top: 1px solid #eeeeee;
+    12px
+
+    12px
+
+    calc(
+
+      28px +
+
+      env(safe-area-inset-bottom)
+
+    );
+
+  border-top:
+
+    1px solid #eeeeee;
+
+  background:
+
+    #ffffff;
 
 }
 
@@ -279,6 +298,20 @@
 }
 
 @media (max-width: 900px) {
+
+  .owner-sidebar-bottom {
+
+  padding-bottom:
+
+    calc(
+
+      70px +
+
+      env(safe-area-inset-bottom)
+
+    );
+
+}
 
   .owner-app-content {
 
