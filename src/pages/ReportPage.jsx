@@ -601,13 +601,138 @@ setTodayBills(
   ]);
 
 
+const displayedMonthlyChartData =
+
+  useMemo(() => {
+
+    const now =
+
+      new Date();
+
+    const currentYear =
+
+      now.getFullYear();
+
+    const currentMonth =
+
+      now.getMonth();
+
+
+    /*
+
+      ถ้าเป็นปีปัจจุบัน
+
+      แสดงตั้งแต่ ม.ค.
+
+      ถึงเดือนปัจจุบันเท่านั้น
+
+      ถ้าเป็นปีย้อนหลัง
+
+      แสดงครบ 12 เดือน
+
+    */
+
+    const visibleMonths =
+
+      Number(reportYear) ===
+
+      currentYear
+
+        ? monthlyChartData.slice(
+
+            0,
+
+            currentMonth + 1
+
+          )
+
+        : monthlyChartData;
+
+
+    /*
+
+      รวมยอดตั้งแต่ต้นปี
+
+      สำหรับ YTD
+
+    */
+
+    const ytd =
+
+      visibleMonths.reduce(
+
+        (result, item) => {
+
+          result.amount +=
+
+            Number(
+
+              item.amount || 0
+
+            );
+
+          result.profit +=
+
+            Number(
+
+              item.profit || 0
+
+            );
+
+          return result;
+
+        },
+
+        {
+
+          amount: 0,
+
+          profit: 0,
+
+        }
+
+      );
+
+
+    return [
+
+      ...visibleMonths,
+
+      {
+
+        month: "ytd",
+
+        label: "YTD",
+
+        amount:
+
+          ytd.amount,
+
+        profit:
+
+          ytd.profit,
+
+        isYtd: true,
+
+      },
+
+    ];
+
+  }, [
+
+    monthlyChartData,
+
+    reportYear,
+
+  ]);
+
 const monthlyChartMax =
 
   Math.max(
 
     1,
 
-    ...monthlyChartData.map(
+    ...displayedMonthlyChartData.map(
 
       (item) =>
 
