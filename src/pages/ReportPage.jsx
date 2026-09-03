@@ -1022,7 +1022,18 @@ const monthlyChartMax =
 
   ) : (
 <div className="report-monthly-scroll">
-<div className="report-monthly-chart">
+<div
+
+  className="report-monthly-chart"
+
+  style={{
+
+    gridTemplateColumns:
+
+      `repeat(${displayedMonthlyChartData.length}, minmax(70px, 1fr))`,
+
+  }}
+>
 
         {monthlyChartData.map(
 
@@ -1051,14 +1062,31 @@ const monthlyChartMax =
             return (
 <div
 
-                className="report-month-column"
+  className={
 
-                key={item.month}
+    item.isYtd
+
+      ? "report-month-column report-month-ytd"
+
+      : "report-month-column"
+
+  }
+
+  key={item.month}
 >
+ 
 <div className="report-month-bars">
 <div
 
-                    className="report-month-bar report-month-sales"
+                    className={
+
+  item.isYtd
+
+    ? "report-month-bar report-month-sales report-ytd-bar"
+
+    : "report-month-bar report-month-sales"
+
+}
 
                     style={{
 
@@ -1093,7 +1121,15 @@ const monthlyChartMax =
 </div>
 <div
 
-                    className="report-month-bar report-month-profit"
+                    className={
+
+  item.isYtd
+
+    ? "report-month-bar report-month-profit report-ytd-bar"
+
+    : "report-month-bar report-month-profit"
+
+}
 
                     style={{
 
