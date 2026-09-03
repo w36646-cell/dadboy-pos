@@ -620,103 +620,29 @@ const displayedMonthlyChartData =
 
     /*
 
-      ถ้าเป็นปีปัจจุบัน
+      ปีปัจจุบัน:
 
-      แสดงตั้งแต่ ม.ค.
+      แสดงถึงเดือนปัจจุบันเท่านั้น
 
-      ถึงเดือนปัจจุบันเท่านั้น
-
-      ถ้าเป็นปีย้อนหลัง
+      ปีย้อนหลัง:
 
       แสดงครบ 12 เดือน
 
     */
 
-    const visibleMonths =
-
-      Number(reportYear) ===
+    return Number(reportYear) ===
 
       currentYear
 
-        ? monthlyChartData.slice(
+      ? monthlyChartData.slice(
 
-            0,
+          0,
 
-            currentMonth + 1
+          currentMonth + 1
 
-          )
+        )
 
-        : monthlyChartData;
-
-
-    /*
-
-      รวมยอดตั้งแต่ต้นปี
-
-      สำหรับ YTD
-
-    */
-
-    const ytd =
-
-      visibleMonths.reduce(
-
-        (result, item) => {
-
-          result.amount +=
-
-            Number(
-
-              item.amount || 0
-
-            );
-
-          result.profit +=
-
-            Number(
-
-              item.profit || 0
-
-            );
-
-          return result;
-
-        },
-
-        {
-
-          amount: 0,
-
-          profit: 0,
-
-        }
-
-      );
-
-
-    return [
-
-      ...visibleMonths,
-
-      {
-
-        month: "ytd",
-
-        label: "YTD",
-
-        amount:
-
-          ytd.amount,
-
-        profit:
-
-          ytd.profit,
-
-        isYtd: true,
-
-      },
-
-    ];
+      : monthlyChartData;
 
   }, [
 
@@ -725,6 +651,78 @@ const displayedMonthlyChartData =
     reportYear,
 
   ]);
+
+
+/*
+
+  =========================================
+
+  YTD
+
+  รวมข้อมูลเดือนที่กำลังแสดง
+
+  =========================================
+
+*/
+
+const ytdData =
+
+  useMemo(() => {
+
+    return displayedMonthlyChartData.reduce(
+
+      (result, item) => {
+
+        result.amount +=
+
+          Number(
+
+            item.amount || 0
+
+          );
+
+        result.profit +=
+
+          Number(
+
+            item.profit || 0
+
+          );
+
+        return result;
+
+      },
+
+      {
+
+        amount: 0,
+
+        profit: 0,
+
+      }
+
+    );
+
+  }, [
+
+    displayedMonthlyChartData,
+
+  ]);
+
+
+/*
+
+  =========================================
+
+  SCALE ซ้าย
+
+  ใช้เฉพาะรายเดือน
+
+  YTD ห้ามเข้ามาคำนวณ
+
+  =========================================
+
+*/
 
 const monthlyChartMax =
 
@@ -748,6 +746,31 @@ const monthlyChartMax =
 
   );
 
+
+/*
+
+  =========================================
+
+  SCALE ขวา
+
+  สำหรับ YTD เท่านั้น
+
+  =========================================
+
+*/
+
+const ytdChartMax =
+
+  Math.max(
+
+    1,
+
+    ytdData.amount,
+
+    ytdData.profit
+
+  );
+ 
   const chartMax = Math.max(1, ...chartData.map((item) => Math.max(item.amount, item.profit)));
 
   const chartTicks = [chartMax, chartMax * 0.75, chartMax * 0.5, chartMax * 0.25, 0];
@@ -1024,15 +1047,18 @@ const monthlyChartMax =
 <div className="report-monthly-scroll">
 <div
 
-  className="report-monthly-chart"
+  <div className="report-monthly-dual-chart">
+<div
 
-  style={{
+    className="report-monthly-chart"
 
-    gridTemplateColumns:
+    style={{
 
-      `repeat(${displayedMonthlyChartData.length}, minmax(70px, 1fr))`,
+      gridTemplateColumns:
 
-  }}
+        `repeat(${displayedMonthlyChartData.length}, minmax(70px, 1fr))`,
+
+    }}
 >
 
         {monthlyChartData.map(
@@ -1194,6 +1220,110 @@ const monthlyChartMax =
           }
 
         )}
+</div>
+</div>
+
+
+  {/* =========================================
+
+      YTD — SCALE แยก
+
+      ========================================= */}
+<div className="report-ytd-column">
+<div className="report-ytd-title">
+
+      YTD
+</div>
+<div className="report-ytd-bars">
+<div
+
+        className="report-month-bar report-month-sales report-ytd-sales"
+
+        style={{
+
+          height:
+
+            `${(
+
+              ytdData.amount /
+
+              ytdChartMax
+
+            ) * 100}%`,
+
+        }}
+>
+
+        {ytdData.amount > 0 && (
+<span>
+
+            {numberText(
+
+              ytdData.amount
+
+            )}
+</span>
+
+        )}
+</div>
+
+<div
+
+        className="report-month-bar report-month-profit report-ytd-profit"
+
+        style={{
+
+          height:
+
+            `${(
+
+              ytdData.profit /
+
+              ytdChartMax
+
+            ) * 100}%`,
+
+        }}
+>
+
+        {ytdData.profit > 0 && (
+<span>
+
+            {numberText(
+
+              ytdData.profit
+
+            )}
+</span>
+
+        )}
+</div>
+</div>
+
+<strong>
+
+      YTD
+</strong>
+<small>
+
+      ขาย{" "}
+
+      {numberText(
+
+        ytdData.amount
+
+      )}
+</small>
+<small>
+
+      กำไร{" "}
+
+      {numberText(
+
+        ytdData.profit
+
+      )}
+</small>
 </div>
 </div>
 
