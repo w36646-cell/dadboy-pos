@@ -44,6 +44,48 @@ function numberText(value) {
 
 }
 
+function reportDateText(value) {
+
+  const date =
+
+    new Date(
+
+      `${value}T00:00:00`
+
+    );
+
+  if (
+
+    Number.isNaN(
+
+      date.getTime()
+
+    )
+
+  ) {
+
+    return value;
+
+  }
+
+  return date.toLocaleDateString(
+
+    "th-TH",
+
+    {
+
+      day: "numeric",
+
+      month: "short",
+
+      year: "numeric",
+
+    }
+
+  );
+
+}
+
 function ReportPage() {
 
   const [sales, setSales] = useState([]);
@@ -1603,7 +1645,21 @@ const ytdChartMax =
 </section>
 <div className="report-layout">
 <section className="report-box">
-<h2>สินค้าขายดี</h2>
+<h2>
+
+  สินค้าขายดี
+<span className="report-top-products-range">
+
+    {" "}
+
+    {reportDateText(startDate)}
+
+    {" ถึง "}
+
+    {reportDateText(endDate)}
+</span>
+</h2>
+ 
 
               {topProducts.length === 0 ? (
 <div className="report-empty">ไม่มีข้อมูล</div>
