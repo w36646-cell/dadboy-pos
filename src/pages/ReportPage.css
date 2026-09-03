@@ -684,3 +684,260 @@
 
 }
  
+/* =========================================================
+
+   MONTHLY BAR CHART
+
+========================================================= */
+
+.report-monthly-box{
+
+  width:100%;
+
+  margin-bottom:14px;
+
+  overflow:hidden;
+
+}
+
+.report-monthly-actions{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:14px;
+
+  flex-wrap:wrap;
+
+}
+
+.report-monthly-actions select{
+
+  height:36px;
+
+  padding:0 10px;
+
+  border:1px solid #d0d5dd;
+
+  border-radius:8px;
+
+  background:#fff;
+
+  font-size:13px;
+
+  font-weight:700;
+
+}
+
+.report-monthly-scroll{
+
+  width:100%;
+
+  overflow-x:auto;
+
+  overflow-y:hidden;
+
+  padding-top:18px;
+
+}
+
+.report-monthly-chart{
+
+  min-width:820px;
+
+  height:330px;
+
+  display:grid;
+
+  grid-template-columns:
+
+    repeat(12,minmax(58px,1fr));
+
+  gap:8px;
+
+  align-items:end;
+
+  padding:
+
+    10px
+
+    4px
+
+    4px;
+
+  box-sizing:border-box;
+
+  border-bottom:
+
+    1px solid #e5e7eb;
+
+}
+
+.report-month-column{
+
+  height:100%;
+
+  min-width:0;
+
+  display:flex;
+
+  flex-direction:column;
+
+  justify-content:flex-end;
+
+  align-items:center;
+
+  text-align:center;
+
+}
+
+.report-month-bars{
+
+  width:100%;
+
+  height:230px;
+
+  display:flex;
+
+  align-items:flex-end;
+
+  justify-content:center;
+
+  gap:4px;
+
+  padding:
+
+    0 5px;
+
+  box-sizing:border-box;
+
+  border-bottom:
+
+    1px solid #e5e7eb;
+
+}
+
+.report-month-bar{
+
+  position:relative;
+
+  width:42%;
+
+  min-height:0;
+
+  border-radius:
+
+    6px
+
+    6px
+
+    2px
+
+    2px;
+
+  transition:
+
+    height .2s ease;
+
+}
+
+.report-month-sales{
+
+  background:#2563eb;
+
+}
+
+.report-month-profit{
+
+  background:#16a34a;
+
+}
+
+.report-month-bar span{
+
+  position:absolute;
+
+  left:50%;
+
+  top:-18px;
+
+  transform:
+
+    translateX(-50%);
+
+  font-size:8px;
+
+  font-weight:800;
+
+  white-space:nowrap;
+
+  color:#475467;
+
+}
+
+.report-month-column > strong{
+
+  display:block;
+
+  margin-top:7px;
+
+  font-size:12px;
+
+}
+
+.report-month-column > small{
+
+  display:block;
+
+  margin-top:2px;
+
+  color:#667085;
+
+  font-size:8px;
+
+  white-space:nowrap;
+
+}
+
+
+/* =========================================================
+
+   MONTHLY BAR CHART MOBILE
+
+========================================================= */
+
+@media(max-width:700px){
+
+  .report-monthly-actions{
+
+    width:100%;
+
+    justify-content:
+
+      space-between;
+
+  }
+
+  .report-monthly-actions select{
+
+    height:34px;
+
+  }
+
+  .report-monthly-chart{
+
+    min-width:760px;
+
+    height:300px;
+
+  }
+
+  .report-month-bars{
+
+    height:200px;
+
+  }
+
+}
+ 
