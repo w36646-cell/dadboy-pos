@@ -971,3 +971,193 @@
 
 }
  
+/* =========================================
+
+   MONTHLY + YTD DUAL SCALE
+
+========================================= */
+
+.report-monthly-dual-chart{
+
+  width:100%;
+
+  display:flex;
+
+  align-items:stretch;
+
+  gap:14px;
+
+}
+
+
+/* =========================================
+
+   MONTHLY SIDE
+
+   SCALE ซ้าย
+
+========================================= */
+
+.report-monthly-dual-chart
+
+.report-monthly-chart{
+
+  flex:1;
+
+  min-width:max-content;
+
+}
+
+
+/* =========================================
+
+   YTD SIDE
+
+   SCALE ขวา
+
+========================================= */
+
+.report-ytd-column{
+
+  flex:0 0 115px;
+
+  min-width:115px;
+
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:center;
+
+  justify-content:flex-end;
+
+  padding-left:14px;
+
+  border-left:
+
+    2px dashed
+
+    #d0d5dd;
+
+  box-sizing:border-box;
+
+}
+
+
+.report-ytd-title{
+
+  width:100%;
+
+  margin-bottom:8px;
+
+  text-align:center;
+
+  font-size:11px;
+
+  font-weight:800;
+
+  color:#667085;
+
+}
+
+
+.report-ytd-bars{
+
+  width:100%;
+
+  height:230px;
+
+  display:flex;
+
+  align-items:flex-end;
+
+  justify-content:center;
+
+  gap:6px;
+
+  border-bottom:
+
+    1px solid #e5e7eb;
+
+}
+
+
+.report-ytd-bars
+
+.report-month-bar{
+
+  width:38%;
+
+}
+
+
+.report-ytd-column > strong{
+
+  display:block;
+
+  margin-top:7px;
+
+  font-size:13px;
+
+  font-weight:900;
+
+}
+
+
+.report-ytd-column > small{
+
+  display:block;
+
+  margin-top:2px;
+
+  color:#667085;
+
+  font-size:9px;
+
+  white-space:nowrap;
+
+}
+
+
+/* YTD เด่นขึ้นเล็กน้อย */
+
+.report-ytd-sales,
+
+.report-ytd-profit{
+
+  box-shadow:
+
+    0 0 0 2px
+
+    rgba(17,24,39,0.10);
+
+}
+
+@media(max-width:700px){
+
+  .report-monthly-dual-chart{
+
+    gap:10px;
+
+  }
+
+  .report-ytd-column{
+
+    flex:
+
+      0 0 100px;
+
+    min-width:100px;
+
+    padding-left:10px;
+
+  }
+
+  .report-ytd-bars{
+
+    height:200px;
+
+  }
+
+}
+ 
