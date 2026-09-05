@@ -103,6 +103,8 @@ function ProductCard({
 
   product,
 
+  stock,
+
   packEnabled,
 
   normalPrice,
@@ -271,7 +273,13 @@ function ProductCard({
 
 <div className="pos-card-shade" />
 
+{lowStock && (
+<div className="pos-low-stock-count">
 
+    {stock}
+</div>
+
+)}
 
       {packEnabled && (
 <div className="pos-pack-badge">
