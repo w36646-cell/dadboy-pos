@@ -878,6 +878,14 @@ const [
 
   const [
 
+  productToEditId,
+
+  setProductToEditId,
+
+] = useState(null);
+
+  const [
+
     ownerMode,
 
     setOwnerMode,
@@ -5205,17 +5213,37 @@ const todaySalesAmount =
       return (
 <DashboardPage
 
-          onOpenStock={() =>
+  onOpenStock={() =>
 
-            setPage(
+    setPage(
 
-              "stock"
+      "stock"
 
-            )
+    )
 
-          }
+  }
 
-        />
+  onOpenProduct={(
+
+    productId
+
+  ) => {
+
+    setProductToEditId(
+
+      productId
+
+    );
+
+    setPage(
+
+      "products"
+
+    );
+
+  }}
+
+/>
 
       );
 
@@ -5270,36 +5298,52 @@ const todaySalesAmount =
       return (
 <ProductManager
 
-          products={
+  products={
 
-            products
+    products
 
-          }
+  }
 
-          inventory={
+  inventory={
 
-            inventory
+    inventory
 
-          }
+  }
 
-          onSaveProduct={
+  onSaveProduct={
 
-            saveProduct
+    saveProduct
 
-          }
+  }
 
-          onClose={() =>
+  initialEditProductId={
 
-            setPage(
+    productToEditId
 
-              "pos"
+  }
 
-            )
+  onInitialEditHandled={() =>
 
-          }
+    setProductToEditId(
 
-        />
+      null
 
+    )
+
+  }
+
+  onClose={() =>
+
+    setPage(
+
+      "pos"
+
+    )
+
+  }
+
+/>
+ 
       );
 
     }
