@@ -78,7 +78,13 @@ function summarize(saleList) {
 
 }
  
-function DashboardPage({ onOpenStock }) {
+function DashboardPage({
+
+  onOpenStock,
+
+  onOpenProduct,
+
+}) {
 
   const [sales, setSales] = useState([]);
 
@@ -933,6 +939,22 @@ const daySales = sales.filter(
 
   }
 
+  function goToProduct(productId) {
+
+  if (
+
+    typeof onOpenProduct ===
+
+    "function"
+
+  ) {
+
+    onOpenProduct(productId);
+
+  }
+
+}
+
   const allCloudReady =
 
     !salesCloudError &&
@@ -1340,52 +1362,77 @@ const daySales = sales.filter(
 </div>
 
           ) : (
+<div className="db-low-stock-list">
+
+  {lowStockProducts.map(
+
+    (product) => (
 <div
 
-              className="db-low-stock-list"
+        className="db-low-stock-row"
 
-              onClick={goToStock}
+        key={product.id}
 
-              role="button"
+        onClick={() =>
 
-              tabIndex={0}
->
+          goToProduct(
+product.id
 
-              {lowStockProducts.map(
+          )
 
-                (product) => (
-<div
+        }
 
-                    className="db-low-stock-row"
+        role="button"
 
-                    key={product.id}
+        tabIndex={0}
+
+        onKeyDown={(event) => {
+
+          if (
+
+            event.key === "Enter" ||
+
+            event.key === " "
+
+          ) {
+
+            event.preventDefault();
+
+            goToProduct(
+product.id
+
+            );
+
+          }
+
+        }}
 >
 <span className="db-low-stock-name">
 
-                      {product.name}
+          {product.name}
 </span>
 <strong
 
-                      className={
+          className={
 
-                        product.stock <= 0
+            product.stock <= 0
 
-                          ? "db-low-stock-danger"
+              ? "db-low-stock-danger"
 
-                          : "db-low-stock-warning"
+              : "db-low-stock-warning"
 
-                      }
+          }
 >
 
-                      {product.stock} ชิ้น
+          {product.stock} ชิ้น
 </strong>
 </div>
 
-                )
+    )
 
-              )}
+  )}
 </div>
-
+  
           )}
 </section>
 </div>
