@@ -173,7 +173,6 @@ function createEmptyForm() {
 
 }
 
-
 function ProductManager({
 
   products,
@@ -182,10 +181,14 @@ function ProductManager({
 
   onSaveProduct,
 
+  initialEditProductId,
+
+  onInitialEditHandled,
+
   onClose,
 
 }) {
-
+ 
   const [
 
     search,
@@ -1363,6 +1366,75 @@ option.id ===
     scrollToEditor();
 
   }
+
+  useEffect(() => {
+
+    if (
+
+      initialEditProductId ===
+
+        null ||
+
+      initialEditProductId ===
+
+        undefined
+
+    ) {
+
+      return;
+
+    }
+
+    const targetProduct =
+
+      products.find(
+
+        (product) =>
+
+          String(
+product.id
+
+          ) ===
+
+          String(
+
+            initialEditProductId
+
+          )
+
+      );
+
+    if (targetProduct) {
+
+      openEdit(
+
+        targetProduct
+
+      );
+
+    }
+
+    if (
+
+      typeof
+
+        onInitialEditHandled ===
+
+        "function"
+
+    ) {
+
+      onInitialEditHandled();
+
+    }
+
+  }, [
+
+    initialEditProductId,
+
+    products,
+
+  ]);
 
   function closeEditor() {
 
