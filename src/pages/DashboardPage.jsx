@@ -82,8 +82,6 @@ function DashboardPage({
 
   onOpenStock,
 
-  onOpenProduct,
-
 }) {
 
   const [sales, setSales] = useState([]);
@@ -949,7 +947,7 @@ const daySales = sales.filter(
 
   ) {
 
-    onOpenProduct(productId);
+    onOpenstock(productId);
 
   }
 
