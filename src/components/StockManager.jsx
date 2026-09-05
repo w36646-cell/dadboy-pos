@@ -86,6 +86,10 @@ function StockManager({
 
   onAddStock,
 
+  initialProductId,
+
+  onInitialProductHandled,
+
   onClose,
 
 }) {
@@ -337,6 +341,64 @@ function StockManager({
     }, 60);
 
   }
+
+  useEffect(() => {
+
+    if (
+
+      initialProductId === null ||
+
+      initialProductId === undefined
+
+    ) {
+
+      return;
+
+    }
+
+    const targetProduct =
+
+      products.find(
+
+        (product) =>
+
+          String(product.id) ===
+
+          String(initialProductId)
+
+      );
+
+    if (!targetProduct) {
+
+      return;
+
+    }
+
+    selectProduct(
+
+      targetProduct
+
+    );
+
+    if (
+
+      typeof onInitialProductHandled ===
+
+      "function"
+
+    ) {
+
+      onInitialProductHandled();
+
+    }
+
+  }, [
+
+    initialProductId,
+
+    products,
+
+  ]);
 
   function getReceivePieces() {
 
