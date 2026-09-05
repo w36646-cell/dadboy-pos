@@ -1,5 +1,7 @@
 import {
 
+  useEffect,
+
   useMemo,
 
   useRef,
@@ -7,7 +9,6 @@ import {
   useState,
 
 } from "react";
-
 
 function parseProductImageSettings(value) {
 
