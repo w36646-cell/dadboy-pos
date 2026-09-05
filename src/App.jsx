@@ -878,9 +878,9 @@ const [
 
   const [
 
-  productToEditId,
+  stockToReceiveId,
 
-  setProductToEditId,
+  setStockToReceiveId,
 
 ] = useState(null);
 
@@ -5213,23 +5213,9 @@ const todaySalesAmount =
       return (
 <DashboardPage
 
-  onOpenStock={() =>
+  onOpenStock={(productId = null) => {
 
-    setPage(
-
-      "stock"
-
-    )
-
-  }
-
-  onOpenProduct={(
-
-    productId
-
-  ) => {
-
-    setProductToEditId(
+    setStockToReceiveId(
 
       productId
 
@@ -5237,14 +5223,14 @@ const todaySalesAmount =
 
     setPage(
 
-      "products"
+      "stock"
 
     );
 
   }}
 
 />
-
+ 
       );
 
     }
@@ -5313,22 +5299,6 @@ const todaySalesAmount =
   onSaveProduct={
 
     saveProduct
-
-  }
-
-  initialEditProductId={
-
-    productToEditId
-
-  }
-
-  onInitialEditHandled={() =>
-
-    setProductToEditId(
-
-      null
-
-    )
 
   }
 
