@@ -947,7 +947,7 @@ const daySales = sales.filter(
 
   ) {
 
-    onOpenstock(productId);
+    onOpenStock(productId);
 
   }
 
@@ -1373,7 +1373,7 @@ const daySales = sales.filter(
 
         onClick={() =>
 
-          goToProduct(
+          goToStockProduct(
 product.id
 
           )
@@ -1396,7 +1396,7 @@ product.id
 
             event.preventDefault();
 
-            goToProduct(
+            goToStockProduct(
 product.id
 
             );
