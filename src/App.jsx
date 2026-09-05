@@ -5329,36 +5329,52 @@ const todaySalesAmount =
       return (
 <StockManager
 
-          products={
+  products={
 
-            products
+    products
 
-          }
+  }
 
-          inventory={
+  inventory={
 
-            inventory
+    inventory
 
-          }
+  }
 
-          onAddStock={
+  onAddStock={
 
-            addStock
+    addStock
 
-          }
+  }
 
-          onClose={() =>
+  initialProductId={
 
-            setPage(
+    stockToReceiveId
 
-              "pos"
+  }
 
-            )
+  onInitialProductHandled={() =>
 
-          }
+    setStockToReceiveId(
 
-        />
+      null
 
+    )
+
+  }
+
+  onClose={() =>
+
+    setPage(
+
+      "pos"
+
+    )
+
+  }
+
+/>
+ 
       );
 
     }
