@@ -1405,4 +1405,38 @@
      0 2px 3px rgba(0, 0, 0, 0.40) !important;
 
 }
+
+.app.pos-page.pos-modern
+
+.product-card.pos-image-card
+
+.pos-low-stock-count {
+
+  position: absolute;
+
+  top: 6px;
+
+  left: 6px;
+
+  z-index: 7;
+
+  color: #ef4444;
+
+  font-size: 13px;
+
+  font-weight: 800;
+
+  line-height: 1;
+
+  text-shadow:
+
+    -1px -1px 0 rgba(255, 255, 255, 0.95),
+
+     1px -1px 0 rgba(255, 255, 255, 0.95),
+
+    -1px  1px 0 rgba(255, 255, 255, 0.95),
+
+     1px  1px 0 rgba(255, 255, 255, 0.95);
+
+}
  
