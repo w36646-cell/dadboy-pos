@@ -937,11 +937,11 @@ const daySales = sales.filter(
 
   }
 
-  function goToProduct(productId) {
+ function goToStockProduct(productId) {
 
   if (
 
-    typeof onOpenProduct ===
+    typeof onOpenStock ===
 
     "function"
 
