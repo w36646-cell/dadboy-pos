@@ -525,15 +525,17 @@ const averageBill =
 
       })
 
-      .filter(
+     .filter(
 
-        (product) =>
+  (product) =>
 
-          product.trackStock === true &&
+    product.isActive !== false &&
 
-          product.stock <= product.minStock
+    product.trackStock === true &&
 
-      )
+    product.stock <= product.minStock
+
+)
 
       .sort((a, b) => {
 
