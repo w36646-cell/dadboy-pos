@@ -3558,17 +3558,17 @@ style={{
 
     }
 
-    onChange={(event) =>
+  onChange={(event) =>
 
-      updateField(
+  updateField(
 
-        "isActive",
+    "trackStock",
 
-        event.target.checked
+    event.target.checked
 
-      )
+  )
 
-    }
+}
 
   />
 
