@@ -18,8 +18,6 @@ import {
 
   getCloudSalesPage,
 
-  updateCloudSaleAfterItemDelete,
-
 } from "../services/salesService";
      
 import "./BillsPage.css";
@@ -1182,34 +1180,108 @@ const localInventory =
     {}
 
   );
- 
-    const updatedInventory = {
 
-      ...localInventory,
+const updatedInventory = {
 
-    };
+  ...localInventory,
 
-    writeStorage(
+};
 
-      STOCK_KEY,
+Object.entries(
 
-      updatedInventory
+  result.cloudStocks || {}
+
+).forEach(
+
+  ([productId, stock]) => {
+
+    updatedInventory[
+
+      productId
+
+    ] = Number(
+
+      stock ?? 0
 
     );
 
-    updateAppInventory(
+  }
 
-      updatedInventory
+);
 
-    );
+writeStorage(
 
-    const updatedSale =
+  STOCK_KEY,
 
-      await updateCloudSaleAfterItemDelete(
+  updatedInventory
 
-        sale.billId
-        
-      );
+);
+
+updateAppInventory(
+
+  updatedInventory
+
+);
+
+const updatedSale = {
+
+  ...sale,
+
+  items: (
+
+    sale.items || []
+
+  ).filter(
+
+    (currentItem) =>
+
+      String(
+
+        currentItem.lineId
+
+      ) !==
+
+      String(
+
+        item.lineId
+
+      )
+
+  ),
+
+  totalQty:
+
+    Number(
+
+      result.totalQty || 0
+
+    ),
+
+  totalAmount:
+
+    Number(
+
+      result.totalAmount || 0
+
+    ),
+
+  totalCost:
+
+    Number(
+
+      result.totalCost || 0
+
+    ),
+
+  totalProfit:
+
+    Number(
+
+      result.totalProfit || 0
+
+    ),
+
+};
 
     const updatedSales =
 
