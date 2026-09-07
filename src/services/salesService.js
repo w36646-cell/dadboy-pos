@@ -1280,6 +1280,8 @@ export async function getCloudSalesRange(
 
               bill_id,
 
+              status,
+
               sold_at,
 
               sold_date,
@@ -1336,14 +1338,30 @@ export async function getCloudSalesRange(
 
     );
 
+  const activeSaleRows =
+
+  saleRows.filter(
+
+    (sale) =>
+
+      String(
+
+        sale.status || ""
+
+      ).toLowerCase() !==
+
+      "cancelled"
+
+  );
+
   const saleIds =
 
-    saleRows.map(
+  activeSaleRows.map(
 
-      (sale) =>
+    (sale) =>
 sale.id
 
-    );
+  );
 
   const itemRows =
 
@@ -1353,15 +1371,15 @@ sale.id
 
     );
 
-  const combinedRows =
+ const combinedRows =
 
-    combineSalesAndItems(
+  combineSalesAndItems(
 
-      saleRows,
+    activeSaleRows,
 
-      itemRows
+    itemRows
 
-    );
+  );
 
   return combinedRows.map(
 
