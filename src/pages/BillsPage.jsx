@@ -1548,9 +1548,6 @@ setSelectedBill(
 
 );
 
-    setSelectedBill(null);
-
-
     window.alert(
 
       result.alreadyApplied
