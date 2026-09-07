@@ -168,11 +168,9 @@ export async function revokeOwnerSession() {
 
     getOwnerSessionToken();
 
-  clearOwnerSessionToken();
-
   if (!token) {
 
-    return true;
+    return false;
 
   }
 
@@ -200,7 +198,16 @@ export async function revokeOwnerSession() {
 
   }
 
-  return data === true;
+  if (data !== true) {
+
+    return false;
+
+  }
+
+  clearOwnerSessionToken();
+
+  return true;
 
 }
+ 
  
