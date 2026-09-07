@@ -4770,12 +4770,6 @@ item.id,
 
     );
 
-    window.alert(
-
-      `ขายสำเร็จ\nเลขบิล ${sale.billId}\nยอดรวม ${checkoutTotal.toLocaleString()} บาท`
-
-    );
-
     /*
 
       Offline:
