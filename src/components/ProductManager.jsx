@@ -3550,28 +3550,44 @@ style={{
 <label className="manager-checkbox">
 <input
 
-    type="checkbox"
+  type="checkbox"
 
-    checked={
+  checked={
 
-      form.isActive
+    form.isActive
+
+  }
+
+  onChange={(event) => {
+
+    const checked =
+
+      event.target.checked;
+
+    updateField(
+
+      "isActive",
+
+      checked
+
+    );
+
+    if (!checked) {
+
+      updateField(
+
+        "trackStock",
+
+        false
+
+      );
 
     }
 
-  onChange={(event) =>
+  }}
 
-  updateField(
-
-    "trackStock",
-
-    event.target.checked
-
-  )
-
-}
-
-  />
-
+/>
+  
   เปิดขายหน้าร้าน
 </label>
 <hr />
@@ -3588,43 +3604,27 @@ style={{
 <label className="manager-checkbox">
 <input
 
-                  type="checkbox"
+  type="checkbox"
 
-                  checked={
+  checked={
 
-                    form.trackStock
+    form.trackStock
 
-                  }
+  }
 
-                  onChange={(event) => {
-
-  const checked =
-
-    event.target.checked;
-
-  updateField(
-
-    "isActive",
-
-    checked
-
-  );
-
-  if (!checked) {
+  onChange={(event) =>
 
     updateField(
 
       "trackStock",
 
-      false
+      event.target.checked
 
-    );
+    )
 
   }
 
-}}
-
-                />
+/>
 
                 ติดตามและแจ้งเตือนสต๊อก
 </label>
