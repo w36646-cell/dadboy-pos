@@ -1105,6 +1105,28 @@ function openBillDetail(
 
   }
 
+  if (
+
+  String(
+
+    sale.status || ""
+
+  ).toLowerCase() ===
+
+  "cancelled"
+
+) {
+
+  window.alert(
+
+    "บิลนี้ถูกยกเลิกแล้ว\nไม่สามารถลบรายการได้"
+
+  );
+
+  return;
+
+}
+
   if (!isOnline) {
 
     window.alert(
@@ -1359,6 +1381,27 @@ const updatedSale = {
 
   }
 
+  if (
+
+  String(
+
+    sale.status || ""
+
+  ).toLowerCase() ===
+
+  "cancelled"
+
+) {
+
+  window.alert(
+
+    "บิลนี้ถูกยกเลิกแล้ว"
+
+  );
+
+  return;
+
+}
 
   /*
 
@@ -2132,11 +2175,19 @@ setSelectedBill(
 
                   disabled={
 
-                    cancelling ||
+  cancelling ||
 
-                    !isOnline
+  !isOnline ||
 
-                  }
+  String(
+
+    selectedBill.status || ""
+
+  ).toLowerCase() ===
+
+  "cancelled"
+
+}
 
                   onClick={() =>
 
@@ -2159,15 +2210,26 @@ setSelectedBill(
                   }
 >
 
-                  {cancelling
+                  {String(
 
-                    ? "กำลังยกเลิก..."
+  selectedBill.status || ""
 
-                    : !isOnline
+).toLowerCase() ===
 
-                      ? "ยกเลิกไม่ได้ขณะ Offline"
+"cancelled"
 
-                      : "ยกเลิกบิล"}
+  ? "✕ ยกเลิกแล้ว"
+
+  : cancelling
+
+    ? "กำลังยกเลิก..."
+
+    : !isOnline
+
+      ? "ยกเลิกไม่ได้ขณะ Offline"
+
+      : "ยกเลิกบิล"}
+ 
 </button>
 </div>
 
@@ -2333,13 +2395,21 @@ setSelectedBill(
 
     }
 
-    disabled={
+  disabled={
 
-      cancelling ||
+  cancelling ||
 
-      !isOnline
+  !isOnline ||
 
-    }
+  String(
+
+    selectedBill.status || ""
+
+  ).toLowerCase() ===
+
+  "cancelled"
+
+}
 
     style={{
 
