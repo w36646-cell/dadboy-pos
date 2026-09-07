@@ -3590,16 +3590,11 @@ style={{
   
   เปิดขายหน้าร้าน
 </label>
-<hr />
-<h3>
-
-  การติดตามสต๊อก
-</h3>  
   
 <hr />
 <h3>
 
-                การติดตามสต๊อก
+  การติดตามสต๊อก
 </h3>
 <label className="manager-checkbox">
 <input
