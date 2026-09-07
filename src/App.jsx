@@ -32,6 +32,8 @@ import BillsPage from "./pages/BillsPage";
 
 import StorageSettingsPage from "./pages/StorageSettingsPage";
 
+import StockHistoryPage from "./pages/StockHistoryPage";
+
 import createBillId from "./utils/createBillId";
 
 import {
@@ -5373,6 +5375,21 @@ const todaySalesAmount =
 
     }
 
+  if (
+
+  page ===
+
+  "stock-history"
+
+) {
+
+  return (
+<StockHistoryPage />
+
+  );
+
+}
+ 
     if (
 
       page ===
