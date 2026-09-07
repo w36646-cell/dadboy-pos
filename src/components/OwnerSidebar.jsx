@@ -80,6 +80,16 @@ function OwnerSidebar({
 
     {
 
+  id: "stock-history",
+
+  icon: "📋",
+
+  label: "ประวัติสต๊อก",
+
+},
+
+    {
+
       id: "reports",
 
       icon: "📈",
