@@ -127,6 +127,14 @@
 
   flex: 1;
 
+  min-height: 0;
+
+  overflow-y: auto;
+
+  overscroll-behavior: contain;
+
+  -webkit-overflow-scrolling: touch;
+
   display: flex;
 
   flex-direction: column;
@@ -206,6 +214,8 @@
 }
 
 .owner-sidebar-bottom {
+
+  flex-shrink: 0;
 
   padding:
 
