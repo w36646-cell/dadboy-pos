@@ -1462,13 +1462,91 @@ const updatedSale = {
       );
 
 
-    /*
+   const localInventory =
 
-      ใช้ Stock ที่ Cloud คำนวณจริง
+  readStorage(
 
-      เป็นค่าหลักของเครื่องนี้
+    STOCK_KEY,
 
-    */
+    {}
+
+  );
+
+const updatedInventory = {
+
+  ...localInventory,
+
+};
+
+Object.entries(
+
+  result.cloudStocks || {}
+
+).forEach(
+
+  ([productId, stock]) => {
+
+    updatedInventory[
+
+      productId
+
+    ] = Number(
+
+      stock ?? 0
+
+    );
+
+  }
+
+);
+
+writeStorage(
+
+  STOCK_KEY,
+
+  updatedInventory
+
+);
+
+updateAppInventory(
+
+  updatedInventory
+
+);
+
+const updatedSale = {
+
+  ...sale,
+
+  status: "cancelled",
+
+};
+
+setSales(
+
+  (currentSales) =>
+
+    currentSales.map(
+
+      (currentSale) =>
+
+        currentSale.billId ===
+
+        sale.billId
+
+          ? updatedSale
+
+          : currentSale
+
+    )
+
+);
+
+setSelectedBill(
+
+  updatedSale
+
+);
 
     setSelectedBill(null);
 
