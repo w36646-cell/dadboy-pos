@@ -8,8 +8,11 @@ import {
 
 } from "react";
 
-import { supabase } from "../lib/supabase";
+import {
 
+  createOwnerSession,
+
+} from "../services/ownerSessionService";
 
 function OwnerLogin({
 
@@ -90,43 +93,26 @@ function OwnerLogin({
 
     try {
 
-      const {
+     const sessionToken =
 
-        data,
+  await createOwnerSession(
 
-        error: rpcError,
+    pin
 
-      } =
+  );
 
-        await supabase.rpc(
 
-          "verify_owner_pin",
+if (sessionToken) {
 
-          {
+  setPin("");
 
-            p_pin: pin,
+  setError("");
 
-          }
+  onSuccess();
 
-        );
+  return;
 
-      if (rpcError) {
-
-        throw rpcError;
-
-      }
-
-      if (data === true) {
-
-        setPin("");
-
-        setError("");
-
-        onSuccess();
-
-        return;
-
-      }
+}
 
       setPin("");
 
