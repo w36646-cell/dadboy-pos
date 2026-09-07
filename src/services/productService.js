@@ -370,7 +370,9 @@ export async function getCloudDashboardProducts() {
 
         min_stock,
 
-        track_stock
+        track_stock,
+
+        is_active
 
       `);
 
