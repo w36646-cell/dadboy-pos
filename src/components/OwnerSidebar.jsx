@@ -8,6 +8,12 @@ import "./OwnerSidebar.css";
 
 import { supabase } from "../lib/supabase";
 
+import {
+
+  revokeOwnerSession,
+
+} from "../services/ownerSessionService";
+
 function OwnerSidebar({
 
   currentPage,
@@ -140,17 +146,33 @@ function OwnerSidebar({
 
   }
 
-  function logout() {
+ async function logout() {
 
-    setMobileOpen(
+  setMobileOpen(
 
-      false
+    false
+
+  );
+
+  try {
+
+    await revokeOwnerSession();
+
+  } catch (error) {
+
+    console.warn(
+
+      "Revoke owner session error:",
+
+      error
 
     );
 
-    onLogout();
-
   }
+
+  onLogout();
+
+}
 
 async function changeOwnerPin() {
 
