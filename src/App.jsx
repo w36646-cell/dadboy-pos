@@ -50,7 +50,9 @@ import {
 
   applyCloudStockDeltaOnce,
 
-  setCloudStockAbsoluteOnce,
+  applyOwnerStockDeltaOnce,
+
+  setCloudStockAbsoluteOnce, 
 
 } from "./services/productService";
 
@@ -2811,15 +2813,15 @@ function applyLocalStockDelta(
   }
 
 
-  applyCloudStockDeltaOnce(
+ applyOwnerStockDeltaOnce(
 
-    operationId,
+  operationId,
 
-    productId,
+  productId,
 
-    safeQty
+  safeQty
 
-  )
+)
 
     .then(
 
@@ -3799,7 +3801,6 @@ result.id,
         */
 
         setCloudReady(false);
-
 
         window.alert(
 
