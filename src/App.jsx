@@ -44,8 +44,6 @@ import {
 
   uploadProductsToCloud,
 
-  updateCloudStock,
-
   updateSoldCloudStocks,
 
   applyOwnerStockDeltaOnce,
@@ -1525,21 +1523,32 @@ result.id,
 
       try {
 
-        await updateCloudStock(
+  await setCloudStockAbsoluteOnce(
 
-          productId,
+    `legacy-set-${String(
 
-          stock
+      productId
 
-        );
+    )}-${String(
 
-        removePendingStock(
+      stock
 
-          productId
+    )}`,
 
-        );
+    productId,
 
-      } catch (error) {
+    stock
+
+  );
+
+  removePendingStock(
+
+    productId
+
+  );
+
+} catch (error) {
+ 
 
         allSuccess =
 
@@ -5065,26 +5074,55 @@ item.id,
 
   function enterOwnerMode() {
 
-    setOwnerMode(
+  setOwnerMode(
 
-      true
+    true
+
+  );
+
+  setLoginOpen(
+
+    false
+
+  );
+
+  setPage(
+
+    "dashboard"
+
+  );
+
+
+  /*
+
+    หลัง Owner Login สำเร็จ
+
+    Retry งานที่ต้องใช้ Owner Session
+
+    รวมถึง Pending Stock รุ่นเก่า
+
+  */
+
+  retryAllPending()
+
+    .catch(
+
+      (error) => {
+
+        console.error(
+
+          "Owner pending sync error:",
+
+          error
+
+        );
+
+      }
 
     );
 
-    setLoginOpen(
-
-      false
-
-    );
-
-    setPage(
-
-      "dashboard"
-
-    );
-
-  }
-
+}
+ 
   function exitOwnerMode() {
 
     setOwnerMode(
