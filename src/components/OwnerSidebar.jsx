@@ -6,11 +6,13 @@ import {
 
 import "./OwnerSidebar.css";
 
-import { supabase } from "../lib/supabase";
-
 import {
 
+  import {
+
   revokeOwnerSession,
+
+  changeOwnerPinWithSession,
 
 } from "../services/ownerSessionService";
 
@@ -287,74 +289,62 @@ async function changeOwnerPin() {
 
   try {
 
-    const {
+   const changed =
 
-      data,
+  await changeOwnerPinWithSession(
 
-      error,
+    oldPin,
 
-    } =
+    newPin
 
-      await supabase.rpc(
-
-        "change_owner_pin",
-
-        {
-
-          p_current_pin:
-
-            oldPin,
-
-          p_new_pin:
-
-            newPin,
-
-        }
-
-      );
+  );
 
 
-    if (error) {
+if (!changed) {
 
-      throw error;
+  window.alert(
 
-    }
+    "เปลี่ยน PIN ไม่สำเร็จ\nPIN ปัจจุบันไม่ถูกต้อง หรือ Session หมดอายุ"
 
+  );
 
-    if (data !== true) {
+  return;
 
-      window.alert(
-
-        "PIN ปัจจุบันไม่ถูกต้อง"
-
-      );
-
-      return;
-
-    }
+}
 
 
-    /*
+/*
 
-      ลบ PIN รุ่นเก่า
+  ลบ PIN รุ่นเก่า
 
-      ที่เคยเก็บไว้ในเครื่อง
+  ที่เคยเก็บไว้ในเครื่อง
 
-    */
+*/
 
-    localStorage.removeItem(
+localStorage.removeItem(
 
-      "dadboy_owner_pin"
+  "dadboy_owner_pin"
 
-    );
+);
 
 
-    window.alert(
+setMobileOpen(
 
-      "เปลี่ยน PIN เรียบร้อยแล้ว\nPIN ใหม่จะใช้กับทุกเครื่อง"
+  false
 
-    );
+);
 
+
+window.alert(
+
+  "เปลี่ยน PIN เรียบร้อยแล้ว\nPIN ใหม่จะใช้กับทุกเครื่อง\n\nระบบจะออกจากโหมดเจ้าของเพื่อความปลอดภัย"
+
+);
+
+
+onLogout();
+
+return;
 
   } catch (error) {
 
