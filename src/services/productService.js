@@ -664,68 +664,65 @@ export async function updateProductSortOrders(
 
   }
 
-  const jobs =
+  const token =
+
+    getOwnerSessionToken();
+
+  if (!token) {
+
+    throw new Error(
+
+      "Owner session is required"
+
+    );
+
+  }
+
+  const productIds =
 
     products.map(
 
-      (
+      (product) =>
 
-        product,
-
-        index
-
-      ) =>
-
-        supabase
-
-          .from(
-
-            "products"
-
-          )
-
-          .update({
-
-            sort_order:
-
-              index + 1,
-
-          })
-
-          .eq(
-
-            "id",
-
-            String(
-product.id
-
-            )
-
-          )
+        String(product.id)
 
     );
 
-  const results =
+  const {
 
-    await Promise.all(
+    data,
 
-      jobs
+    error,
+
+  } = await supabase.rpc(
+
+    "update_product_sort_orders_with_session",
+
+    {
+
+      p_token: token,
+
+      p_product_ids:
+
+        productIds,
+
+    }
+
+  );
+
+  if (error) {
+
+    throw error;
+
+  }
+
+  if (data !== true) {
+
+    throw new Error(
+
+      "Owner session invalid or expired"
 
     );
-
-  const failed =
-
-    results.find(
-
-      (result) =>
-
-        result.error
-
-    );
-
-  if (failed?.error) {
-
-    throw failed.error;
 
   }
 
@@ -750,9 +747,6 @@ product.id
   );
 
 }
-
-/*
-
   =====================================
 
   Update Stock สินค้า 1 รายการ
