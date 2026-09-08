@@ -1,5 +1,12 @@
 import { supabase } from "../lib/supabase";
 
+import {
+
+  getOwnerSessionToken,
+
+} from "./ownerSessionService";
+
+
 function getAdjustmentId(
 
   adjustment
@@ -34,13 +41,14 @@ function getAdjustmentId(
 
       adjustment.adjustedAt ||
 
-      new Date().toISOString()
+        new Date().toISOString()
 
     );
 
   return `${productId}-${adjustedAt}`;
 
 }
+
 
 export async function applySelfUseOnce(
 
@@ -55,6 +63,20 @@ export async function applySelfUseOnce(
   adjustedAt = null
 
 ) {
+
+  const token =
+
+    getOwnerSessionToken();
+
+  if (!token) {
+
+    throw new Error(
+
+      "Owner session is required"
+
+    );
+
+  }
 
   const safeOperationId =
 
@@ -134,9 +156,13 @@ export async function applySelfUseOnce(
 
     .rpc(
 
-      "apply_self_use_once",
+      "apply_self_use_once_with_session",
 
       {
+
+        p_token:
+
+          token,
 
         p_operation_id:
 
@@ -164,7 +190,7 @@ export async function applySelfUseOnce(
 
     )
 
-    .single();
+    .maybeSingle();
 
 
   if (error) {
@@ -178,7 +204,7 @@ export async function applySelfUseOnce(
 
     throw new Error(
 
-      `Self-use returned no data: ${safeOperationId}`
+      "Owner session invalid or expired"
 
     );
 
@@ -218,6 +244,7 @@ export async function applySelfUseOnce(
   };
 
 }
+
 
 export async function saveStockAdjustment(
 
@@ -297,6 +324,7 @@ export async function saveStockAdjustment(
 
   };
 
+
   const {
 
     data,
@@ -329,6 +357,7 @@ export async function saveStockAdjustment(
 
     .single();
 
+
   if (error) {
 
     throw error;
@@ -338,3 +367,4 @@ export async function saveStockAdjustment(
   return data;
 
 }
+ 
