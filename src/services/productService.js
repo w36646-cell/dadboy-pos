@@ -563,70 +563,46 @@ export async function uploadProductsToCloud(
 
   }
 
-  const payload =
 
-    products.map(
+  const uploaded = [];
 
-      (product) =>
 
-        toDatabase(
+  for (
 
-          product,
+    const product of
 
-          inventory[
+    products
+
+  ) {
+
+    const saved =
+
+      await saveCloudProduct(
+
+        product,
+
+        inventory[
 product.id
 
-          ] ??
+        ] ??
 
-            product.stock ??
+          product.stock ??
 
-            0
+          0
 
-        )
+      );
+
+
+    uploaded.push(
+
+      saved
 
     );
 
-  const {
-
-    data,
-
-    error,
-
-  } =
-
-    await supabase
-
-      .from("products")
-
-      .upsert(
-
-        payload,
-
-        {
-
-          onConflict: "id",
-
-        }
-
-      )
-
-      .select();
-
-  if (error) {
-
-    throw error;
-
   }
 
-  return (
 
-    data || []
-
-  ).map(
-
-    fromDatabase
-
-  );
+  return uploaded;
 
 }
 
