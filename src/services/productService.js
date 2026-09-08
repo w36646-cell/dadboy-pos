@@ -1271,6 +1271,20 @@ export async function setCloudStockAbsoluteOnce(
 
 ) {
 
+  const token =
+
+    getOwnerSessionToken();
+
+  if (!token) {
+
+    throw new Error(
+
+      "Owner session is required"
+
+    );
+
+  }
+
   const safeOperationId =
 
     String(
@@ -1347,28 +1361,31 @@ export async function setCloudStockAbsoluteOnce(
 
       .rpc(
 
-        "set_stock_absolute_once",
+        "set_stock_absolute_once_with_session",
 
-        {
+       {
 
-          p_operation_id:
+  p_token:
 
-            safeOperationId,
+    token,
 
-          p_product_id:
+  p_operation_id:
 
-            id,
+    safeOperationId,
 
-          p_new_stock:
+  p_product_id:
 
-            safeStock,
+    id,
 
-        }
+  p_new_stock:
+
+    safeStock,
+
+}
 
       )
 
       .maybeSingle();
-
 
   if (error) {
 
@@ -1376,17 +1393,15 @@ export async function setCloudStockAbsoluteOnce(
 
   }
 
+ if (!data) {
 
-  if (!data) {
+  throw new Error(
 
-    throw new Error(
+    "Owner session invalid or expired"
 
-      `Atomic stock set returned no data: ${id}`
+  );
 
-    );
-
-  }
-
+}
 
   return {
 
