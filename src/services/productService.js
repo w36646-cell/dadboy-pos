@@ -1,5 +1,11 @@
 import { supabase } from "../lib/supabase";
 
+import {
+
+  getOwnerSessionToken,
+
+} from "./ownerSessionService";
+
 function normalizeId(id) {
 
   const value = String(id);
@@ -465,33 +471,39 @@ export async function saveCloudProduct(
 
     );
 
+  const token =
+
+    getOwnerSessionToken();
+
+  if (!token) {
+
+    throw new Error(
+
+      "Owner session is required"
+
+    );
+
+  }
+
   const {
 
     data,
 
     error,
 
-  } =
+  } = await supabase.rpc(
 
-    await supabase
+    "save_product_with_session",
 
-      .from("products")
+    {
 
-      .upsert(
+      p_token: token,
 
-        payload,
+      p_product: payload,
 
-        {
+    }
 
-          onConflict: "id",
-
-        }
-
-      )
-
-      .select()
-
-      .single();
+  );
 
   if (error) {
 
@@ -499,14 +511,24 @@ export async function saveCloudProduct(
 
   }
 
+  if (!data) {
+
+    throw new Error(
+
+      "Owner session invalid or expired"
+
+    );
+
+  }
+
   return fromDatabase(
 
-  data
+    data
 
-);
+  );
 
 }
-
+ 
 /*
 
   =====================================
