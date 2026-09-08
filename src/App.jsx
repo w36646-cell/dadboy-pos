@@ -2910,302 +2910,400 @@ result.id,
 
   */
 
-  function adjustStock(
+function adjustStock(
 
-    adjustment
+  adjustment
 
-  ) {
+) {
 
-    const productId =
+  const productId =
 
-      adjustment?.productId;
+    adjustment?.productId;
 
-    const actualStock =
+  const actualStock =
 
-      Number(
+    Number(
 
-        adjustment?.actualStock
-
-      );
-
-    if (
-
-      productId ===
-
-        undefined ||
-
-      productId ===
-
-        null ||
-
-      !Number.isFinite(
-
-        actualStock
-
-      ) ||
-
-      actualStock < 0
-
-    ) {
-
-      window.alert(
-
-        "ข้อมูลปรับสต๊อกไม่ถูกต้อง"
-
-      );
-
-      return;
-
-    }
-
-    const normalizedAdjustment = {
-
-      ...adjustment,
-
-      productId,
-
-      previousStock:
-
-        Number(
-
-          adjustment.previousStock
-
-        ),
-
-      actualStock,
-
-      difference:
-
-        actualStock -
-
-        Number(
-
-          adjustment.previousStock
-
-        ),
-
-      adjustedAt:
-
-        adjustment.adjustedAt ||
-
-        new Date()
-
-          .toISOString(),
-
-    };
-
-    const newInventory = {
-
-      ...inventory,
-
-      [productId]:
-
-        actualStock,
-
-    };
-
-    /*
-
-      Save local ก่อน
-
-    */
-
-    saveInventoryLocal(
-
-      newInventory
+      adjustment?.actualStock
 
     );
 
-    savePendingStock(
+  if (
+
+    productId ===
+
+      undefined ||
+
+    productId ===
+
+      null ||
+
+    !Number.isFinite(
+
+      actualStock
+
+    ) ||
+
+    actualStock < 0
+
+  ) {
+
+    window.alert(
+
+      "ข้อมูลปรับสต๊อกไม่ถูกต้อง"
+
+    );
+
+    return;
+
+  }
+
+
+  const normalizedAdjustment = {
+
+    ...adjustment,
+
+    productId,
+
+    previousStock:
+
+      Number(
+
+        adjustment.previousStock
+
+      ),
+
+    actualStock,
+
+    difference:
+
+      actualStock -
+
+      Number(
+
+        adjustment.previousStock
+
+      ),
+
+    adjustedAt:
+
+      adjustment.adjustedAt ||
+
+      new Date()
+
+        .toISOString(),
+
+  };
+
+
+  const operationId =
+
+    `adjust-${String(
+
+      productId
+
+    )}-${Date.now()}-${Math.random()
+
+      .toString(36)
+
+      .slice(2, 8)}`;
+
+
+  const operation = {
+
+    operationId,
+
+    productId:
+
+      String(productId),
+
+    type:
+
+      "set",
+
+    value:
+
+      actualStock,
+
+    createdAt:
+
+      normalizedAdjustment
+
+        .adjustedAt,
+
+  };
+
+
+  /*
+
+    ต้องเก็บ Atomic Operation
+
+    ก่อนเปลี่ยนยอดในเครื่อง
+
+    ถ้า Cloud สำเร็จแต่
+
+    Response กลับมาไม่ถึง
+
+    จะ Retry operationId เดิม
+
+    และไม่ปรับซ้ำ
+
+  */
+
+  const pendingSaved =
+
+    savePendingStockOperation(
+
+      operation
+
+    );
+
+  if (!pendingSaved) {
+
+    window.alert(
+
+      "ไม่สามารถบันทึกคิวปรับสต๊อกในเครื่องได้\nกรุณาลองใหม่"
+
+    );
+
+    return;
+
+  }
+
+
+  savePendingAdjustment(
+
+    normalizedAdjustment
+
+  );
+
+
+  const newInventory = {
+
+    ...inventory,
+
+    [productId]:
+
+      actualStock,
+
+  };
+
+
+  /*
+
+    แสดงยอดใหม่ในเครื่องทันที
+
+  */
+
+  saveInventoryLocal(
+
+    newInventory
+
+  );
+
+  notifySyncStateChanged();
+
+
+  /*
+
+    Offline:
+
+    เก็บ Atomic Set
+
+    และประวัติไว้ก่อน
+
+  */
+
+  if (
+
+    typeof navigator !==
+
+      "undefined" &&
+
+    navigator.onLine ===
+
+      false
+
+  ) {
+
+    setCloudReady(
+
+      false
+
+    );
+
+    window.alert(
+
+      "ปรับสต๊อกเรียบร้อย\nข้อมูลจะ Sync เมื่อกลับมาออนไลน์"
+
+    );
+
+    return;
+
+  }
+
+
+  /*
+
+    Online:
+
+    Database เป็นผู้ตั้งยอดจริง
+
+    ผ่าน Owner Session
+
+  */
+
+  const stockJob =
+
+    setCloudStockAbsoluteOnce(
+
+      operationId,
 
       productId,
 
       actualStock
 
-    );
+    )
 
-    savePendingAdjustment(
+      .then(
 
-      normalizedAdjustment
+        (result) => {
 
-    );
+          setLocalStockValue(
+result.id,
 
-    notifySyncStateChanged();
+            result.stock
 
-    /*
+          );
 
-      ถ้า Offline
+          removePendingStockOperation(
 
-      จบแค่นี้ก่อน
-
-      รอระบบ Sync
-
-    */
-
-    if (
-
-      typeof navigator !==
-
-        "undefined" &&
-
-      navigator.onLine ===
-
-        false
-
-    ) {
-
-      setCloudReady(
-
-        false
-
-      );
-
-      window.alert(
-
-        "ปรับสต๊อกเรียบร้อย\nข้อมูลจะ Sync เมื่อกลับมาออนไลน์"
-
-      );
-
-      return;
-
-    }
-
-    const stockJob =
-
-      updateCloudStock(
-
-        productId,
-
-        actualStock
-
-      )
-
-        .then(() => {
-
-          removePendingStock(
-
-            productId
+            operationId
 
           );
 
           return true;
-
-        })
-
-        .catch(
-
-          (error) => {
-
-            console.error(
-
-              "Stock adjustment stock sync error:",
-
-              error
-
-            );
-
-            return false;
-
-          }
-
-        );
-
-    const adjustmentJob =
-
-      saveStockAdjustment(
-
-        normalizedAdjustment
-
-      )
-
-        .then(() => {
-
-          removePendingAdjustment(
-
-            normalizedAdjustment
-
-          );
-
-          return true;
-
-        })
-
-        .catch(
-
-          (error) => {
-
-            console.error(
-
-              "Stock adjustment history sync error:",
-
-              error
-
-            );
-
-            return false;
-
-          }
-
-        );
-
-    Promise.all([
-
-      stockJob,
-
-      adjustmentJob,
-
-    ]).then(
-
-      ([
-
-        stockOk,
-
-        adjustmentOk,
-
-      ]) => {
-
-        notifySyncStateChanged();
-
-        setCloudReady(
-
-          stockOk &&
-
-            adjustmentOk &&
-
-            isSyncClean()
-
-        );
-
-        if (
-
-          stockOk &&
-
-          adjustmentOk
-
-        ) {
-
-          window.alert(
-
-            "ปรับสต๊อกและบันทึกประวัติเรียบร้อย"
-
-          );
-
-        } else {
-
-          window.alert(
-
-            "ปรับสต๊อกในเครื่องแล้ว\nมีข้อมูลบางส่วนรอ Sync"
-
-          );
 
         }
 
+      )
+
+      .catch(
+
+        (error) => {
+
+          console.error(
+
+            "Stock adjustment stock sync error:",
+
+            error
+
+          );
+
+          return false;
+
+        }
+
+      );
+
+
+  const adjustmentJob =
+
+    saveStockAdjustment(
+
+      normalizedAdjustment
+
+    )
+
+      .then(() => {
+
+        removePendingAdjustment(
+
+          normalizedAdjustment
+
+        );
+
+        return true;
+
+      })
+
+      .catch(
+
+        (error) => {
+
+          console.error(
+
+            "Stock adjustment history sync error:",
+
+            error
+
+          );
+
+          return false;
+
+        }
+
+      );
+
+
+  Promise.all([
+
+    stockJob,
+
+    adjustmentJob,
+
+  ]).then(
+
+    ([
+
+      stockOk,
+
+      adjustmentOk,
+
+    ]) => {
+
+      notifySyncStateChanged();
+
+      setCloudReady(
+
+        stockOk &&
+
+          adjustmentOk &&
+
+          isSyncClean()
+
+      );
+
+      if (
+
+        stockOk &&
+
+        adjustmentOk
+
+      ) {
+
+        window.alert(
+
+          "ปรับสต๊อกและบันทึกประวัติเรียบร้อย"
+
+        );
+
+      } else {
+
+        window.alert(
+
+          "ปรับสต๊อกในเครื่องแล้ว\nมีข้อมูลบางส่วนรอ Sync"
+
+        );
+
       }
 
-    );
+    }
 
-  }
+  );
 
+}
+  
   /* =========================
 
      Cart Helpers
