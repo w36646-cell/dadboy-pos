@@ -209,5 +209,66 @@ export async function revokeOwnerSession() {
   return true;
 
 }
- 
+
+export async function changeOwnerPinWithSession(
+
+  currentPin,
+
+  newPin
+
+) {
+
+  const token =
+
+    getOwnerSessionToken();
+
+  if (!token) {
+
+    return false;
+
+  }
+
+  const {
+
+    data,
+
+    error,
+
+  } = await supabase.rpc(
+
+    "change_owner_pin_with_session",
+
+    {
+
+      p_token: token,
+
+      p_current_pin:
+
+        String(currentPin),
+
+      p_new_pin:
+
+        String(newPin),
+
+    }
+
+  );
+
+  if (error) {
+
+    throw error;
+
+  }
+
+  if (data !== true) {
+
+    return false;
+
+  }
+
+  clearOwnerSessionToken();
+
+  return true;
+
+}
  
