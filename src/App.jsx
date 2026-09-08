@@ -48,8 +48,6 @@ import {
 
   updateSoldCloudStocks,
 
-  applyCloudStockDeltaOnce,
-
   applyOwnerStockDeltaOnce,
 
   setCloudStockAbsoluteOnce, 
@@ -1440,7 +1438,7 @@ useEffect(() => {
 
   result =
 
-    await applyCloudStockDeltaOnce(
+    await applyOwnerStockDeltaOnce(
 
       operation.operationId,
 
