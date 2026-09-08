@@ -252,6 +252,21 @@ export async function saveStockAdjustment(
 
 ) {
 
+  const token =
+
+    getOwnerSessionToken();
+
+  if (!token) {
+
+    throw new Error(
+
+      "Owner session is required"
+
+    );
+
+  }
+
+
   const adjustmentId =
 
     getAdjustmentId(
@@ -259,6 +274,7 @@ export async function saveStockAdjustment(
       adjustment
 
     );
+
 
   const payload = {
 
@@ -331,31 +347,23 @@ export async function saveStockAdjustment(
 
     error,
 
-  } = await supabase
+  } = await supabase.rpc(
 
-    .from(
+    "save_stock_adjustment_with_session",
 
-      "stock_adjustments"
+    {
 
-    )
+      p_token:
 
-    .upsert(
+        token,
 
-      payload,
+      p_adjustment:
 
-      {
+        payload,
 
-        onConflict:
+    }
 
-          "adjustment_id",
-
-      }
-
-    )
-
-    .select()
-
-    .single();
+  );
 
 
   if (error) {
@@ -364,7 +372,19 @@ export async function saveStockAdjustment(
 
   }
 
+
+  if (!data) {
+
+    throw new Error(
+
+      "Owner session invalid or expired"
+
+    );
+
+  }
+
+
   return data;
 
 }
- 
+  
