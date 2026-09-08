@@ -1072,6 +1072,178 @@ export async function applyCloudStockDeltaOnce(
 
 }
 
+export async function applyOwnerStockDeltaOnce(
+
+  operationId,
+
+  productId,
+
+  delta
+
+) {
+
+  const token =
+
+    getOwnerSessionToken();
+
+  if (!token) {
+
+    throw new Error(
+
+      "Owner session is required"
+
+    );
+
+  }
+
+  const safeOperationId =
+
+    String(
+
+      operationId || ""
+
+    ).trim();
+
+  const id =
+
+    String(
+
+      productId ?? ""
+
+    ).trim();
+
+  const safeDelta =
+
+    Number(delta);
+
+  if (!safeOperationId) {
+
+    throw new Error(
+
+      "Stock operationId is required"
+
+    );
+
+  }
+
+  if (!id) {
+
+    throw new Error(
+
+      "Stock productId is required"
+
+    );
+
+  }
+
+  if (
+
+    !Number.isSafeInteger(
+
+      safeDelta
+
+    ) ||
+
+    safeDelta === 0
+
+  ) {
+
+    throw new Error(
+
+      `Invalid stock delta: ${delta}`
+
+    );
+
+  }
+
+  const {
+
+    data,
+
+    error,
+
+  } = await supabase
+
+    .rpc(
+
+      "apply_stock_delta_once_with_session",
+
+      {
+
+        p_token:
+
+          token,
+
+        p_operation_id:
+
+          safeOperationId,
+
+        p_product_id:
+
+          id,
+
+        p_delta:
+
+          safeDelta,
+
+      }
+
+    )
+
+    .maybeSingle();
+
+  if (error) {
+
+    throw error;
+
+  }
+
+  if (!data) {
+
+    throw new Error(
+
+      "Owner session invalid or expired"
+
+    );
+
+  }
+
+  return {
+
+    id:
+
+      normalizeId(
+
+        data.product_id
+
+      ),
+
+    previousStock:
+
+      Number(
+
+        data.previous_stock ?? 0
+
+      ),
+
+    stock:
+
+      Number(
+
+        data.new_stock ?? 0
+
+      ),
+
+    alreadyApplied:
+
+      data.already_applied ===
+
+      true,
+
+  };
+
+}
+ 
 
 /*
 
