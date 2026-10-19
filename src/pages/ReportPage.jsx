@@ -692,7 +692,7 @@ const displayedMonthlyChartData =
 
         Math.min(
 
-          currentMonth + 2,
+          currentMonth + 1,
 
           12
 
@@ -775,7 +775,7 @@ const ytdMonthlyData =
 
         0,
 
-        currentMonth + 1
+        currentMonth + 2
 
       );
 
