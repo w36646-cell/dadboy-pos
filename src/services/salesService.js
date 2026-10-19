@@ -3077,121 +3077,63 @@ sale.id
 
 ========================================================= */
 
+
 export async function getCloudSalesSummaryRange(
-
   startDate,
-
   endDate
-
 ) {
-
   return withRetry(
-
     async () => {
+      const pageSize = 1000;
+      let offset = 0;
+      const allRows = [];
 
-      const {
-
-        data,
-
-        error,
-
-      } =
-
-        await supabase
-
+      while (true) {
+        const {
+          data,
+          error,
+        } = await supabase
           .from("sales")
-
           .select(`
-
             id,
-
             bill_id,
-
             status,
-
             sold_at,
-
             sold_date,
-
             sold_time,
-
             total_qty,
-
             total_amount,
-
             total_cost,
-
             total_profit
-
           `)
+          .gte("sold_date", startDate)
+          .lte("sold_date", endDate)
+          .order("sold_date", { ascending: true })
+          .order("id", { ascending: true })
+          .range(offset, offset + pageSize - 1);
 
-          .gte(
+        if (error) {
+          throw error;
+        }
 
-            "sold_date",
+        const pageRows = data || [];
+        allRows.push(...pageRows);
 
-            startDate
+        if (pageRows.length < pageSize) {
+          break;
+        }
 
-          )
-
-          .lte(
-
-            "sold_date",
-
-            endDate
-
-          )
-
-          .order(
-
-            "sold_date",
-
-            {
-
-              ascending: true,
-
-            }
-
-          );
-
-      if (error) {
-
-        throw error;
-
+        offset += pageSize;
       }
 
-      return (
-
-        data || []
-
-      )
-
-        .filter(
-
-          (row) =>
-
-            row.status !==
-
-            "cancelled"
-
-        )
-
-        .map(
-
-          (row) =>
-
-            fromSaleRow({
-
-              ...row,
-
-              sale_items: [],
-
-            })
-
+      return allRows
+        .filter((row) => row.status !== "cancelled")
+        .map((row) =>
+          fromSaleRow({
+            ...row,
+            sale_items: [],
+          })
         );
-
     }
-
   );
-
 }
- 
